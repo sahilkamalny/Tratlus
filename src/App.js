@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Coffee, Hotel, Car, Plus, ChevronRight, ChevronLeft, X, Utensils, ShoppingBag, Camera, Star, Train, Bike, CheckCircle2, Plane, Globe, Compass, Map } from 'lucide-react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { MapPin, Coffee, Hotel, Car, Plus, ChevronRight, ChevronLeft, X, Utensils, ShoppingBag, Camera, Star, Train, Bike, CheckCircle2, Plane, Globe, Compass, Map, Sun, Moon } from 'lucide-react';
+
+// --- THEME CONTEXT ---
+const ThemeContext = createContext();
 
 // Global drag state tracker
 let currentDragData = { category: null, blockIndex: null };
 
-// Activity categories with enhanced defaults
+// Activity categories
 const ACTIVITY_CATEGORIES = [
   { 
     id: 'attraction', 
@@ -50,64 +53,105 @@ const ACTIVITY_CATEGORIES = [
 
 const HOURS = Array.from({ length: 25 }, (_, i) => i);
 
+// --- REUSABLE COMPONENTS ---
+
+const ThemeToggle = () => {
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  return (
+    <button 
+      onClick={toggleTheme}
+      className={`w-16 h-9 rounded-full p-1 transition-all duration-300 relative shadow-inner ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+      aria-label="Toggle Theme"
+    >
+      <div className={`absolute top-1 left-1 w-7 h-7 rounded-full bg-white shadow-md transition-all duration-300 flex items-center justify-center ${isDarkMode ? 'translate-x-7' : 'translate-x-0'}`}>
+        {isDarkMode ? <Moon size={14} className="text-slate-800" /> : <Sun size={14} className="text-slate-400" />}
+      </div>
+    </button>
+  );
+};
+
 // --- LANDING PAGE COMPONENT ---
 const LandingPage = ({ onStart }) => {
+  const { isDarkMode } = useContext(ThemeContext);
+  const [isFlushing, setIsFlushing] = useState(false);
+
+  const handleStartClick = () => {
+    setIsFlushing(true);
+    // Wait for animation (800ms) before changing screen
+    setTimeout(() => {
+        onStart();
+    }, 800);
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950 text-white font-sans selection:bg-blue-500 selection:text-white">
-        {/* Animated Background Elements */}
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-blue-600 text-white selection:bg-blue-200 selection:text-blue-900'}`}>
+        
+        {/* Theme Toggle */}
+        <div className="absolute top-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
+
+        {/* Background Gradients */}
+        <div className={`absolute inset-0 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-gradient-to-b from-blue-50 via-blue-200 to-blue-600'}`} />
+
+        {/* Animated Background Elements - UPDATED FOR HIGH VISIBILITY IN LIGHT MODE */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] rounded-full bg-blue-600/20 blur-[150px] animate-pulse duration-[10s]" />
-            <div className="absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] rounded-full bg-purple-600/10 blur-[150px] animate-pulse duration-[15s]" />
-            <div className="absolute bottom-0 left-[20%] w-[60vw] h-[60vw] rounded-full bg-indigo-600/10 blur-[150px]" />
+            {/* In Light Mode: Using significantly darker blues/purples with higher opacity so the breathing is obvious */}
+            <div className={`absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] rounded-full blur-[150px] animate-pulse duration-[10s] ${isDarkMode ? 'bg-blue-600/20' : 'bg-blue-600/40'}`} />
+            <div className={`absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] rounded-full blur-[150px] animate-pulse duration-[15s] ${isDarkMode ? 'bg-purple-600/10' : 'bg-purple-600/40'}`} />
+            <div className={`absolute bottom-0 left-[20%] w-[60vw] h-[60vw] rounded-full blur-[150px] ${isDarkMode ? 'bg-indigo-600/10' : 'bg-indigo-600/40'}`} />
             
             {/* Grid Overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]" />
+            <div className={`absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] ${isDarkMode ? 'bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]' : 'bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]'}`} />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 h-screen flex flex-col justify-center items-center text-center">
             {/* Floating Icons */}
-            <div className="absolute top-1/4 left-[15%] bg-white/5 backdrop-blur-lg p-4 rounded-2xl border border-white/10 shadow-2xl animate-[bounce_6s_infinite]">
-                <Map className="text-blue-400 w-8 h-8" />
+            <div className={`absolute top-1/4 left-[15%] backdrop-blur-lg p-4 rounded-2xl border shadow-2xl animate-[bounce_6s_infinite] ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
+                <Map className={`${isDarkMode ? 'text-blue-400' : 'text-white'} w-8 h-8`} />
             </div>
-            <div className="absolute bottom-1/3 right-[15%] bg-white/5 backdrop-blur-lg p-4 rounded-2xl border border-white/10 shadow-2xl animate-[bounce_8s_infinite] delay-1000">
-                <Compass className="text-purple-400 w-8 h-8" />
+            <div className={`absolute bottom-1/3 right-[15%] backdrop-blur-lg p-4 rounded-2xl border shadow-2xl animate-[bounce_8s_infinite] delay-1000 ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
+                <Compass className={`${isDarkMode ? 'text-purple-400' : 'text-blue-100'} w-8 h-8`} />
             </div>
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 hover:bg-white/10 transition-colors cursor-default animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md mb-8 transition-colors cursor-default animate-in fade-in slide-in-from-bottom-4 duration-700 ${isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/20 border-white/30 hover:bg-white/30 shadow-sm'}`}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                 </span>
-                <span className="text-xs font-bold tracking-widest uppercase text-slate-300">The Future of Travel Logic</span>
+                <span className={`text-xs font-bold tracking-widest uppercase ${isDarkMode ? 'text-slate-300' : 'text-blue-50'}`}>The Future of Travel Planning</span>
             </div>
 
-            {/* Main Title */}
-            <h1 className="text-7xl md:text-9xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent drop-shadow-sm animate-in fade-in zoom-in-95 duration-1000">
+            {/* Main Title - Updated Gradient for Dark Mode */}
+            <h1 className={`text-7xl md:text-9xl font-black tracking-tighter mb-6 bg-clip-text text-transparent drop-shadow-sm animate-in fade-in zoom-in-95 duration-1000 px-4 pb-4 ${isDarkMode ? 'bg-gradient-to-r from-purple-300 to-blue-300' : 'bg-gradient-to-r from-purple-700 to-blue-700'}`}>
                 TRATLUS
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mb-12 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+            <p className={`text-xl md:text-2xl max-w-2xl mb-12 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 ${isDarkMode ? 'text-slate-400' : 'text-blue-100 drop-shadow-md'}`}>
                 Architect your perfect journey with our AAA-grade itinerary engine. 
                 Drag, drop, and discover the world with precision.
             </p>
 
-            {/* CTA Button */}
+            {/* CTA Button with delayed flood effect */}
             <button 
-                onClick={onStart}
-                className="group relative px-10 py-5 bg-white text-slate-950 rounded-full font-black text-lg tracking-wide overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300"
+                onClick={handleStartClick}
+                className={`group relative px-10 py-5 rounded-full font-black text-lg tracking-wide overflow-hidden transition-all hover:scale-105 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 ${isDarkMode ? 'bg-white text-slate-950 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]' : 'bg-slate-900 text-white hover:shadow-[0_0_40px_rgba(30,58,138,0.4)]'}`}
             >
                 <span className="relative z-10 flex items-center gap-2">
                     START PLANNING <ChevronRight className="group-hover:translate-x-1 transition-transform" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-purple-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {/* The flood animation div */}
+                <div 
+                  className={`absolute inset-0 transition-transform duration-[800ms] ease-in-out origin-left ${isFlushing ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 group-active:opacity-100'} ${isDarkMode ? 'bg-gradient-to-r from-purple-400 to-blue-400' : 'bg-gradient-to-r from-purple-700 to-blue-700'}`} 
+                />
             </button>
 
             {/* Feature Pills */}
             <div className="mt-16 flex flex-wrap justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
                 {['Smart Drag & Drop', 'Real-time Logistics', 'Global Database', 'AI Powered'].map((feat, i) => (
-                    <div key={i} className="px-6 py-3 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm text-sm font-bold text-slate-400 hover:bg-white/10 hover:text-white transition-all hover:-translate-y-1">
+                    <div key={i} className={`px-6 py-3 rounded-xl backdrop-blur-sm text-sm font-bold transition-all hover:-translate-y-1 ${isDarkMode ? 'bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10 hover:text-white' : 'bg-white/10 border border-white/20 text-blue-50 hover:bg-white/20 hover:text-white shadow-sm'}`}>
                         {feat}
                     </div>
                 ))}
@@ -149,6 +193,7 @@ const formatTime = (minutes) => {
 };
 
 const CalendarView = ({ selectedDate, onDateSelect, activities }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
   
   const getDaysInMonth = (date) => {
@@ -180,22 +225,22 @@ const CalendarView = ({ selectedDate, onDateSelect, activities }) => {
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   
   return (
-    <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-8 border border-white/40 relative overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
+    <div className={`backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-8 border relative overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] ${isDarkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/40 border-white/40'}`}>
       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
       
       <div className="flex items-center justify-between mb-8 pt-4">
         <div>
-            <h2 className="text-3xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent tracking-tight pb-2 leading-normal">Travel Dates</h2>
-            <p className="text-slate-500 font-medium text-sm">Pick a day to plan your adventure</p>
+            <h2 className={`text-3xl font-black bg-clip-text text-transparent tracking-tight pb-2 leading-normal ${isDarkMode ? 'bg-gradient-to-r from-white to-slate-400' : 'bg-gradient-to-r from-slate-800 to-slate-600'}`}>Travel Dates</h2>
+            <p className={`font-medium text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Pick a day to plan your adventure</p>
         </div>
-        <div className="flex items-center gap-4 bg-white/60 p-1.5 rounded-2xl shadow-sm border border-white/50 backdrop-blur-md">
-            <button onClick={previousMonth} className="p-2 hover:bg-white rounded-xl transition-all text-slate-600 hover:text-blue-600 hover:shadow-md active:scale-90">
+        <div className={`flex items-center gap-4 p-1.5 rounded-2xl shadow-sm border backdrop-blur-md ${isDarkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-white/60 border-white/50'}`}>
+            <button onClick={previousMonth} className={`p-2 rounded-xl transition-all hover:shadow-md active:scale-90 ${isDarkMode ? 'hover:bg-slate-700 text-slate-400 hover:text-white' : 'hover:bg-white text-slate-600 hover:text-blue-600'}`}>
             <ChevronLeft size={20} />
             </button>
-            <h3 className="text-lg font-bold text-slate-700 min-w-[140px] text-center">
+            <h3 className={`text-lg font-bold min-w-[140px] text-center ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
             {monthNames[month]} {year}
             </h3>
-            <button onClick={nextMonth} className="p-2 hover:bg-white rounded-xl transition-all text-slate-600 hover:text-blue-600 hover:shadow-md active:scale-90">
+            <button onClick={nextMonth} className={`p-2 rounded-xl transition-all hover:shadow-md active:scale-90 ${isDarkMode ? 'hover:bg-slate-700 text-slate-400 hover:text-white' : 'hover:bg-white text-slate-600 hover:text-blue-600'}`}>
             <ChevronRight size={20} />
             </button>
         </div>
@@ -218,18 +263,26 @@ const CalendarView = ({ selectedDate, onDateSelect, activities }) => {
           const hasAct = hasActivities(day);
           const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
 
+          let buttonClass = "bg-white/40 hover:bg-white text-slate-600 hover:shadow-lg hover:scale-105 border border-transparent hover:border-white/60";
+          if (isDarkMode) {
+              buttonClass = "bg-slate-800/40 hover:bg-slate-700 text-slate-300 hover:shadow-lg hover:scale-105 border border-transparent hover:border-slate-600";
+          }
+
+          if (isSelected) {
+              buttonClass = "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-xl scale-105 z-10 ring-4 ring-blue-100";
+              if (isDarkMode) buttonClass = "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-xl scale-105 z-10 ring-4 ring-slate-700";
+          } else if (today) {
+             buttonClass = "bg-white border-2 border-blue-200 text-blue-600 font-bold shadow-md";
+             if (isDarkMode) buttonClass = "bg-slate-800 border-2 border-blue-500 text-blue-400 font-bold shadow-md";
+          }
+
           return (
             <button
               key={day}
               onClick={() => selectDate(day)}
               className={`
                 w-full h-16 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative group
-                ${isSelected 
-                    ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-xl scale-105 z-10 ring-4 ring-blue-100' 
-                    : today 
-                        ? 'bg-white border-2 border-blue-200 text-blue-600 font-bold shadow-md'
-                        : 'bg-white/40 hover:bg-white text-slate-600 hover:shadow-lg hover:scale-105 border border-transparent hover:border-white/60'
-                }
+                ${buttonClass}
               `}
             >
               <span className={`text-sm ${isSelected ? 'font-bold' : 'font-semibold'}`}>{day}</span>
@@ -248,6 +301,7 @@ const CalendarView = ({ selectedDate, onDateSelect, activities }) => {
 };
 
 const DayView = ({ date, blocks, onDrop, onDeleteBlock, onEditBlock, onBackToCalendar, onUpdateBlock }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const timelineRef = useRef(null);
   const [draggingBlock, setDraggingBlock] = useState(null);
   const [ghostPreview, setGhostPreview] = useState(null);
@@ -366,7 +420,8 @@ const DayView = ({ date, blocks, onDrop, onDeleteBlock, onEditBlock, onBackToCal
             <div className="bg-black/10 p-1 rounded-lg flex-shrink-0 backdrop-blur-md"><Icon size={12} className="text-white" /></div>
             <div className="flex-1 min-w-0 flex justify-between items-center pr-1">
               <div className="font-bold text-xs truncate leading-tight drop-shadow-md">{block.title || cat.defaultTitle}</div>
-              <div className="text-[10px] opacity-90 whitespace-nowrap font-semibold flex-shrink-0 ml-2 tracking-tight bg-black/10 px-1.5 py-0.5 rounded-md">
+              
+              <div className="text-[10px] opacity-90 whitespace-nowrap font-semibold flex-shrink-0 ml-2 tracking-tight">
                 {formatTime(block.startTime)} - {formatTime(block.startTime + block.duration)}
               </div>
             </div>
@@ -380,44 +435,41 @@ const DayView = ({ date, blocks, onDrop, onDeleteBlock, onEditBlock, onBackToCal
   };
   
   return (
-    <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-6 border border-white/40 flex flex-col h-[800px] relative overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
+    <div className={`backdrop-blur-xl rounded-[2.5rem] p-6 border flex flex-col h-[800px] relative overflow-hidden transition-all ${isDarkMode ? 'bg-slate-900/60 border-slate-700 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]' : 'bg-white/40 border-white/40 shadow-sm hover:shadow-2xl'}`}>
       {/* Gradient inside rounded container */}
       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
       
       <div className="flex items-center justify-between mb-6 z-10 pt-4">
         <div>
           <button onClick={onBackToCalendar} className="text-xs font-extrabold text-slate-500 hover:text-blue-600 mb-1 flex items-center gap-1 hover:gap-2 transition-all uppercase tracking-wider"><ChevronLeft size={14} />Back to Calendar</button>
-          <h3 className="font-black text-3xl text-slate-800 tracking-tight pb-1 bg-clip-text">{date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
+          <h3 className={`font-black text-3xl tracking-tight pb-1 bg-clip-text ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
         </div>
-        <div className="text-right bg-white/60 px-5 py-2.5 rounded-2xl border border-white/60 shadow-sm backdrop-blur-md">
+        <div className={`text-right px-5 py-2.5 rounded-2xl border shadow-sm backdrop-blur-md ${isDarkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-white/60 border-white/60'}`}>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Activities</div>
-          <div className="text-2xl font-black text-slate-700 leading-none">{blocks.length}</div>
+          <div className={`text-2xl font-black leading-none ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{blocks.length}</div>
         </div>
       </div>
       
-      {/* Dark Scrollbar Styles */}
       <style dangerouslySetInnerHTML={{__html: `
         .dark-scrollbar::-webkit-scrollbar { width: 8px; }
-        .dark-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .dark-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        .dark-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .dark-scrollbar::-webkit-scrollbar-track { background: ${isDarkMode ? '#0f172a' : '#eff6ff'}; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: ${isDarkMode ? 'rgba(255,255,255,0.2)' : '#ffffff'}; border-radius: 4px; }
+        .dark-scrollbar::-webkit-scrollbar-thumb:hover { background: ${isDarkMode ? 'rgba(255,255,255,0.4)' : '#f8fafc'}; }
       `}} />
 
-      {/* Main Timeline Container: Rounded, contains dark grid and dark labels */}
-      <div className="flex-1 overflow-y-auto relative dark-scrollbar rounded-3xl border border-slate-700 bg-slate-900 shadow-inner">
+      {/* Main Timeline Container */}
+      <div className={`flex-1 overflow-y-auto relative dark-scrollbar rounded-3xl border shadow-inner ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-blue-100 bg-blue-50'}`}>
         <div className="flex min-h-full relative" style={{ height: `${(24 * COMPACT_PIXELS_PER_HOUR) + (2 * VERTICAL_CLEARANCE)}px` }}>
             
-            {/* Dark Time Column */}
-            <div className="w-16 flex-shrink-0 relative border-r border-slate-700 bg-slate-900 z-10">
-                {HOURS.map(hour => (<div key={hour} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + VERTICAL_CLEARANCE}px` }} className="absolute right-0 w-full text-right pr-3"><span className="text-[10px] font-bold text-slate-500 block -translate-y-1/2">{hour === 0 || hour === 24 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}</span></div>))}
+            <div className={`w-16 flex-shrink-0 relative border-r z-10 ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-blue-200 bg-blue-100/60'}`}>
+                {/* UPDATED TIME LABEL COLOR FOR LIGHT MODE (text-slate-900 instead of blue) */}
+                {HOURS.map(hour => (<div key={hour} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + VERTICAL_CLEARANCE}px` }} className="absolute right-0 w-full text-right pr-3"><span className={`text-[10px] font-bold block -translate-y-1/2 ${isDarkMode ? 'text-slate-200' : 'text-slate-900'}`}>{hour === 0 || hour === 24 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}</span></div>))}
             </div>
 
-            {/* Dark Grid Area */}
-            <div className="flex-1 relative bg-slate-900">
+            <div className={`flex-1 relative ${isDarkMode ? 'bg-slate-900' : 'bg-blue-50'}`}>
                 <div ref={timelineRef} onDrop={handleTimelineDrop} onDragOver={handleTimelineDragOver} onDragLeave={handleDragLeave} onDragEnd={handleDragEnd} className="absolute inset-0">
-                    {/* Dark Grid Lines */}
-                    {HOURS.map(hour => (<div key={`h-${hour}`} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + VERTICAL_CLEARANCE}px` }} className="absolute left-0 right-0 border-t border-slate-700/50 w-full" />))}
-                    {HOURS.filter(h => h < 24).map(hour => (<div key={`m-${hour}`} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + (COMPACT_PIXELS_PER_HOUR / 2) + VERTICAL_CLEARANCE}px` }} className="absolute left-0 right-0 border-t border-slate-800/50 border-dashed" />))}
+                    {HOURS.map(hour => (<div key={`h-${hour}`} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + VERTICAL_CLEARANCE}px` }} className={`absolute left-0 right-0 border-t w-full ${isDarkMode ? 'border-slate-700/50' : 'border-blue-100'}`} />))}
+                    {HOURS.filter(h => h < 24).map(hour => (<div key={`m-${hour}`} style={{ top: `${(hour * COMPACT_PIXELS_PER_HOUR) + (COMPACT_PIXELS_PER_HOUR / 2) + VERTICAL_CLEARANCE}px` }} className={`absolute left-0 right-0 border-t border-dashed ${isDarkMode ? 'border-slate-800/50' : 'border-blue-100/70'}`} />))}
                     
                     {ghostPreview && (() => {
                       const cat = ACTIVITY_CATEGORIES.find(c => c.id === ghostPreview.category);
@@ -426,7 +478,7 @@ const DayView = ({ date, blocks, onDrop, onDeleteBlock, onEditBlock, onBackToCal
                     
                     {blocks.length === 0 && !ghostPreview ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 pointer-events-none">
-                            <div className="bg-slate-800 p-8 rounded-full mb-4 shadow-sm backdrop-blur-md animate-pulse"><Plus size={40} className="opacity-40 text-slate-400" /></div>
+                            <div className={`p-8 rounded-full mb-4 shadow-sm backdrop-blur-md animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-white/80'}`}><Plus size={40} className="opacity-40 text-slate-400" /></div>
                             <p className="text-sm font-bold uppercase tracking-wider opacity-60 text-slate-500">Drop activities here</p>
                         </div>
                     ) : (
@@ -441,31 +493,72 @@ const DayView = ({ date, blocks, onDrop, onDeleteBlock, onEditBlock, onBackToCal
 };
 
 const ActivityModal = ({ block, onSave, onClose }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const [formData, setFormData] = useState(block || { title: '', location: '', duration: 60, notes: '', category: 'attraction', startTime: 540 });
   const roundToHalfHour = (num, min = 0) => Math.max(min, Math.ceil(num / 30) * 30);
   const handleBlur = (field) => { if (field === 'duration') setFormData(prev => ({ ...prev, duration: roundToHalfHour(prev.duration, 30) })); else if (field === 'startTime') setFormData(prev => ({ ...prev, startTime: roundToHalfHour(prev.startTime, 0) % 1440 })); };
 
+  // --- THEME VARIABLES FOR MODAL ---
+  const modalBg = isDarkMode ? 'bg-slate-900' : 'bg-white';
+  const borderCol = isDarkMode ? 'border-slate-700' : 'border-white/20';
+  const textPrimary = isDarkMode ? 'text-white' : 'text-slate-800';
+  const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-500';
+  const inputBg = isDarkMode ? 'bg-slate-800' : 'bg-slate-50';
+  const inputRing = isDarkMode ? 'ring-slate-700' : 'ring-slate-200';
+  const inputText = isDarkMode ? 'text-slate-200' : 'text-slate-700';
+  const closeBtn = isDarkMode ? 'text-slate-500 hover:bg-slate-800 hover:text-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100';
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-      <div className="bg-white rounded-[2rem] shadow-2xl max-w-lg w-full p-8 border border-white/20 scale-100 transition-all ring-1 ring-black/5 relative overflow-hidden">
+      <div className={`${modalBg} rounded-[2rem] shadow-2xl max-w-lg w-full p-8 border ${borderCol} scale-100 transition-all ring-1 ring-black/5 relative overflow-hidden`}>
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-        <div className="flex items-center justify-between mb-8 pt-2"><div><h2 className="text-2xl font-black text-slate-800 tracking-tight">Edit Activity</h2><p className="text-slate-500 font-medium text-sm">Customize your itinerary details</p></div><button onClick={onClose} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-all"><X size={24} /></button></div>
-        <div className="space-y-6">
-          <div><label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Activity Name</label><input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700 placeholder-slate-400 shadow-sm" placeholder="e.g., Visit Eiffel Tower" /></div>
-          <div><label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Location</label><div className="relative"><MapPin className="absolute left-4 top-4 text-slate-400" size={20} /><input type="text" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full pl-12 pr-5 py-4 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700 shadow-sm" placeholder="e.g., Paris, France" /></div></div>
-          <div className="grid grid-cols-2 gap-5">
-            <div><label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Start Time</label><input type="time" value={`${Math.floor(formData.startTime / 60).toString().padStart(2, '0')}:${(formData.startTime % 60).toString().padStart(2, '0')}`} onChange={(e) => { const [h, m] = e.target.value.split(':').map(Number); setFormData({ ...formData, startTime: h * 60 + m }); }} onBlur={() => handleBlur('startTime')} className="w-full px-5 py-4 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700 shadow-sm" /></div>
-            <div><label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Duration (min)</label><input type="number" value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })} onBlur={() => handleBlur('duration')} className="w-full px-5 py-4 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700 shadow-sm" min="30" step="30" /></div>
-          </div>
-          <div><label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Notes</label><textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-700 shadow-sm resize-none" rows="3" placeholder="Add any special notes..." /></div>
+        <div className="flex items-center justify-between mb-8 pt-2">
+            <div>
+                <h2 className={`text-2xl font-black ${textPrimary} tracking-tight`}>Edit Activity</h2>
+                <p className={`${textSecondary} font-medium text-sm`}>Customize your itinerary details</p>
+            </div>
+            <button onClick={onClose} className={`${closeBtn} p-2 rounded-full transition-all`}>
+                <X size={24} />
+            </button>
         </div>
-        <div className="flex gap-4 mt-10"><button onClick={onClose} className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-600 rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-sm uppercase tracking-wide">Cancel</button><button onClick={() => onSave(formData)} className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-95 transition-all font-bold text-sm uppercase tracking-wide">Save Changes</button></div>
+        <div className="space-y-6">
+          <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Activity Name</label>
+              <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={`w-full px-5 py-4 ${inputBg} border-0 ring-1 ${inputRing} rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold ${inputText} placeholder-slate-400 shadow-sm`} placeholder="e.g., Visit Eiffel Tower" />
+          </div>
+          <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Location</label>
+              <div className="relative">
+                  <MapPin className="absolute left-4 top-4 text-slate-400" size={20} />
+                  <input type="text" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className={`w-full pl-12 pr-5 py-4 ${inputBg} border-0 ring-1 ${inputRing} rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold ${inputText} shadow-sm`} placeholder="e.g., Paris, France" />
+              </div>
+          </div>
+          <div className="grid grid-cols-2 gap-5">
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Start Time</label>
+                <input type="time" value={`${Math.floor(formData.startTime / 60).toString().padStart(2, '0')}:${(formData.startTime % 60).toString().padStart(2, '0')}`} onChange={(e) => { const [h, m] = e.target.value.split(':').map(Number); setFormData({ ...formData, startTime: h * 60 + m }); }} onBlur={() => handleBlur('startTime')} className={`w-full px-5 py-4 ${inputBg} border-0 ring-1 ${inputRing} rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold ${inputText} shadow-sm`} />
+            </div>
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Duration (min)</label>
+                <input type="number" value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })} onBlur={() => handleBlur('duration')} className={`w-full px-5 py-4 ${inputBg} border-0 ring-1 ${inputRing} rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold ${inputText} shadow-sm`} min="30" step="30" />
+            </div>
+          </div>
+          <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 ml-1">Notes</label>
+              <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className={`w-full px-5 py-4 ${inputBg} border-0 ring-1 ${inputRing} rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-medium ${inputText} shadow-sm resize-none`} rows="3" placeholder="Add any special notes..." />
+          </div>
+        </div>
+        <div className="flex gap-4 mt-10">
+            <button onClick={onClose} className={`flex-1 px-6 py-4 border-2 ${isDarkMode ? 'border-slate-700 text-slate-400 hover:bg-slate-800' : 'border-slate-100 text-slate-600 hover:bg-slate-50'} rounded-2xl transition-all font-bold text-sm uppercase tracking-wide`}>Cancel</button>
+            <button onClick={() => onSave(formData)} className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-95 transition-all font-bold text-sm uppercase tracking-wide">Save Changes</button>
+        </div>
       </div>
     </div>
   );
 };
 
 const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const cuisineTypes = ['Italian', 'Chinese', 'Japanese', 'Mexican', 'Indian', 'Thai', 'French', 'Mediterranean', 'American', 'Korean', 'Vietnamese', 'Greek', 'African'];
   const dietaryRestrictions = ['Vegetarian', 'Vegan', 'Halal', 'Kosher', 'Gluten-Free', 'Dairy-Free', 'Nut-Free'];
 
@@ -474,37 +567,32 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border border-white/40 relative overflow-hidden">
+      <div className={`backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border relative overflow-hidden ${isDarkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/40 border-white/40'}`}>
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 via-red-400 to-pink-400" />
         
-        <button onClick={onBack} className="text-sm text-slate-500 hover:text-orange-600 font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all bg-white/50 w-fit px-4 py-2 rounded-full shadow-sm pt-4">
+        <button onClick={onBack} className={`text-sm font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all w-fit px-4 py-2 rounded-full shadow-sm pt-4 ${isDarkMode ? 'text-slate-400 hover:text-orange-400 bg-slate-800/50' : 'text-slate-500 hover:text-orange-600 bg-white/50'}`}>
           <ChevronLeft size={16} /> Back to Itinerary
         </button>
 
         <div className="mb-10 text-center">
           <h2 className="text-4xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3 drop-shadow-sm pt-2 pb-3 leading-normal">Culinary Preferences</h2>
-          <p className="text-slate-600 font-medium text-lg">Curate your perfect dining experience</p>
+          <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Curate your perfect dining experience</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-10">
           {/* Interactive Circles */}
-          <div className="lg:col-span-7 relative bg-white/30 rounded-[2rem] p-8 border border-white/40 shadow-inner">
+          <div className={`lg:col-span-7 relative rounded-[2rem] p-8 border shadow-inner ${isDarkMode ? 'bg-slate-800/30 border-slate-700' : 'bg-white/30 border-white/40'}`}>
              <div className="flex flex-col lg:flex-row justify-around items-start gap-8 mt-4">
                 
-                {/* CUISINE WHEEL (Larger Radius, No Overlap) */}
+                {/* CUISINE WHEEL */}
                 <div className="text-center w-full">
-                    <h3 className="font-black text-slate-700 mb-6 flex items-center justify-center gap-2"><Utensils size={20} className="text-orange-500"/> Favorite Cuisines</h3>
-                    {/* Increased container size to 500px to fit 170px radius cleanly */}
+                    <h3 className={`font-black mb-6 flex items-center justify-center gap-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}><Utensils size={20} className="text-orange-500"/> Favorite Cuisines</h3>
                     <div className="relative w-full aspect-square max-w-[500px] mx-auto">
                         {cuisineTypes.map((cuisine, index) => {
                             const angle = (index / cuisineTypes.length) * 2 * Math.PI - Math.PI / 2;
-                            // Increased radius to 170 to give 16px buttons plenty of space
-                            const radius = 170; 
-                            // Calculate position as percentage
-                            // 50% + (radius / total_width * 100) * cos/sin
-                            // Using approx scale factor: 170px is ~34% of 500px width
-                            const xPct = 50 + 34 * Math.cos(angle);
-                            const yPct = 50 + 34 * Math.sin(angle);
+                            const radius = 100; 
+                            const xPct = 50 + (radius / 500 * 100 * 2) * Math.cos(angle);
+                            const yPct = 50 + (radius / 500 * 100 * 2) * Math.sin(angle);
 
                             const cuisineColors = {
                                 'Italian': 'from-red-500 to-green-500', 'Chinese': 'from-red-600 to-yellow-500', 'Japanese': 'from-pink-400 to-red-500', 'Mexican': 'from-green-600 to-red-600',
@@ -513,8 +601,9 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
                                 'African': 'from-orange-600 to-yellow-500'
                             };
                             return (
-                                <button key={cuisine} onClick={() => toggleCuisine(cuisine)} style={{ left: `calc(${xPct}% - 2rem)`, top: `calc(${yPct}% - 2rem)` }}
-                                  className={`absolute w-16 h-16 rounded-full font-medium text-[10px] transition-all hover:scale-110 hover:shadow-xl active:scale-95 cursor-pointer text-white flex items-center justify-center leading-tight ${preferences.cuisines.includes(cuisine) ? `bg-gradient-to-br ${cuisineColors[cuisine]} shadow-lg z-10` : `bg-gradient-to-br ${cuisineColors[cuisine]} opacity-40 shadow-md hover:opacity-70`}`}>
+                                <button key={cuisine} onClick={() => toggleCuisine(cuisine)} style={{ left: `calc(${xPct}% - 1.75rem)`, top: `calc(${yPct}% - 1.75rem)` }}
+                                  // SMALLER SIZE: w-14 h-14, text-[9px]
+                                  className={`absolute w-14 h-14 rounded-full font-medium text-[9px] transition-all hover:scale-110 hover:shadow-xl active:scale-95 cursor-pointer text-white flex items-center justify-center leading-tight ${preferences.cuisines.includes(cuisine) ? `bg-gradient-to-br ${cuisineColors[cuisine]} shadow-lg z-10` : `bg-gradient-to-br ${cuisineColors[cuisine]} opacity-40 shadow-md hover:opacity-70`}`}>
                                   {cuisine}
                                 </button>
                             );
@@ -522,9 +611,9 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
                     </div>
                 </div>
                 
-                {/* DIETARY WHEEL (Original Sizes Restored: 24 center, 16 outer) */}
+                {/* DIETARY WHEEL */}
                 <div className="text-center w-full">
-                    <h3 className="font-black text-slate-700 mb-6 flex items-center justify-center gap-2"><Coffee size={20} className="text-green-500"/> Dietary Restrictions</h3>
+                    <h3 className={`font-black mb-6 flex items-center justify-center gap-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}><Coffee size={20} className="text-green-500"/> Dietary Restrictions</h3>
                     <div className="relative w-full aspect-square max-w-[380px] mx-auto">
                          {dietaryRestrictions.map((dietary, index) => {
                             let xPct, yPct;
@@ -538,8 +627,8 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
                                 'Kosher': 'from-blue-500 to-indigo-500', 'Gluten-Free': 'from-yellow-500 to-amber-500', 'Dairy-Free': 'from-sky-400 to-blue-400', 'Nut-Free': 'from-orange-400 to-red-400'
                             };
                             return (
-                                <button key={dietary} onClick={() => toggleDietary(dietary)} style={{ left: `calc(${xPct}% - ${index === 0 ? '3rem' : '2rem'})`, top: `calc(${yPct}% - ${index === 0 ? '3rem' : '2rem'})` }}
-                                  className={`absolute rounded-full font-medium text-xs transition-all hover:scale-110 hover:shadow-xl active:scale-95 cursor-pointer text-white ${preferences.dietary.includes(dietary) ? `bg-gradient-to-br ${dietaryColors[dietary]} shadow-lg z-10` : `bg-gradient-to-br ${dietaryColors[dietary]} opacity-40 shadow-md hover:opacity-70`} ${index === 0 ? 'w-24 h-24 z-20' : 'w-16 h-16'}`}>
+                                <button key={dietary} onClick={() => toggleDietary(dietary)} style={{ left: `calc(${xPct}% - 2.5rem)`, top: `calc(${yPct}% - 2.5rem)` }}
+                                  className={`absolute w-20 h-20 rounded-full font-medium text-xs transition-all hover:scale-110 hover:shadow-xl active:scale-95 cursor-pointer text-white flex items-center justify-center leading-tight ${preferences.dietary.includes(dietary) ? `bg-gradient-to-br ${dietaryColors[dietary]} shadow-lg z-10` : `bg-gradient-to-br ${dietaryColors[dietary]} opacity-40 shadow-md hover:opacity-70`}`}>
                                   {dietary}
                                 </button>
                             );
@@ -551,29 +640,32 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
 
           {/* Right Column - Details */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white/50 p-6 rounded-3xl shadow-sm border border-white/60 hover:shadow-md transition-all">
+            <div className={`p-6 rounded-[2rem] shadow-sm border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/50 border-white/60'}`}>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Food Allergies</label>
-                <input type="text" value={preferences.allergies} onChange={(e) => setPreferences({ ...preferences, allergies: e.target.value })} className="w-full px-5 py-4 bg-white border-0 ring-1 ring-slate-200 rounded-2xl focus:ring-2 focus:ring-orange-500 transition-all font-bold text-slate-700 placeholder-slate-300" placeholder="e.g., Peanuts, Shellfish..." />
+                <input type="text" value={preferences.allergies} onChange={(e) => setPreferences({ ...preferences, allergies: e.target.value })} className={`w-full px-5 py-4 border-0 ring-1 rounded-2xl focus:ring-2 focus:ring-orange-500 transition-all font-bold placeholder-slate-300 ${isDarkMode ? 'bg-slate-900 ring-slate-700 text-slate-200' : 'bg-white ring-slate-200 text-slate-700'}`} placeholder="e.g., Peanuts, Shellfish..." />
             </div>
 
-            <div className="bg-white/50 p-6 rounded-3xl shadow-sm border border-white/60 hover:shadow-md transition-all">
+            <div className={`p-6 rounded-[2rem] shadow-sm border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/50 border-white/60'}`}>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4">Price Range</label>
                 <div className="flex gap-3">
                     {[1, 2, 3, 4].map(l => (
-                        <button key={l} onClick={() => setPreferences({ ...preferences, priceRange: [1, l] })} className={`flex-1 h-12 rounded-xl font-black text-lg transition-all duration-200 flex items-center justify-center ${l <= preferences.priceRange[1] ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg scale-105 ring-2 ring-orange-200' : 'bg-white text-slate-300 hover:bg-slate-50'}`}>{'$'.repeat(l)}</button>
+                        <button key={l} onClick={() => setPreferences({ ...preferences, priceRange: [1, l] })} className={`flex-1 h-12 rounded-xl font-black text-lg transition-all duration-200 flex items-center justify-center hover:scale-105 ${l <= preferences.priceRange[1] ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg ring-2 ring-orange-200' : isDarkMode ? 'bg-slate-900 text-slate-500 hover:bg-slate-800' : 'bg-white text-slate-300 hover:bg-slate-50'}`}>{'$'.repeat(l)}</button>
                     ))}
                 </div>
             </div>
 
-            <div className="bg-white/50 p-6 rounded-3xl shadow-sm border border-white/60 hover:shadow-md transition-all">
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4 flex justify-between"><span>Max Distance</span> <span className="text-orange-600">{preferences.maxDistance} min</span></label>
-                <input type="range" min="5" max="60" step="5" value={preferences.maxDistance} onChange={(e) => setPreferences({ ...preferences, maxDistance: parseInt(e.target.value) })} className="w-full h-3 bg-slate-200 rounded-full appearance-none cursor-pointer accent-orange-500 hover:accent-orange-600" />
+            {/* UPDATED: Max Distance Label Color to match Daily Budget (white/60) */}
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-[2rem] shadow-lg text-white relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-white/60 mb-2">Max Distance</label>
+                <div className="text-5xl font-black mb-4 tracking-tighter">{preferences.maxDistance} <span className="text-2xl font-bold text-orange-100">min</span></div>
+                <input type="range" min="5" max="60" step="5" value={preferences.maxDistance} onChange={(e) => setPreferences({ ...preferences, maxDistance: parseInt(e.target.value) })} className="w-full h-2 bg-white/20 rounded-full appearance-none cursor-pointer accent-white hover:accent-orange-100" />
             </div>
           </div>
         </div>
 
         <div className="flex gap-5">
-          <button onClick={onBack} className="px-8 py-4 border-2 border-slate-200 text-slate-600 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all font-bold text-sm uppercase tracking-wide">Back</button>
+          <button onClick={onBack} className={`px-8 py-4 border-2 rounded-2xl transition-all font-bold text-sm uppercase tracking-wide ${isDarkMode ? 'border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}>Back</button>
           <button onClick={onNext} className="flex-1 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.01] active:scale-95 transition-all font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2">Find Places to Stay <ChevronRight size={18} /></button>
         </div>
       </div>
@@ -582,6 +674,7 @@ const FoodPreferencesScreen = ({ onBack, onNext, preferences, setPreferences }) 
 };
 
 const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const types = [
     { id: 'hotel', name: 'Hotel', icon: Hotel }, { id: 'hostel', name: 'Hostel', icon: Coffee },
     { id: 'airbnb', name: 'Airbnb', icon: Hotel }, { id: 'resort', name: 'Resort', icon: Star },
@@ -592,20 +685,18 @@ const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) =>
   const toggleType = (t) => setPreferences(p => ({ ...p, types: p.types.includes(t) ? p.types.filter(x => x !== t) : [...p.types, t] }));
   const toggleAmenity = (a) => setPreferences(p => ({ ...p, amenities: p.amenities.includes(a) ? p.amenities.filter(x => x !== a) : [...p.amenities, a] }));
 
-  const getPercent = (val, min, max) => ((val - min) / (max - min)) * 100;
-
   return (
     <div className="max-w-6xl mx-auto">
-        <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border border-white/40 relative overflow-hidden">
+        <div className={`backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border relative overflow-hidden ${isDarkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/40 border-white/40'}`}>
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400" />
             
-            <button onClick={onBack} className="text-sm text-slate-500 hover:text-purple-600 font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all bg-white/50 w-fit px-4 py-2 rounded-full shadow-sm pt-4">
+            <button onClick={onBack} className={`text-sm font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all w-fit px-4 py-2 rounded-full shadow-sm pt-4 ${isDarkMode ? 'text-slate-400 hover:text-purple-400 bg-slate-800/50' : 'text-slate-500 hover:text-purple-600 bg-white/50'}`}>
                 <ChevronLeft size={16} /> Back to Food
             </button>
 
             <div className="mb-10 text-center">
                 <h2 className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 pt-2 pb-3 leading-normal">Where to Stay?</h2>
-                <p className="text-slate-600 font-medium text-lg">Find your home away from home</p>
+                <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Find your home away from home</p>
             </div>
 
             <div className="space-y-8 mb-10">
@@ -614,8 +705,8 @@ const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) =>
                         const Icon = t.icon;
                         const isSel = preferences.types.includes(t.id);
                         return (
-                            <button key={t.id} onClick={() => toggleType(t.id)} className={`h-32 rounded-3xl flex flex-col items-center justify-center gap-3 transition-all duration-300 group ${isSel ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl scale-105 ring-4 ring-purple-100' : 'bg-white/60 hover:bg-white text-slate-600 hover:shadow-lg hover:-translate-y-1'}`}>
-                                <div className={`p-3 rounded-2xl ${isSel ? 'bg-white/20' : 'bg-purple-50 group-hover:bg-purple-100'} transition-colors`}><Icon size={28} /></div>
+                            <button key={t.id} onClick={() => toggleType(t.id)} className={`p-4 rounded-3xl transition-all duration-300 text-left relative overflow-hidden group flex flex-col items-center justify-center gap-2 h-32 ${isSel ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-xl scale-[1.02]' : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-700 text-slate-400' : 'bg-white/60 hover:bg-white text-slate-600 hover:shadow-lg hover:-translate-y-1'}`}>
+                                <div className={`p-3 rounded-2xl ${isSel ? 'bg-white/20' : isDarkMode ? 'bg-slate-900 group-hover:bg-slate-800' : 'bg-purple-50 group-hover:bg-purple-100'} transition-colors`}><Icon size={28} /></div>
                                 <span className="font-bold text-sm">{t.name}</span>
                             </button>
                         );
@@ -623,39 +714,35 @@ const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) =>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-white/50 p-8 rounded-[2rem] shadow-sm border border-white/60">
+                    <div className={`p-8 rounded-[2rem] shadow-sm border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/50 border-white/60'}`}>
                          <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-6">Star Rating</label>
                          <div className="flex justify-between items-center gap-2">
                             {[1, 2, 3, 4, 5].map(s => (
-                                <button key={s} onClick={() => setPreferences({...preferences, minStars: s})} className={`flex-1 aspect-square rounded-2xl flex items-center justify-center font-black text-lg transition-all ${preferences.minStars <= s ? 'bg-yellow-400 text-white shadow-lg scale-110 rotate-3' : 'bg-white text-slate-300 hover:bg-slate-50'}`}>
+                                <button key={s} onClick={() => setPreferences({...preferences, minStars: s})} className={`flex-1 aspect-square rounded-2xl flex items-center justify-center font-black text-lg transition-all border hover:scale-110 ${preferences.minStars <= s ? 'bg-yellow-400 text-white shadow-lg rotate-3 border-transparent' : isDarkMode ? 'bg-slate-900 text-slate-600 hover:bg-slate-800 border-slate-800' : 'bg-white text-slate-300 hover:bg-slate-50 border-slate-100'}`}>
                                     {s}<span className="text-[10px] ml-0.5 align-top">★</span>
                                 </button>
                             ))}
                          </div>
                     </div>
 
-                    <div className="bg-white/50 p-8 rounded-[2rem] shadow-sm border border-white/60 flex flex-col justify-center">
-                        <div className="flex justify-between mb-6">
-                             <label className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Price Range / Night</label>
-                             <span className="font-black text-slate-700 text-lg">${preferences.minPrice} - ${preferences.maxPrice}</span>
-                        </div>
-                        <div className="relative h-12 bg-white rounded-2xl p-2 shadow-inner flex items-center">
-                             <input type="range" min="50" max="1000" value={preferences.maxPrice} onChange={(e) => setPreferences({...preferences, maxPrice: parseInt(e.target.value)})} className="w-full h-full opacity-0 absolute z-10 cursor-pointer" />
-                             <div className="h-2 bg-slate-100 w-full rounded-full overflow-hidden relative">
-                                <div style={{ width: `${getPercent(preferences.maxPrice, 50, 1000)}%` }} className="h-full bg-gradient-to-r from-purple-500 to-pink-500 absolute top-0 left-0" />
-                             </div>
-                             <div style={{ left: `calc(${getPercent(preferences.maxPrice, 50, 1000)}% - 1rem)` }} className="absolute w-8 h-8 bg-white rounded-full shadow-md border-2 border-purple-500 pointer-events-none transition-all" />
-                        </div>
+                    {/* UPDATED: Price Range Slider + Label Color (white/60) */}
+                    <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-[2rem] shadow-lg text-white relative overflow-hidden group flex flex-col justify-center">
+                        <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                        <label className="block text-xs font-extrabold uppercase tracking-wider text-white/60 mb-2">Price / Night</label>
+                         <div className="text-4xl font-black mb-4 tracking-tighter">${preferences.maxPrice}</div>
+                        {/* UPDATED SLIDER LOGIC: min=25, step=25, max=1000 */}
+                        <input type="range" min="25" max="1000" step="25" value={preferences.maxPrice} onChange={(e) => setPreferences({...preferences, maxPrice: parseInt(e.target.value)})} className="w-full h-2 bg-white/20 rounded-full appearance-none cursor-pointer accent-white hover:accent-purple-100" />
                     </div>
                 </div>
 
-                <div className="bg-white/30 p-8 rounded-[2rem] border border-white/40">
-                     <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-6 flex items-center gap-2"><Plus size={14}/> Must-Haves</label>
+                <div className={`p-8 rounded-[2rem] border ${isDarkMode ? 'bg-slate-800/30 border-slate-700' : 'bg-white/30 border-white/40'}`}>
+                     {/* UPDATED: Must-Haves text color to match Star Rating (text-slate-400) */}
+                     <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-6 flex items-center gap-2"><Plus size={14}/> Must-Haves</label>
                      <div className="flex flex-wrap gap-3">
                         {amenities.map(a => {
                             const isSel = preferences.amenities.includes(a);
                             return (
-                                <button key={a} onClick={() => toggleAmenity(a)} className={`px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${isSel ? 'bg-slate-800 text-white shadow-lg scale-105' : 'bg-white text-slate-500 hover:bg-slate-100 shadow-sm hover:shadow'}`}>
+                                <button key={a} onClick={() => toggleAmenity(a)} className={`px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${isSel ? 'bg-slate-800 text-white shadow-lg scale-105' : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-500 hover:bg-slate-100 shadow-sm hover:shadow'}`}>
                                     {a}
                                 </button>
                             );
@@ -665,7 +752,7 @@ const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) =>
             </div>
 
             <div className="flex gap-5">
-                <button onClick={onBack} className="px-8 py-4 border-2 border-slate-200 text-slate-600 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all font-bold text-sm uppercase tracking-wide">Back</button>
+                <button onClick={onBack} className={`px-8 py-4 border-2 rounded-2xl transition-all font-bold text-sm uppercase tracking-wide ${isDarkMode ? 'border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}>Back</button>
                 <button onClick={onNext} className="flex-1 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:shadow-xl hover:shadow-purple-500/30 hover:scale-[1.01] active:scale-95 transition-all font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2">Transport Options <ChevronRight size={18} /></button>
             </div>
         </div>
@@ -674,6 +761,7 @@ const AccommodationScreen = ({ onBack, onNext, preferences, setPreferences }) =>
 };
 
 const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const modes = [
     { id: 'rideshare', name: 'Rideshare', icon: Car, desc: 'Uber/Lyft' },
     { id: 'public', name: 'Transit', icon: Train, desc: 'Bus/Metro' },
@@ -687,16 +775,16 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
 
   return (
     <div className="max-w-6xl mx-auto">
-        <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border border-white/40 relative overflow-hidden">
+        <div className={`backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-10 border relative overflow-hidden ${isDarkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/40 border-white/40'}`}>
              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-teal-400 to-cyan-400" />
              
-             <button onClick={onBack} className="text-sm text-slate-500 hover:text-teal-600 font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all bg-white/50 w-fit px-4 py-2 rounded-full shadow-sm pt-4">
+             <button onClick={onBack} className={`text-sm font-bold mb-6 flex items-center gap-2 hover:-translate-x-1 transition-all w-fit px-4 py-2 rounded-full shadow-sm pt-4 ${isDarkMode ? 'text-slate-400 hover:text-teal-400 bg-slate-800/50' : 'text-slate-500 hover:text-teal-600 bg-white/50'}`}>
                 <ChevronLeft size={16} /> Back to Accommodation
             </button>
 
             <div className="mb-10">
                 <h2 className="text-4xl font-black bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-3 pt-2 pb-3 leading-normal">Getting Around</h2>
-                <p className="text-slate-600 font-medium text-lg">Select your preferred wheels (or wings)</p>
+                <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select your preferred wheels (or wings)</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
@@ -705,9 +793,9 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
                         const Icon = m.icon;
                         const isSel = preferences.modes.includes(m.id);
                         return (
-                            <button key={m.id} onClick={() => toggleMode(m.id)} className={`p-6 rounded-3xl transition-all duration-300 text-left relative overflow-hidden group ${isSel ? 'bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-xl scale-[1.02]' : 'bg-white/70 hover:bg-white text-slate-600 hover:shadow-lg'}`}>
+                            <button key={m.id} onClick={() => toggleMode(m.id)} className={`p-6 rounded-3xl transition-all duration-300 text-left relative overflow-hidden group ${isSel ? 'bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-xl scale-[1.02]' : isDarkMode ? 'bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:shadow-lg' : 'bg-white/70 hover:bg-white text-slate-600 hover:shadow-lg'}`}>
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className={`p-3 rounded-2xl ${isSel ? 'bg-white/20' : 'bg-teal-50 group-hover:bg-teal-100'} transition-colors`}><Icon size={24} /></div>
+                                    <div className={`p-3 rounded-2xl ${isSel ? 'bg-white/20' : isDarkMode ? 'bg-slate-900 group-hover:bg-slate-800' : 'bg-teal-50 group-hover:bg-teal-100'} transition-colors`}><Icon size={24} /></div>
                                     {isSel && <div className="bg-white/20 p-1 rounded-full"><CheckCircle2 size={16} /></div>}
                                 </div>
                                 <div className="font-bold text-lg">{m.name}</div>
@@ -717,13 +805,13 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
                     })}
                 </div>
                 <div className="lg:col-span-4 flex flex-col gap-6">
-                    <div className="bg-white/50 p-6 rounded-[2rem] shadow-sm border border-white/60">
+                    <div className={`p-6 rounded-[2rem] shadow-sm border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/50 border-white/60'}`}>
                         <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4">Priority</label>
                         <div className="flex flex-col gap-2">
                             {['Speed', 'Cost', 'Comfort'].map(p => {
                                 const isSel = preferences.priority === p.toLowerCase();
                                 return (
-                                    <button key={p} onClick={() => setPreferences({...preferences, priority: p.toLowerCase()})} className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-between px-6 ${isSel ? 'bg-slate-800 text-white shadow-lg scale-105' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
+                                    <button key={p} onClick={() => setPreferences({...preferences, priority: p.toLowerCase()})} className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-between px-6 ${isSel ? 'bg-slate-800 text-white shadow-lg scale-105' : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
                                         {p}
                                         {isSel && <div className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.8)]" />}
                                     </button>
@@ -733,7 +821,8 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
                     </div>
                     <div className="bg-gradient-to-br from-teal-500 to-emerald-600 p-6 rounded-[2rem] shadow-lg text-white relative overflow-hidden group">
                         <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                        <label className="block text-xs font-extrabold uppercase tracking-wider text-teal-100 mb-2">Daily Budget</label>
+                        {/* UPDATED: Daily Budget Label Color (white/60) */}
+                        <label className="block text-xs font-extrabold uppercase tracking-wider text-white/60 mb-2">Daily Budget</label>
                         <div className="text-5xl font-black mb-4 tracking-tighter">${preferences.budget}</div>
                         <input type="range" min="10" max="200" step="10" value={preferences.budget} onChange={(e) => setPreferences({...preferences, budget: parseInt(e.target.value)})} className="w-full h-2 bg-white/20 rounded-full appearance-none cursor-pointer accent-white hover:accent-teal-100" />
                     </div>
@@ -741,7 +830,7 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
             </div>
 
             <div className="flex gap-5">
-                <button onClick={onBack} className="px-8 py-4 border-2 border-slate-200 text-slate-600 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all font-bold text-sm uppercase tracking-wide">Back</button>
+                <button onClick={onBack} className={`px-8 py-4 border-2 rounded-2xl transition-all font-bold text-sm uppercase tracking-wide ${isDarkMode ? 'border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}>Back</button>
                 <button onClick={onNext} className="flex-1 px-8 py-4 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl hover:shadow-teal-500/30 hover:scale-[1.01] active:scale-95 transition-all font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2">Review Trip <ChevronRight size={18} /></button>
             </div>
         </div>
@@ -750,61 +839,68 @@ const TransportationScreen = ({ onBack, onNext, preferences, setPreferences }) =
 };
 
 const ReviewScreen = ({ onBack, activities, foodPrefs, accommPrefs, transportPrefs }) => {
-  const totalDays = Object.keys(activities).length;
+  const { isDarkMode } = useContext(ThemeContext);
+  
+  const totalDays = Object.values(activities).filter(dayActivities => dayActivities.length > 0).length;
   const totalActivities = Object.values(activities).reduce((sum, day) => sum + day.length, 0);
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-slate-900 text-white rounded-[3rem] shadow-2xl overflow-hidden relative min-h-[600px]">
+      <div className={`rounded-[3rem] shadow-2xl overflow-hidden relative min-h-[600px] transition-all duration-500 ${isDarkMode ? 'bg-slate-900 text-white' : 'bg-gradient-to-br from-blue-100 via-blue-400 to-blue-700 text-white shadow-[0_20px_60px_-15px_rgba(30,58,138,0.5)] border border-blue-300'}`}>
          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none" />
-         <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500 rounded-full blur-[100px] opacity-20 animate-pulse" />
-         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-purple-500 rounded-full blur-[100px] opacity-20 animate-pulse delay-1000" />
+         
+         {/* Breathing Blobs - Updated for High Visibility in Light Mode */}
+         {/* Increased opacity and darkened colors for light mode */}
+         <div className={`absolute -top-20 -right-20 w-96 h-96 rounded-full blur-[100px] animate-pulse ${isDarkMode ? 'bg-blue-500 opacity-20' : 'bg-blue-600 opacity-50'}`} />
+         <div className={`absolute -bottom-20 -left-20 w-96 h-96 rounded-full blur-[100px] animate-pulse delay-1000 ${isDarkMode ? 'bg-purple-500 opacity-20' : 'bg-purple-700 opacity-50'}`} />
 
          <div className="p-12 relative z-10 pt-16">
-            <button onClick={onBack} className="text-sm text-slate-400 hover:text-white font-bold mb-8 flex items-center gap-2 transition-all w-fit px-4 py-2 rounded-full bg-white/5 hover:bg-white/10">
+            <button onClick={onBack} className={`text-sm font-bold mb-8 flex items-center gap-2 transition-all w-fit px-4 py-2 rounded-full ${isDarkMode ? 'text-slate-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-blue-100 hover:text-white bg-white/10 hover:bg-white/20 shadow-sm'}`}>
                 <ChevronLeft size={16} /> Edit Details
             </button>
 
             <div className="text-center mb-16">
-                <h2 className="text-6xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4 drop-shadow-2xl tracking-tighter pb-3 leading-tight">Ready for Takeoff?</h2>
-                <p className="text-slate-400 text-xl max-w-lg mx-auto">Your personalized itinerary is generated below.</p>
+                <h2 className={`text-6xl font-black bg-clip-text text-transparent mb-4 drop-shadow-2xl tracking-tighter pb-3 leading-tight ${isDarkMode ? 'bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400' : 'bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700'}`}>Ready for Takeoff?</h2>
+                <p className={`text-xl max-w-lg mx-auto ${isDarkMode ? 'text-slate-400' : 'text-blue-100'}`}>Your personalized itinerary is generated below.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div className="bg-white/10 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 text-center hover:bg-white/15 transition-all hover:-translate-y-1">
-                    <div className="text-5xl font-black mb-2 text-blue-400">{totalDays}</div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-slate-500">Days</div>
+                {/* Stat Cards */}
+                <div className={`backdrop-blur-md p-8 rounded-[2rem] border text-center transition-all hover:-translate-y-1 ${isDarkMode ? 'bg-white/10 border-white/10 hover:bg-white/15' : 'bg-white/20 border-white/30 shadow-lg hover:bg-white/30'}`}>
+                    <div className={`text-5xl font-black mb-2 ${isDarkMode ? 'text-blue-400' : 'text-white'}`}>{totalDays}</div>
+                    <div className={`text-xs font-bold uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-blue-200'}`}>Days</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 text-center hover:bg-white/15 transition-all hover:-translate-y-1">
-                    <div className="text-5xl font-black mb-2 text-purple-400">{totalActivities}</div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-slate-500">Activities</div>
+                <div className={`backdrop-blur-md p-8 rounded-[2rem] border text-center transition-all hover:-translate-y-1 ${isDarkMode ? 'bg-white/10 border-white/10 hover:bg-white/15' : 'bg-white/20 border-white/30 shadow-lg hover:bg-white/30'}`}>
+                    <div className={`text-5xl font-black mb-2 ${isDarkMode ? 'text-purple-400' : 'text-white'}`}>{totalActivities}</div>
+                    <div className={`text-xs font-bold uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-blue-200'}`}>Activities</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 text-center hover:bg-white/15 transition-all hover:-translate-y-1">
-                    <div className="text-5xl font-black mb-2 text-pink-400">${transportPrefs.budget + accommPrefs.maxPrice}</div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-slate-500">Est. Daily Cost</div>
+                <div className={`backdrop-blur-md p-8 rounded-[2rem] border text-center transition-all hover:-translate-y-1 ${isDarkMode ? 'bg-white/10 border-white/10 hover:bg-white/15' : 'bg-white/20 border-white/30 shadow-lg hover:bg-white/30'}`}>
+                    <div className={`text-5xl font-black mb-2 ${isDarkMode ? 'text-pink-400' : 'text-white'}`}>${transportPrefs.budget + accommPrefs.maxPrice}</div>
+                    <div className={`text-xs font-bold uppercase tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-blue-200'}`}>Est. Daily Cost</div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-                <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 space-y-6">
-                    <h3 className="font-bold text-xl text-white flex items-center gap-3"><Utensils className="text-orange-400"/> Dining Profile</h3>
+                {/* Detail Cards */}
+                <div className={`p-8 rounded-[2rem] border space-y-6 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white/10 border-white/20 shadow-sm'}`}>
+                    <h3 className={`font-bold text-xl flex items-center gap-3 text-white`}><Utensils className="text-orange-400"/> Dining Profile</h3>
                     <div className="flex flex-wrap gap-2">
-                        {foodPrefs.cuisines.map(c => <span key={c} className="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-300 text-xs font-bold">{c}</span>)}
+                        {foodPrefs.cuisines.map(c => <span key={c} className={`px-3 py-1 rounded-lg text-xs font-bold ${isDarkMode ? 'bg-orange-500/20 text-orange-500' : 'bg-white/20 text-white'}`}>{c}</span>)}
                     </div>
-                    <div className="flex justify-between items-end border-t border-white/10 pt-4">
-                        <span className="text-slate-500 text-sm font-medium">Price Range</span>
+                    <div className={`flex justify-between items-end border-t pt-4 ${isDarkMode ? 'border-white/10' : 'border-white/20'}`}>
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-500' : 'text-blue-200'}`}>Price Range</span>
                         <span className="text-orange-400 font-black text-xl">{'$'.repeat(foodPrefs.priceRange[1])}</span>
                     </div>
                 </div>
 
-                <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 space-y-6">
-                    <h3 className="font-bold text-xl text-white flex items-center gap-3"><Hotel className="text-purple-400"/> Stay & Travel</h3>
+                <div className={`p-8 rounded-[2rem] border space-y-6 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white/10 border-white/20 shadow-sm'}`}>
+                    <h3 className={`font-bold text-xl flex items-center gap-3 text-white`}><Hotel className="text-purple-400"/> Stay & Travel</h3>
                     <div className="flex flex-wrap gap-2">
-                        {accommPrefs.types.map(t => <span key={t} className="px-3 py-1 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-bold">{t}</span>)}
-                        {transportPrefs.modes.map(t => <span key={t} className="px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 text-xs font-bold">{t}</span>)}
+                        {accommPrefs.types.map(t => <span key={t} className={`px-3 py-1 rounded-lg text-xs font-bold ${isDarkMode ? 'bg-purple-500/20 text-purple-500' : 'bg-white/20 text-white'}`}>{t}</span>)}
+                        {transportPrefs.modes.map(t => <span key={t} className={`px-3 py-1 rounded-lg text-xs font-bold ${isDarkMode ? 'bg-teal-500/20 text-teal-500' : 'bg-white/20 text-white'}`}>{t}</span>)}
                     </div>
-                    <div className="flex justify-between items-end border-t border-white/10 pt-4">
-                        <span className="text-slate-500 text-sm font-medium">Comfort Level</span>
+                    <div className={`flex justify-between items-end border-t pt-4 ${isDarkMode ? 'border-white/10' : 'border-white/20'}`}>
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-500' : 'text-blue-200'}`}>Comfort Level</span>
                         <span className="text-purple-400 font-black text-xl">{accommPrefs.minStars}+ Stars</span>
                     </div>
                 </div>
@@ -820,7 +916,8 @@ const ReviewScreen = ({ onBack, activities, foodPrefs, accommPrefs, transportPre
   );
 };
 
-export default function Tratlus() {
+const MainApp = () => {
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [showLanding, setShowLanding] = useState(true);
   const [activities, setActivities] = useState({});
   const [editingActivity, setEditingActivity] = useState(null);
@@ -857,34 +954,41 @@ export default function Tratlus() {
   }
 
   return (
-    <div className="min-h-screen bg-fixed transition-colors duration-500" style={{ background: 'linear-gradient(to bottom, #ffffff, #7d9eff)' }}>
+    <div className={`min-h-screen bg-fixed transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-white'}`} style={{ background: isDarkMode ? 'linear-gradient(to bottom, #0f172a, #172554)' : 'linear-gradient(to bottom, #eff6ff, #bfdbfe, #2563eb)' }}>
+        {/* Main App Background Blobs - Updated for Light Mode visibility */}
         <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-             <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-blue-200/30 blur-[120px]" />
-             <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full bg-purple-200/30 blur-[120px]" />
-             <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[50%] rounded-full bg-pink-200/30 blur-[120px]" />
+             <div className={`absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full blur-[120px] ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-600/40'}`} />
+             <div className={`absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[120px] ${isDarkMode ? 'bg-purple-900/20' : 'bg-purple-600/40'}`} />
+             <div className={`absolute -bottom-[10%] left-[20%] w-[50%] h-[50%] rounded-full blur-[120px] ${isDarkMode ? 'bg-indigo-900/20' : 'bg-pink-600/40'}`} />
         </div>
 
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-white/50 shadow-sm">
+      <header className={`sticky top-0 z-50 backdrop-blur-md border-b shadow-sm ${isDarkMode ? 'bg-slate-900/70 border-slate-800' : 'bg-white/70 border-white/50'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => goToStep(1)}>
+            <div className="flex items-center gap-3" onClick={() => goToStep(1)}>
               <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
                 <MapPin className="text-white" size={24} strokeWidth={2.5} />
               </div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent tracking-tight">Tratlus</h1>
+              {/* UPDATED HEADER TITLE GRADIENT for Dark Mode */}
+              <h1 className={`text-2xl font-black bg-clip-text text-transparent tracking-tight ${isDarkMode ? 'bg-gradient-to-r from-purple-300 to-blue-300' : 'bg-gradient-to-r from-purple-700 to-blue-700'}`}>Tratlus</h1>
             </div>
             
-            <div className="hidden md:flex items-center gap-1 bg-slate-100/50 p-1.5 rounded-full border border-white/50">
-              {['Itinerary', 'Food', 'Stay', 'Travel', 'Review'].map((step, i) => {
-                const s = i + 1;
-                const isC = currentStep === s;
-                const isD = completedSteps.includes(s);
-                return (
-                  <button key={step} disabled={!isD && !isC} onClick={() => (isD || isC) && goToStep(s)} 
-                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${isC ? 'bg-white text-slate-800 shadow-md scale-105' : isD ? 'text-slate-500 hover:text-slate-800 hover:bg-white/50' : 'text-slate-300 cursor-not-allowed'}`}>
-                    {step}
-                  </button>
-                );
-              })}
+            <div className="flex items-center gap-4">
+                <div className={`hidden md:flex items-center gap-1 p-1.5 rounded-full border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-100/50 border-white/50'}`}>
+                {['Itinerary', 'Food', 'Stay', 'Travel', 'Review'].map((step, i) => {
+                    const s = i + 1;
+                    const isC = currentStep === s;
+                    const isD = completedSteps.includes(s);
+                    return (
+                    <button key={step} disabled={!isD && !isC} onClick={() => (isD || isC) && goToStep(s)} 
+                        className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${isC ? (isDarkMode ? 'bg-slate-700 text-white shadow-md scale-105' : 'bg-white text-slate-800 shadow-md scale-105') : isD ? (isDarkMode ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50') : (isDarkMode ? 'text-slate-700 cursor-not-allowed' : 'text-slate-300 cursor-not-allowed')}`}>
+                        {step}
+                    </button>
+                    );
+                })}
+                </div>
+                
+                {/* Theme Toggle Switch */}
+                <ThemeToggle />
             </div>
         </div>
       </header>
@@ -894,12 +998,12 @@ export default function Tratlus() {
           <div className="animate-in slide-in-from-bottom-8 fade-in duration-500">
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h2 className="text-5xl font-black text-slate-800 mb-2 tracking-tight">Plan Your Journey</h2>
-                    <p className="text-slate-500 font-medium text-lg">Drag and drop activities to craft your perfect day.</p>
+                    <h2 className={`text-5xl font-black mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Plan Your Journey</h2>
+                    <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Drag and drop activities to craft your perfect day.</p>
                 </div>
                 
                 <div className={`transition-all duration-500 ${hasActivities ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-                  <button onClick={() => advanceStep(2)} className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                  <button onClick={() => advanceStep(2)} className={`px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-2 ${isDarkMode ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'}`}>
                     Next Step <ChevronRight size={18}/>
                   </button>
                 </div>
@@ -908,8 +1012,8 @@ export default function Tratlus() {
             <div className={`grid grid-cols-1 ${viewMode === 'day' ? 'lg:grid-cols-4' : ''} gap-8`}>
               {viewMode === 'day' && (
                 <div className="lg:col-span-1 animate-in slide-in-from-left-8 duration-500 delay-100">
-                  <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] shadow-xl p-6 sticky top-28 border border-white/60">
-                    <h3 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2"><Plus className="text-blue-500" strokeWidth={3} /> Add Activities</h3>
+                  <div className={`backdrop-blur-xl rounded-[2rem] shadow-xl p-6 sticky top-28 border ${isDarkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/60 border-white/60'}`}>
+                    <h3 className={`font-black text-lg mb-6 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}><Plus className="text-blue-500" strokeWidth={3} /> Add Activities</h3>
                     <div className="space-y-3">
                       {ACTIVITY_CATEGORIES.map(cat => <ActivityBlock key={cat.id} category={cat.id} onDragStart={handleDragStart} />)}
                     </div>
@@ -935,5 +1039,16 @@ export default function Tratlus() {
 
       {editingActivity && <ActivityModal block={editingActivity.block} onSave={handleSaveActivity} onClose={() => setEditingActivity(null)} />}
     </div>
+  );
+};
+
+export default function Tratlus() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+      <MainApp />
+    </ThemeContext.Provider>
   );
 }
