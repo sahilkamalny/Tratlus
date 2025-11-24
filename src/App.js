@@ -117,8 +117,8 @@ const SoundProvider = ({ children }) => {
   return (
     <SoundContext.Provider value={{ isMuted, setIsMuted, playSound }}>
       {children}
-      {/* Floating Mute Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Mute Button - MOVED TO BOTTOM LEFT */}
+      <div className="fixed bottom-6 left-6 z-50">
         <button 
           onClick={() => setIsMuted(!isMuted)}
           className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-full shadow-2xl hover:scale-110 active:scale-90 transition-all group"
@@ -261,12 +261,25 @@ const LandingPage = ({ onStart }) => {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 h-screen flex flex-col justify-center items-center text-center">
-            {/* Floating Icons */}
+            {/* Floating Icons - UPDATED COLORS TO MATCH GRADIENT */}
             <div className={`absolute top-1/4 left-[15%] backdrop-blur-lg p-4 rounded-2xl border shadow-2xl animate-[bounce_6s_infinite] ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
-                <Map className={`${isDarkMode ? 'text-blue-400' : 'text-white'} w-8 h-8`} />
+                {/* Map matches the start of the gradient (Fuchsia) */}
+                <Map className={`${isDarkMode ? 'text-fuchsia-500' : 'text-fuchsia-600'} w-8 h-8`} />
             </div>
             <div className={`absolute bottom-1/3 right-[15%] backdrop-blur-lg p-4 rounded-2xl border shadow-2xl animate-[bounce_8s_infinite] delay-1000 ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
-                <Compass className={`${isDarkMode ? 'text-purple-400' : 'text-blue-100'} w-8 h-8`} />
+                {/* Compass matches the end of the gradient (Blue) */}
+                <Compass className={`${isDarkMode ? 'text-blue-500' : 'text-blue-600'} w-8 h-8`} />
+            </div>
+
+            {/* LOGO PLACEMENT - NEW & AESTHETIC */}
+            <div className="mb-8 relative animate-in fade-in zoom-in duration-700">
+                {/* Subtle glow behind logo matching theme */}
+                <div className={`absolute inset-0 blur-xl opacity-30 rounded-full ${isDarkMode ? 'bg-fuchsia-500' : 'bg-blue-500'}`} />
+                <img 
+                  src={logo} 
+                  alt="Tratlus Logo" 
+                  className="relative w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-2xl" 
+                />
             </div>
 
             {/* Badge */}
