@@ -1,0 +1,134 @@
+{
+  "id": "102019ac646c4de7584b2c6af60e00ea088",
+  "version": "102019ac646c4de74bf8bfdd9ea9fcb483d",
+  "schema": {
+    "name": "preference_score",
+    "description": "Stores calculated preference scores for various tags based on user swipes.",
+    "fields": [
+      {
+        "name": "id",
+        "description": "Unique identifier for each preference score.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 1,
+          "reason": "Publicly accessible unique identifier."
+        }
+      },
+      {
+        "name": "data_creator",
+        "description": "id of the user who creates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "data_updater",
+        "description": "id of the user who updates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "create_time",
+        "description": "create time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "update_time",
+        "description": "update time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "tag_name",
+        "description": "The name of the preference tag.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Preference data for scoring."
+        },
+        "taxonomy": {
+          "category": "User Preference",
+          "subject": "Travel Tag"
+        }
+      },
+      {
+        "name": "score",
+        "description": "The calculated numeric weight or score for the tag.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Calculated user preference metric."
+        },
+        "taxonomy": {
+          "category": "User Preference",
+          "subject": "Preference Score"
+        },
+        "numeric": "float"
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "id"
+        ],
+        "unique": true,
+        "primary": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_updater"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator",
+          "tag_name"
+        ],
+        "unique": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator",
+          "score"
+        ],
+        "order": true
+      }
+    ]
+  },
+  "task": {
+    "id": "692883ddc321cfaf0a53c7bc",
+    "root": "692883ddc321cfaf0a53c7bc",
+    "project": "692883ddc321cfaf0a53c7bb",
+    "user": "f831b3f0-3001-70f7-0fab-208ce95eb04b"
+  },
+  "namespace": {
+    "id": "01987547fc6c72ecb453bd2736bd4ea0",
+    "tenant": 2,
+    "name": "global-1",
+    "default": true
+  },
+  "revision": 1
+}

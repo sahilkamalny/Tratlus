@@ -1,0 +1,204 @@
+{
+  "id": "102019ac646c4de7538b4ae03de1c72c4ab",
+  "version": "102019ac646c4de74bf8bfdd9ea9fcb483d",
+  "schema": {
+    "name": "swipe_history",
+    "description": "Tracks user swipe actions on preference cards to build a taste profile.",
+    "fields": [
+      {
+        "name": "id",
+        "description": "Unique identifier for each swipe record.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 1,
+          "reason": "Publicly accessible unique identifier."
+        }
+      },
+      {
+        "name": "data_creator",
+        "description": "id of the user who creates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "data_updater",
+        "description": "id of the user who updates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "create_time",
+        "description": "create time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "update_time",
+        "description": "update time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "card_id",
+        "description": "The unique identifier of the card that was swiped.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal identifier for a content card."
+        }
+      },
+      {
+        "name": "category",
+        "description": "The category of the card swiped.",
+        "type": 100,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Categorization of user preferences."
+        },
+        "enumeration": [
+          {
+            "value": "Unspecified"
+          },
+          {
+            "number": 1,
+            "value": "Locations"
+          },
+          {
+            "number": 2,
+            "value": "Food"
+          },
+          {
+            "number": 3,
+            "value": "Activities"
+          },
+          {
+            "number": 4,
+            "value": "Accommodations"
+          },
+          {
+            "number": 5,
+            "value": "Transportation"
+          },
+          {
+            "number": 6,
+            "value": "Vibes"
+          }
+        ]
+      },
+      {
+        "name": "direction",
+        "description": "The direction of the swipe, indicating preference.",
+        "type": 100,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Indicates user preference signal."
+        },
+        "enumeration": [
+          {
+            "value": "Unspecified"
+          },
+          {
+            "number": 1,
+            "value": "Right"
+          },
+          {
+            "number": 2,
+            "value": "Left"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "description": "An array of tags associated with the swiped card.",
+        "type": 101,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Detailed preference data for scoring."
+        },
+        "nullable": true,
+        "items": {
+          "description": "A single preference tag.",
+          "type": 1,
+          "taxonomy": {
+            "category": "User Preference",
+            "subject": "Travel Tag"
+          },
+          "pattern": "^[a-zA-Z0-9_]+$"
+        }
+      },
+      {
+        "name": "timestamp",
+        "description": "The exact time the swipe occurred, as a 10-digit unix timestamp string.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Timestamp for user activity."
+        },
+        "format": "timestamp"
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "id"
+        ],
+        "unique": true,
+        "primary": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_updater"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "category",
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator",
+          "timestamp"
+        ],
+        "order": true
+      }
+    ]
+  },
+  "task": {
+    "id": "692883ddc321cfaf0a53c7bc",
+    "root": "692883ddc321cfaf0a53c7bc",
+    "project": "692883ddc321cfaf0a53c7bb",
+    "user": "f831b3f0-3001-70f7-0fab-208ce95eb04b"
+  },
+  "namespace": {
+    "id": "01987547fc6c72ecb453bd2736bd4ea0",
+    "tenant": 2,
+    "name": "global-1",
+    "default": true
+  },
+  "revision": 1
+}

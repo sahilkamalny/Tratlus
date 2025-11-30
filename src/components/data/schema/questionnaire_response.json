@@ -1,0 +1,235 @@
+{
+  "id": "102019ac646c4de75b698d91392f78d6fbf",
+  "version": "102019ac646c4de74bf8bfdd9ea9fcb483d",
+  "schema": {
+    "name": "questionnaire_response",
+    "description": "Stores user responses from the initial travel preferences questionnaire.",
+    "fields": [
+      {
+        "name": "id",
+        "description": "Unique identifier for each questionnaire submission.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 1,
+          "reason": "Publicly accessible unique identifier."
+        }
+      },
+      {
+        "name": "data_creator",
+        "description": "id of the user who creates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "data_updater",
+        "description": "id of the user who updates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "create_time",
+        "description": "create time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "update_time",
+        "description": "update time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "dietary_needs",
+        "description": "Array of strings specifying dietary needs or restrictions.",
+        "type": 101,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Contains potentially sensitive health-related information."
+        },
+        "nullable": true,
+        "items": {
+          "type": 1,
+          "taxonomy": {
+            "category": "User Profile",
+            "subject": "Dietary Preference"
+          }
+        }
+      },
+      {
+        "name": "meal_budget",
+        "description": "User's preferred budget for meals (e.g., $, $$, $$$).",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User-provided preference data."
+        },
+        "nullable": true
+      },
+      {
+        "name": "food_adventurousness",
+        "description": "A numeric rating of how adventurous the user is with food.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User-provided preference data."
+        },
+        "nullable": true,
+        "numeric": "int"
+      },
+      {
+        "name": "accommodation_type",
+        "description": "Array of preferred accommodation types (e.g., Hotel, Hostel, Airbnb).",
+        "type": 101,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User-provided preference data."
+        },
+        "nullable": true,
+        "items": {
+          "type": 1,
+          "taxonomy": {
+            "category": "User Preference",
+            "subject": "Accommodation Type"
+          }
+        }
+      },
+      {
+        "name": "must_have_amenities",
+        "description": "Array of essential amenities for accommodation.",
+        "type": 101,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User-provided preference data."
+        },
+        "nullable": true,
+        "items": {
+          "type": 1,
+          "taxonomy": {
+            "category": "User Preference",
+            "subject": "Accommodation Amenity"
+          }
+        }
+      },
+      {
+        "name": "price_per_night",
+        "description": "User's budget for accommodation per night.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "User's financial information."
+        },
+        "nullable": true,
+        "numeric": "float"
+      },
+      {
+        "name": "trip_start_date",
+        "description": "The starting date of the trip.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User's travel plan details."
+        },
+        "format": "date"
+      },
+      {
+        "name": "trip_end_date",
+        "description": "The ending date of the trip.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User's travel plan details."
+        },
+        "format": "date"
+      },
+      {
+        "name": "destination",
+        "description": "The desired travel destination.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User's travel plan details."
+        }
+      },
+      {
+        "name": "number_of_travelers",
+        "description": "The number of people traveling.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "User's travel plan details."
+        },
+        "numeric": "uint"
+      },
+      {
+        "name": "total_budget",
+        "description": "The optional total budget for the trip.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "User's financial information."
+        },
+        "nullable": true,
+        "numeric": "float"
+      },
+      {
+        "name": "timestamp",
+        "description": "The time the questionnaire was submitted, as a 10-digit unix timestamp string.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Timestamp for user activity."
+        },
+        "format": "timestamp"
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "id"
+        ],
+        "unique": true,
+        "primary": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_updater"
+        ],
+        "order": false
+      }
+    ]
+  },
+  "task": {
+    "id": "692883ddc321cfaf0a53c7bc",
+    "root": "692883ddc321cfaf0a53c7bc",
+    "project": "692883ddc321cfaf0a53c7bb",
+    "user": "f831b3f0-3001-70f7-0fab-208ce95eb04b"
+  },
+  "namespace": {
+    "id": "01987547fc6c72ecb453bd2736bd4ea0",
+    "tenant": 2,
+    "name": "global-1",
+    "default": true
+  },
+  "revision": 1
+}

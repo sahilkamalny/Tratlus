@@ -1,0 +1,164 @@
+{
+  "id": "102019ac647147f74b8ab821b063e158051",
+  "version": "102019ad31e8738725989b0fc9d913961e3",
+  "schema": {
+    "name": "generated_itinerary",
+    "description": "Stores AI-generated travel itineraries for users.",
+    "fields": [
+      {
+        "name": "id",
+        "description": "Unique identifier for each generated itinerary.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 1,
+          "reason": "Publicly accessible unique identifier."
+        }
+      },
+      {
+        "name": "data_creator",
+        "description": "id of the user who creates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "data_updater",
+        "description": "id of the user who updates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "create_time",
+        "description": "create time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "update_time",
+        "description": "update time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "destination",
+        "description": "The destination of the itinerary.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Core detail of the travel plan."
+        }
+      },
+      {
+        "name": "start_date",
+        "description": "The start date of the itinerary.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Core detail of the travel plan."
+        },
+        "format": "date"
+      },
+      {
+        "name": "end_date",
+        "description": "The end date of the itinerary.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Core detail of the travel plan."
+        },
+        "format": "date"
+      },
+      {
+        "name": "days",
+        "description": "A JSON string representing an array of daily plans and activities.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Contains the detailed structure of the travel plan."
+        }
+      },
+      {
+        "name": "total_estimated_cost",
+        "description": "The total estimated cost for the entire trip.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Contains financial estimation data."
+        },
+        "numeric": "float"
+      },
+      {
+        "name": "timestamp",
+        "description": "The time the itinerary was generated, as a 10-digit unix timestamp string.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Timestamp for generation event."
+        },
+        "format": "timestamp"
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "id"
+        ],
+        "unique": true,
+        "primary": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_updater"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator",
+          "destination"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator",
+          "timestamp"
+        ],
+        "order": true
+      }
+    ]
+  },
+  "task": {
+    "id": "692bce64a323fe2c2ea754ba",
+    "root": "692883ddc321cfaf0a53c7bc",
+    "project": "692883ddc321cfaf0a53c7bb",
+    "user": "f831b3f0-3001-70f7-0fab-208ce95eb04b"
+  },
+  "namespace": {
+    "id": "01987547fc6c72ecb453bd2736bd4ea0",
+    "tenant": 2,
+    "name": "global-1",
+    "default": true
+  },
+  "revision": 1
+}

@@ -1,0 +1,161 @@
+{
+  "id": "102019ac647147f7824a6b679b53ae176b1",
+  "version": "102019ad31e8738725989b0fc9d913961e3",
+  "schema": {
+    "name": "category_progress",
+    "description": "Monitors a user's swipe completion for each category.",
+    "fields": [
+      {
+        "name": "id",
+        "description": "Unique identifier for each progress record.",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 1,
+          "reason": "Publicly accessible unique identifier."
+        }
+      },
+      {
+        "name": "data_creator",
+        "description": "id of the user who creates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "data_updater",
+        "description": "id of the user who updates the record",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 3,
+          "reason": "Corresponds to a user's internal ID."
+        }
+      },
+      {
+        "name": "create_time",
+        "description": "create time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "update_time",
+        "description": "update time in timestamp unix",
+        "type": 1,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Internal system metadata."
+        },
+        "format": "timestamp"
+      },
+      {
+        "name": "category",
+        "description": "The category for which progress is being tracked.",
+        "type": 100,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Categorization of user progress."
+        },
+        "enumeration": [
+          {
+            "value": "Unspecified"
+          },
+          {
+            "number": 1,
+            "value": "Locations"
+          },
+          {
+            "number": 2,
+            "value": "Food"
+          },
+          {
+            "number": 3,
+            "value": "Activities"
+          },
+          {
+            "number": 4,
+            "value": "Accommodations"
+          },
+          {
+            "number": 5,
+            "value": "Transportation"
+          },
+          {
+            "number": 6,
+            "value": "Vibes"
+          }
+        ]
+      },
+      {
+        "name": "swipe_count",
+        "description": "The number of swipes the user has completed in this category.",
+        "type": 2,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Tracks user engagement metric."
+        },
+        "taxonomy": {
+          "category": "User Engagement",
+          "subject": "Swipe Count"
+        },
+        "numeric": "uint"
+      },
+      {
+        "name": "is_complete",
+        "description": "Boolean flag indicating if the user has completed the category (e.g., swipe count \u003e= 10).",
+        "type": 3,
+        "compliance": {
+          "confidentiality": 2,
+          "reason": "Indicates completion of a profile-building step."
+        }
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "id"
+        ],
+        "unique": true,
+        "primary": true,
+        "order": false
+      },
+      {
+        "fields": [
+          "data_creator"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "data_updater"
+        ],
+        "order": false
+      },
+      {
+        "fields": [
+          "category",
+          "data_creator"
+        ],
+        "unique": true,
+        "order": false
+      }
+    ]
+  },
+  "task": {
+    "id": "692bce64a323fe2c2ea754ba",
+    "root": "692883ddc321cfaf0a53c7bc",
+    "project": "692883ddc321cfaf0a53c7bb",
+    "user": "f831b3f0-3001-70f7-0fab-208ce95eb04b"
+  },
+  "namespace": {
+    "id": "01987547fc6c72ecb453bd2736bd4ea0",
+    "tenant": 2,
+    "name": "global-1",
+    "default": true
+  },
+  "revision": 1
+}
