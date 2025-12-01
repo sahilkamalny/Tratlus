@@ -109,7 +109,7 @@ const useAuthStore = create<AuthStore>(
 				});
 
 				// Store in localStorage for persistence
-				tratlus_auth_token
+				localStorage.setItem("tratlus_auth_token", token);
 			} else {
 				// Token is invalid, clear it
 				set({
@@ -117,7 +117,7 @@ const useAuthStore = create<AuthStore>(
 					status: "invalid_token",
 					parentOrigin: origin || get().parentOrigin,
 				});
-				localStorage.removeItem("creao_auth_token");
+				localStorage.removeItem("tratlus_auth_token");
 			}
 		},
 
@@ -128,7 +128,7 @@ const useAuthStore = create<AuthStore>(
 				status: "unauthenticated",
 				parentOrigin: null,
 			});
-			localStorage.removeItem("creao_auth_token");
+			localStorage.removeItem("tratlus_auth_token");
 		},
 
 		// Refresh authentication state by re-validating the current token
@@ -142,7 +142,7 @@ const useAuthStore = create<AuthStore>(
 			const isValid = await validateToken(token);
 			if (!isValid) {
 				set({ status: "invalid_token" });
-				localStorage.removeItem("creao_auth_token");
+				localStorage.removeItem("tratlus_auth_token");
 				return false;
 			}
 
@@ -189,7 +189,7 @@ async function initializeFromStorage(
 	set: (state: Partial<AuthStore>) => void,
 ): Promise<void> {
 	console.log("Initializing auth from storage...");
-	const storedToken = localStorage.getItem("creao_auth_token");
+	const storedToken = localStorage.getItem("tratlus_auth_token");
 	if (storedToken) {
 		console.log("Found stored token, validating...");
 		const { validateToken } = get();
@@ -202,7 +202,7 @@ async function initializeFromStorage(
 			});
 		} else {
 			console.log("Stored token is invalid, clearing...");
-			localStorage.removeItem("creao_auth_token");
+			localStorage.removeItem("tratlus_auth_token");
 			set({ status: "invalid_token" });
 		}
 	} else {
@@ -234,7 +234,7 @@ function setupMessageListener(get: () => AuthStore): void {
 		try {
 			const data = event.data as AuthMessage;
 
-			if (data?.type === "CREAO_AUTH_TOKEN" && data.token) {
+			if (data?.type === "TRATLUS_AUTH_TOKEN" && data.token) {
 				const { setToken } = get();
 				await setToken(data.token, event.origin);
 			}
