@@ -1,5 +1,5 @@
 import TratlusLogo from "@/assets/tratlus_logo.svg?react";
-useTratlusAuth } from "@/sdk/core/auth";
+import { useTratlusAuth } from "@/sdk/core/auth";
 import { useState } from "react";
 
 interface FloatingBannerProps {
@@ -10,7 +10,7 @@ export function FloatingBanner({
 	position = "bottom-left",
 }: FloatingBannerProps) {
 	const [isVisible, setIsVisible] = useState(true);
-	const { status } = useCreaoAuth();
+	const { status } = useTratlusAuth();
 
 	const handleClose = () => {
 		setIsVisible(false);
