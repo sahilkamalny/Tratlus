@@ -133,7 +133,7 @@ Main "transportation" activity types should only be used for major travel events
 
 Include 4-6 MAIN activities per day, PLUS transport-between blocks connecting each activity. Estimate costs in USD. Consider dietary restrictions, budget constraints, accommodation preferences, and user interests.`;
 
-      const model = genAI.getGenerativeModel({ model: "gemini-pro-latest" });
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
       const generationConfig = {
         temperature: 0.9,
@@ -185,11 +185,15 @@ Include 4-6 MAIN activities per day, PLUS transport-between blocks connecting ea
       try {
         // Remove potential markdown code blocks if present
         let cleanedResponse = rawResponse.trim();
-        if (cleanedResponse.startsWith('```json')) {
+        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch && jsonMatch[0]) {
+            cleanedResponse = jsonMatch[0];
+        } else if (cleanedResponse.startsWith('```json')) {
           cleanedResponse = cleanedResponse.replace(/^```json\n?/, '').replace(/\n?```$/, '');
         } else if (cleanedResponse.startsWith('```')) {
           cleanedResponse = cleanedResponse.replace(/^```\n?/, '').replace(/\n?```$/, '');
         }
+
 
         itinerary = JSON.parse(cleanedResponse);
       } catch (parseError) {
