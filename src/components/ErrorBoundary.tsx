@@ -1,4 +1,3 @@
-import { reportError } from "@/sdk/core/internal/creao-shell";
 import { AlertTriangle } from "lucide-react";
 import React, { useReducer, type JSX } from "react";
 import { ScrollArea } from "./ui/scroll-area";
@@ -39,7 +38,6 @@ export class ErrorBoundary extends React.Component<
 	applyClonedContent = (target: HTMLDivElement | null) => {
 		if (!clonedStage || !target) return;
 		for (const node of clonedStage.childNodes) target.appendChild(node);
-		reportError(this.state.error, {});
 	};
 
 	render() {

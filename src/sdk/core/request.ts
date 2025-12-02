@@ -1,5 +1,4 @@
 import { getAuthTokenAsync } from "./auth";
-import { reportToParentWindow } from "./internal/creao-shell";
 
 const API_BASE_PATH = import.meta.env.VITE_MCP_API_BASE_PATH;
 
@@ -31,16 +30,6 @@ export async function platformRequest(
 		...options,
 		headers,
 	});
-
-	// TODO: check response status and throw error if not 200
-	reportToParentWindow({
-		type: "platform-request",
-		timestamp: new Date().toISOString(),
-		url: response.url,
-		method,
-		status: response.status,
-		responseHeaders: Object.fromEntries(response.headers.entries()),
-	})
 
 	return response;
 }

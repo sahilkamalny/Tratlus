@@ -2,7 +2,6 @@ import type * as React from "react";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
 
 function Table({
 	className,
@@ -10,13 +9,6 @@ function Table({
 	onClick,
 	...props
 }: React.ComponentProps<"table"> & { id?: string }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "table",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
 	return (
 		<div
 			data-slot="table-container"
@@ -26,7 +18,7 @@ function Table({
 				id={id}
 				data-slot="table"
 				className={cn("w-full caption-bottom text-sm", className)}
-				onClick={handleClick}
+				onClick={onClick}
 				{...props}
 			/>
 		</div>
@@ -72,13 +64,6 @@ function TableRow({
 	onClick,
 	...props
 }: React.ComponentProps<"tr"> & { id?: string }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "table-row",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
 	return (
 		<tr
 			id={id}
@@ -87,7 +72,7 @@ function TableRow({
 				"hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
 				className,
 			)}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);
@@ -112,13 +97,6 @@ function TableCell({
 	onClick,
 	...props
 }: React.ComponentProps<"td"> & { id?: string }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "table-cell",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
 	return (
 		<td
 			id={id}
@@ -127,7 +105,7 @@ function TableCell({
 				"p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
 				className,
 			)}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);

@@ -3,8 +3,6 @@ import { XIcon } from "lucide-react";
 import type * as React from "react";
 import { useCallback } from "react";
 
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
-
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,19 +34,11 @@ function DialogTrigger({
 }: React.ComponentProps<typeof DialogPrimitive.Trigger> & {
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "dialog-trigger",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
-
 	return (
 		<DialogPrimitive.Trigger
 			data-slot="dialog-trigger"
 			id={id}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);
@@ -67,19 +57,11 @@ function DialogClose({
 }: React.ComponentProps<typeof DialogPrimitive.Close> & {
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "dialog-close",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
-
 	return (
 		<DialogPrimitive.Close
 			data-slot="dialog-close"
 			id={id}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);
@@ -113,27 +95,9 @@ function DialogContent({
 	showCloseButton?: boolean;
 	id?: string;
 }) {
-	const handleOpenAutoFocus = useDelegatedComponentEventHandler(
-		onOpenAutoFocus,
-		() => ({
-			componentType: "dialog-content",
-			eventType: "open-focus",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleOpenAutoFocus = onOpenAutoFocus;
 
-	const handleCloseAutoFocus = useDelegatedComponentEventHandler(
-		onCloseAutoFocus,
-		() => ({
-			componentType: "dialog-content",
-			eventType: "close-focus",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleCloseAutoFocus = onCloseAutoFocus;
 	return (
 		<DialogPortal data-slot="dialog-portal">
 			<DialogOverlay />
@@ -172,18 +136,11 @@ function DialogHeader({
 }: React.ComponentProps<"div"> & {
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "dialog-header",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
 	return (
 		<div
 			data-slot="dialog-header"
 			id={id}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
 			{...props}
 		/>
@@ -198,18 +155,11 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "dialog-footer",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
 	return (
 		<div
 			data-slot="dialog-footer"
 			id={id}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn(
 				"flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
 				className,

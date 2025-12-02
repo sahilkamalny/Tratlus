@@ -35,7 +35,7 @@ import type {
   CountRankedListResponse,
 } from "./common";
 
-const BASE_URL = "https://api-production.creao.ai";
+const BASE_URL = "https://api-production.tratlus.ai";
 const BASE_TIMEOUT = 30000;
 
 

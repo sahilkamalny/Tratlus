@@ -3,8 +3,6 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import type * as React from "react";
 import { useRef } from "react";
 
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
-
 import { cn } from "@/lib/utils";
 
 function Select({
@@ -15,16 +13,7 @@ function Select({
 	id?: string;
 	onValueChange?: (value: string) => void;
 }) {
-	const handleValueChange = useDelegatedComponentEventHandler(
-		onValueChange,
-		() => ({
-			componentType: "select",
-			eventType: "value-change",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleValueChange = onValueChange;
 
 	return (
 		<SelectPrimitive.Root
@@ -58,13 +47,7 @@ function SelectTrigger({
 	size?: "sm" | "default";
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "select-trigger",
-		eventType: "click",
-		componentInfo: {
-			id,
-		},
-	}));
+	const handleClick = onClick;
 	return (
 		<SelectPrimitive.Trigger
 			data-slot="select-trigger"
@@ -101,27 +84,9 @@ function SelectContent({
 	onCloseAutoFocus?: (event: Event) => void;
 	onEscapeKeyDown?: (event: KeyboardEvent) => void;
 }) {
-	const handleCloseAutoFocus = useDelegatedComponentEventHandler(
-		onCloseAutoFocus,
-		() => ({
-			componentType: "select-content",
-			eventType: "close-autofocus",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleCloseAutoFocus = onCloseAutoFocus;
 
-	const handleEscapeKeyDown = useDelegatedComponentEventHandler(
-		onEscapeKeyDown,
-		() => ({
-			componentType: "select-content",
-			eventType: "escape-keydown",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleEscapeKeyDown = onEscapeKeyDown;
 	return (
 		<SelectPrimitive.Portal>
 			<SelectPrimitive.Content
@@ -175,14 +140,7 @@ function SelectItem({
 }: React.ComponentProps<typeof SelectPrimitive.Item> & {
 	id?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "select-item",
-		eventType: "click",
-		componentInfo: {
-			id,
-			value: props.value,
-		},
-	}));
+	const handleClick = onClick;
 	return (
 		<SelectPrimitive.Item
 			data-slot="select-item"

@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 import type * as React from "react";
@@ -48,20 +47,11 @@ function Button({
 	}) {
 	const Comp = asChild ? Slot : "button";
 
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "button",
-		eventType: "click",
-		componentInfo: {
-			variant,
-			componentProps: { variant, className, size },
-		},
-	}));
-
 	return (
 		<Comp
 			data-slot="button"
 			className={cn(buttonVariants({ variant, size, className }))}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);

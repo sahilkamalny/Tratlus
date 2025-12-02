@@ -1,8 +1,6 @@
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 import type * as React from "react";
 
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
-
 import { cn } from "@/lib/utils";
 
 function Progress({
@@ -15,29 +13,9 @@ function Progress({
 }: React.ComponentProps<typeof ProgressPrimitive.Root> & {
 	id?: string;
 }) {
-	const handleAnimationStart = useDelegatedComponentEventHandler(
-		onAnimationStart,
-		() => ({
-			componentType: "progress",
-			eventType: "animation-start",
-			componentInfo: {
-				id,
-				value,
-			},
-		}),
-	);
+	const handleAnimationStart = onAnimationStart;
 
-	const handleAnimationEnd = useDelegatedComponentEventHandler(
-		onAnimationEnd,
-		() => ({
-			componentType: "progress",
-			eventType: "animation-end",
-			componentInfo: {
-				id,
-				value,
-			},
-		}),
-	);
+	const handleAnimationEnd = onAnimationEnd;
 	return (
 		<ProgressPrimitive.Root
 			data-slot="progress"

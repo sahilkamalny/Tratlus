@@ -9,8 +9,6 @@
 import { MCP_SERVERS, type McpServerId } from "../constants/mcp-server";
 import { getAuthTokenAsync, isAuthenticatedSync } from "./auth";
 import { APP_CONFIG } from "./global";
-import { reportToParentWindow } from "./internal/creao-shell";
-import type { IFrameMessage } from "./internal/internal-types";
 import { platformRequest } from "./request";
 
 const API_BASE_PATH = import.meta.env.VITE_MCP_API_BASE_PATH;
@@ -74,12 +72,9 @@ async function internalCallService(
 		const headers: Record<string, string> = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${token}`,
-			"X-CREAO-MCP-ID": mcpId,
 		};
 
-		const { taskId, projectId } = APP_CONFIG;
-		if (taskId) headers["X-CREAO-API-TASK-ID"] = taskId;
-		if (projectId) headers["X-CREAO-API-PROJECT-ID"] = projectId;
+
 
 		const response = await platformRequest("/execute-mcp/v2", {
 			method: "POST",
@@ -93,20 +88,7 @@ async function internalCallService(
 
 		if (!response.ok) {
 			const errorMessage = `HTTP error! status: ${response.status}`;
-			// Report error response to parent window
-			reportToParentWindow({
-				type: "mcp",
-				subType: "http-error",
-				success: false,
-				payload: {
-					...baseReportData,
-					error: {
-						message: errorMessage,
-						type: "http",
-						status: response.status,
-					},
-				},
-			} as IFrameMessage);
+
 			throw new Error(errorMessage);
 		}
 
@@ -114,52 +96,15 @@ async function internalCallService(
 
 		if (data.error) {
 			const errorMessage = data.error.message || "MCP request failed";
-			// Report MCP error to parent window
-			reportToParentWindow({
-				type: "mcp",
-				subType: "data-error",
-				success: false,
-				payload: {
-					...baseReportData,
-					error: {
-						message: errorMessage,
-						type: "mcp-data",
-						code: data.error.code,
-						data: data.error.data,
-					},
-				},
-			} as IFrameMessage);
+
 			throw new Error(errorMessage);
 		}
 
-		// Report successful response to parent window
-		reportToParentWindow({
-			type: "mcp",
-			subType: "response-success",
-			success: true,
-			payload: {
-				...baseReportData,
-				response: data,
-			},
-		} as IFrameMessage);
+
 
 		return data.result;
 	} catch (error) {
-		// Report any unexpected errors
-		if (error instanceof Error) {
-			reportToParentWindow({
-				type: "mcp",
-				subType: "runtime-error",
-				success: false,
-				payload: {
-					...baseReportData,
-					error: {
-						message: error.message,
-						type: "runtime",
-					},
-				},
-			} as IFrameMessage);
-		}
+
 		throw error;
 	}
 }

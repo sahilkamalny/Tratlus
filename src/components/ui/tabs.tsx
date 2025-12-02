@@ -1,9 +1,7 @@
 "use client";
 
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * * as TabsPrimitive from "@radix-ui/react-tabs";
 import type * as React from "react";
-
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
 
 import { cn } from "@/lib/utils";
 
@@ -17,16 +15,7 @@ function Tabs({
 }: React.ComponentProps<typeof TabsPrimitive.Root> & {
 	id?: string;
 }) {
-	const handleValueChange = useDelegatedComponentEventHandler(
-		onValueChange,
-		() => ({
-			componentType: "tabs",
-			eventType: "value-change",
-			componentInfo: {
-				id,
-			},
-		}),
-	);
+	const handleValueChange = onValueChange;
 	return (
 		<TabsPrimitive.Root
 			id={id}
@@ -67,14 +56,7 @@ function TabsTrigger({
 	onClick,
 	...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "tabs-trigger",
-		eventType: "click",
-		componentInfo: {
-			id,
-			value,
-		},
-	}));
+	const handleClick = onClick;
 	return (
 		<TabsPrimitive.Trigger
 			id={id}
@@ -98,23 +80,9 @@ function TabsContent({
 	onBlur,
 	...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
-	const handleFocus = useDelegatedComponentEventHandler(onFocus, () => ({
-		componentType: "tabs-content",
-		eventType: "focus",
-		componentInfo: {
-			id,
-			value,
-		},
-	}));
+	const handleFocus = onFocus;
 
-	const handleBlur = useDelegatedComponentEventHandler(onBlur, () => ({
-		componentType: "tabs-content",
-		eventType: "blur",
-		componentInfo: {
-			id,
-			value,
-		},
-	}));
+	const handleBlur = onBlur;
 	return (
 		<TabsPrimitive.Content
 			id={id}

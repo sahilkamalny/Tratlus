@@ -1,4 +1,3 @@
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -13,21 +12,12 @@ function Card({
 	id?: string;
 	name?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "card",
-		eventType: "click",
-		componentInfo: {
-			id,
-			name,
-		},
-	}));
-
 	return (
 		<div
 			data-slot="card"
 			id={id}
 			data-name={name}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn(
 				"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
 				className,
@@ -47,20 +37,12 @@ function CardHeader({
 	id?: string;
 	name?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "card-header",
-		eventType: "click",
-		componentInfo: {
-			id,
-			name,
-		},
-	}));
 	return (
 		<div
 			data-slot="card-header"
 			id={id}
 			data-name={name}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn(
 				"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
 				className,
@@ -80,20 +62,12 @@ function CardTitle({
 	id?: string;
 	name?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "card-title",
-		eventType: "click",
-		componentInfo: {
-			id,
-			name,
-		},
-	}));
 	return (
 		<div
 			data-slot="card-title"
 			id={id}
 			data-name={name}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn("leading-none font-semibold", className)}
 			{...props}
 		/>
@@ -110,20 +84,12 @@ function CardDescription({
 	id?: string;
 	name?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "card-description",
-		eventType: "click",
-		componentInfo: {
-			id,
-			name,
-		},
-	}));
 	return (
 		<div
 			data-slot="card-description"
 			id={id}
 			data-name={name}
-			onClick={handleClick}
+			onClick={onClick}
 			className={cn("text-muted-foreground text-sm", className)}
 			{...props}
 		/>
@@ -140,14 +106,6 @@ function CardAction({
 	id?: string;
 	name?: string;
 }) {
-	const handleClick = useDelegatedComponentEventHandler(onClick, () => ({
-		componentType: "card-action",
-		eventType: "click",
-		componentInfo: {
-			id,
-			name,
-		},
-	}));
 	return (
 		<div
 			data-slot="card-action"
@@ -155,7 +113,7 @@ function CardAction({
 				"col-start-2 row-span-2 row-start-1 self-start justify-self-end",
 				className,
 			)}
-			onClick={handleClick}
+			onClick={onClick}
 			{...props}
 		/>
 	);

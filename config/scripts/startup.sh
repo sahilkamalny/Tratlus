@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-S3_PATH="${S3_PATH:-s3://creao-template/webapp/}"
+S3_PATH="${S3_PATH:-s3://tratlus-template/webapp/}"
 APP_DIR="/home/user/vite-template"
 
 # Logging functions

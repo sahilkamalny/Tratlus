@@ -1,8 +1,6 @@
 import type * as React from "react";
 import { useRef } from "react";
 
-import { useDelegatedComponentEventHandler } from "@/sdk/core/internal/creao-shell";
-
 import { cn } from "@/lib/utils";
 
 function Input({
@@ -17,82 +15,15 @@ function Input({
 }: React.ComponentProps<"input">) {
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const handleChange = useDelegatedComponentEventHandler(
-		onChange,
-		() => ({
-			componentType: "input",
-			eventType: "change",
-			componentInfo: {
-				id: props.id,
-				name: props.name,
-				type,
-				value: inputRef.current?.value,
-			},
-		}),
-		inputRef.current,
-	);
+	const handleChange = onChange;
 
-	const handleBlur = useDelegatedComponentEventHandler(
-		onBlur,
-		() => ({
-			componentType: "input",
-			eventType: "blur",
-			componentInfo: {
-				id: props.id,
-				name: props.name,
-				type,
-				value: inputRef.current?.value,
-			},
-		}),
-		inputRef.current,
-	);
+	const handleBlur = onBlur;
 
-	const handleFocus = useDelegatedComponentEventHandler(
-		onFocus,
-		() => ({
-			componentType: "input",
-			eventType: "focus",
-			componentInfo: {
-				id: props.id,
-				name: props.name,
-				type,
-				value: inputRef.current?.value,
-			},
-		}),
-		inputRef.current,
-	);
+	const handleFocus = onFocus;
 
-	const handleKeyDown = useDelegatedComponentEventHandler(
-		onKeyDown,
-		() => ({
-			componentType: "input",
-			eventType: "keydown",
-			componentInfo: {
-				id: props.id,
-				name: props.name,
-				type,
-				key: inputRef.current?.value,
-				value: inputRef.current?.value,
-			},
-		}),
-		inputRef.current,
-	);
+	const handleKeyDown = onKeyDown;
 
-	const handleKeyUp = useDelegatedComponentEventHandler(
-		onKeyUp,
-		() => ({
-			componentType: "input",
-			eventType: "keyup",
-			componentInfo: {
-				id: props.id,
-				name: props.name,
-				type,
-				key: inputRef.current?.value,
-				value: inputRef.current?.value,
-			},
-		}),
-		inputRef.current,
-	);
+	const handleKeyUp = onKeyUp;
 
 	return (
 		<input
