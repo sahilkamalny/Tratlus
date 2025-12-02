@@ -2944,10 +2944,10 @@ Return ONLY a single JSON object (no array, no wrapper):
         pageBgClass
       )}
     >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -left-16 w-[80vw] h-[80vw] rounded-full blur-[200px] bg-fuchsia-500/35 animate-pulse" />
-        <div className="absolute top-1/3 -right-28 w-[70vw] h-[70vw] rounded-full blur-[200px] bg-blue-500/30 animate-pulse delay-500" />
-        <div className="absolute bottom-[-10%] left-1/4 w-[70vw] h-[70vw] rounded-full blur-[200px] bg-purple-500/30 animate-pulse delay-1000" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[120px] sm:blur-[200px] bg-fuchsia-500/50 sm:bg-fuchsia-500/35 animate-pulse" />
+        <div className="absolute top-1/4 -right-20 w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:top-1/3 sm:-right-28 rounded-full blur-[120px] sm:blur-[200px] bg-blue-500/45 sm:bg-blue-500/30 animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-0 left-1/4 w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[120px] sm:blur-[200px] bg-purple-500/45 sm:bg-purple-500/30 animate-pulse" style={{ animationDelay: '1s' }} />
         <div
           className={cn(
             "absolute inset-0 mix-blend-overlay opacity-50 bg-[size:80px_80px]",
