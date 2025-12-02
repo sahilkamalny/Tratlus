@@ -2943,9 +2943,9 @@ Return ONLY a single JSON object (no array, no wrapper):
       )}
     >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-10 w-[60vw] h-[60vw] rounded-full blur-[180px] bg-fuchsia-500/30 animate-pulse" />
-        <div className="absolute top-1/3 -right-24 w-[55vw] h-[55vw] rounded-full blur-[180px] bg-blue-500/25 animate-pulse delay-500" />
-        <div className="absolute bottom-0 left-1/4 w-[45vw] h-[45vw] rounded-full blur-[180px] bg-purple-500/25 animate-pulse delay-1000" />
+        <div className="absolute -top-40 -left-16 w-[80vw] h-[80vw] rounded-full blur-[200px] bg-fuchsia-500/35 animate-pulse" />
+        <div className="absolute top-1/3 -right-28 w-[70vw] h-[70vw] rounded-full blur-[200px] bg-blue-500/30 animate-pulse delay-500" />
+        <div className="absolute bottom-[-10%] left-1/4 w-[70vw] h-[70vw] rounded-full blur-[200px] bg-purple-500/30 animate-pulse delay-1000" />
         <div
           className={cn(
             "absolute inset-0 mix-blend-overlay opacity-50 bg-[size:80px_80px]",
@@ -2954,24 +2954,6 @@ Return ONLY a single JSON object (no array, no wrapper):
               : "bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)]"
           )}
         />
-        <div
-          className={cn(
-            "absolute top-24 left-4 px-4 py-3 rounded-2xl border flex items-center gap-2 text-sm font-semibold animate-[float_6s_ease-in-out_infinite]",
-            glassPanelClass
-          )}
-        >
-          <Compass className="size-4 text-cyan-300" />
-          AI Compass
-        </div>
-        <div
-          className={cn(
-            "absolute bottom-24 right-6 px-4 py-3 rounded-2xl border flex items-center gap-2 text-sm font-semibold animate-[float_7s_ease-in-out_infinite]",
-            glassPanelClass
-          )}
-        >
-          <Map className="size-4 text-fuchsia-300" />
-          Global Map
-        </div>
       </div>
 
       <div className="fixed top-4 right-4 z-30 flex items-center gap-3">
@@ -3025,36 +3007,31 @@ Return ONLY a single JSON object (no array, no wrapper):
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <header className={cn("p-4 md:p-6", glassHeaderClass)}>
-          <div className="max-w-xl mx-auto space-y-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className={cn("uppercase text-[11px] tracking-[0.5em]", subTextClass)}>Swipe deck</p>
-                <h1 className="text-3xl font-black tracking-tight">Tratlus Explorer</h1>
-                <p className={cn("text-sm mt-1", subTextClass)}>
-                  Swipe through curated cards to calibrate your travel palette. Right = love, left = skip.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                <div
-                  className={cn(
-                    "px-3 py-2 rounded-2xl border text-left min-w-[110px]",
-                    glassPanelClass
-                  )}
-                >
-                  <span className="text-[10px] uppercase opacity-80">Tratlus score</span>
-                  <div className="text-2xl font-black leading-tight">{tratlusScore}</div>
-                </div>
+        <header className={cn("px-4 pt-4 pb-2 md:px-6 md:pt-6 md:pb-3", glassHeaderClass)}>
+          <div className="max-w-xl mx-auto space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h1
+                className={cn(
+                  "text-3xl font-black tracking-tight uppercase",
+                  "bg-clip-text text-transparent",
+                  isDarkMode
+                    ? "bg-gradient-to-r from-fuchsia-400 via-purple-400 to-blue-400"
+                    : "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600"
+                )}
+              >
+                Swipe Deck
+              </h1>
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   onClick={handleReset}
                   className={cn(
-                    "rounded-2xl border text-xs font-semibold px-4 py-2",
+                    "rounded-2xl border text-[11px] font-semibold px-3 py-1.5",
                     accentBorderClass,
                     "hover:-translate-y-0.5 transition-all"
                   )}
                 >
-                  <RotateCcw className="size-3.5 mr-2" />
+                  <RotateCcw className="size-3 mr-1" />
                   Reset
                 </Button>
                 <Button
@@ -3062,21 +3039,15 @@ Return ONLY a single JSON object (no array, no wrapper):
                   onClick={handleAutoComplete}
                   disabled={isAutoCompleting}
                   className={cn(
-                    "rounded-2xl border text-xs font-semibold px-4 py-2",
+                    "rounded-2xl border text-[11px] font-semibold px-3 py-1.5",
                     accentBorderClass,
                     "hover:-translate-y-0.5 transition-all disabled:opacity-60"
                   )}
                 >
                   {isAutoCompleting ? (
-                    <>
-                      <Loader2 className="size-3.5 mr-2 animate-spin" />
-                      Filling
-                    </>
+                    <Loader2 className="size-3 animate-spin" />
                   ) : (
-                    <>
-                      <Sparkles className="size-3.5 mr-2" />
-                      Auto-fill
-                    </>
+                    <Sparkles className="size-3" />
                   )}
                 </Button>
               </div>
@@ -3098,7 +3069,7 @@ Return ONLY a single JSON object (no array, no wrapper):
               />
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-6 gap-2">
               {CATEGORIES.map((cat, idx) => {
                 const progress = categoryProgress[cat.name];
                 const required = REQUIRED_SWIPES_MAP[cat.name];
@@ -3115,10 +3086,12 @@ Return ONLY a single JSON object (no array, no wrapper):
                       playSound("click");
                     }}
                     className={cn(
-                      "rounded-2xl border px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all",
+                      "rounded-2xl border px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible",
                       glassPanelClass,
-                      isActive && "ring-2 ring-offset-2 ring-offset-transparent ring-fuchsia-500/60",
-                      isComplete && "text-green-300"
+                      isActive
+                        ? "bg-gradient-to-br from-fuchsia-500/90 to-blue-500/90 text-white shadow-lg border-transparent"
+                        : "",
+                      isComplete && !isActive && "text-green-300 border-green-400/40"
                     )}
                   >
                     <div className="relative">
@@ -3155,8 +3128,8 @@ Return ONLY a single JSON object (no array, no wrapper):
           </div>
         </header>
 
-        <main className="flex-1 flex items-center justify-center px-4 py-8">
-          <div className="relative w-full max-w-md h-[520px]">
+        <main className="flex-1 flex items-center justify-center px-4 py-4 md:py-8">
+          <div className="relative w-full max-w-md h-[430px] sm:h-[500px]">
             {cardStack.slice(1, 3).map((card, idx) => (
               <div
                 key={card.id + "-bg-" + idx}
@@ -3289,12 +3262,12 @@ Return ONLY a single JSON object (no array, no wrapper):
                 <Button
                   size="lg"
                   className={cn(
-                    "size-20 rounded-full flex items-center justify-center text-white text-2xl font-black hover:scale-105 active:scale-95 transition-all",
+                    "size-16 rounded-full flex items-center justify-center text-white text-2xl font-black hover:scale-105 active:scale-95 transition-all",
                     primaryGradientButton
                   )}
                   onClick={() => handleSwipe("right")}
                 >
-                  <Check className="size-8" />
+                  <Check className="size-7" />
                 </Button>
               </div>
             ) : (
@@ -3332,20 +3305,6 @@ Return ONLY a single JSON object (no array, no wrapper):
                 Continue to Questionnaire
               </Button>
             )}
-
-            <div className="flex flex-wrap gap-2 text-[11px] uppercase font-semibold">
-              {["Precision Picks", "AI Compass", "Jet Lag Friendly", "Budget Guard"].map((pill) => (
-                <span
-                  key={pill}
-                  className={cn(
-                    "px-3 py-1 rounded-full border text-xs tracking-wide",
-                    accentBorderClass
-                  )}
-                >
-                  {pill}
-                </span>
-              ))}
-            </div>
           </div>
         </footer>
       </div>
