@@ -1778,7 +1778,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4">
+      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-8">
             <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
@@ -1792,7 +1792,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "generating") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4">
+      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-8">
             <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
@@ -1806,7 +1806,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "itinerary" && itinerary) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4">
+      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           <Card className="mb-4">
             <CardHeader>
@@ -2561,7 +2561,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "questionnaire") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4">
+      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-hidden overflow-y-auto">
         <div className="max-w-lg mx-auto">
           <div className="mb-6">
             <Progress value={(questionnaireStep / 3) * 100} className="h-2" />
