@@ -2659,10 +2659,10 @@ Return ONLY a single JSON object (no array, no wrapper):
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setAppState("swiping")} className="flex-1">
+                  <Button variant="outline" onClick={() => setAppState("swiping")} className="flex-1 active:scale-95">
                     <ChevronLeft className="size-4 mr-2" /> Back to Swiping
                   </Button>
-                  <Button onClick={() => setQuestionnaireStep(2)} className="flex-1 bg-cyan-600 hover:bg-cyan-700">
+                  <Button onClick={() => setQuestionnaireStep(2)} className="flex-1 bg-cyan-600 hover:bg-cyan-700 active:scale-95">
                     Next <ChevronRight className="size-4 ml-2" />
                   </Button>
                 </div>
@@ -2939,35 +2939,36 @@ Return ONLY a single JSON object (no array, no wrapper):
   return (
     <div
       className={cn(
-        "min-h-screen relative flex flex-col overflow-hidden transition-colors duration-500",
+        "h-screen relative flex flex-col overflow-hidden transition-colors duration-500",
         "bg-gradient-to-br",
         pageBgClass
       )}
+      style={{ touchAction: 'none' }}
     >
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Fuchsia blob - top left */}
         <div className={cn(
-          "absolute top-0 left-0 w-[200vw] h-[200vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px] animate-pulse",
+          "absolute top-0 left-0 w-[200vw] h-[200vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
           isDarkMode 
-            ? "bg-fuchsia-500/60 sm:bg-fuchsia-500/35" 
-            : "bg-fuchsia-600/70 sm:bg-fuchsia-600/60"
-        )} style={{ transform: 'translate(-40%, -40%)' }} />
+            ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" 
+            : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
+        )} style={{ transform: 'translate(-40%, -40%)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
         
         {/* Blue blob - middle right */}
         <div className={cn(
-          "absolute top-1/3 right-0 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px] animate-pulse",
+          "absolute top-1/3 right-0 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
           isDarkMode 
-            ? "bg-blue-500/55 sm:bg-blue-500/30" 
-            : "bg-purple-600/65 sm:bg-purple-600/55"
-        )} style={{ transform: 'translate(40%, 0)', animationDelay: '0.5s' }} />
+            ? "bg-blue-500/41 sm:bg-blue-500/22" 
+            : "bg-purple-600/48 sm:bg-purple-600/41"
+        )} style={{ transform: 'translate(40%, 0)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
         
         {/* Purple blob - bottom left */}
         <div className={cn(
-          "absolute bottom-0 left-1/4 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px] animate-pulse",
+          "absolute bottom-0 left-1/4 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
           isDarkMode 
-            ? "bg-purple-500/55 sm:bg-purple-500/30" 
-            : "bg-violet-600/65 sm:bg-violet-600/55"
-        )} style={{ transform: 'translate(-25%, 30%)', animationDelay: '1s' }} />
+            ? "bg-purple-500/41 sm:bg-purple-500/22" 
+            : "bg-violet-600/48 sm:bg-violet-600/41"
+        )} style={{ transform: 'translate(-25%, 30%)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
         <div
           className={cn(
             "absolute inset-0 mix-blend-overlay opacity-50 bg-[size:80px_80px]",
@@ -2998,7 +2999,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                   variant="ghost"
                   onClick={handleReset}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5",
+                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
                       ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all" 
@@ -3013,7 +3014,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                   onClick={handleAutoComplete}
                   disabled={isAutoCompleting}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-3 py-1.5",
+                    "rounded-2xl border text-[11px] font-semibold px-3 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
                       ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all disabled:opacity-60" 
@@ -3030,7 +3031,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                   variant="ghost"
                   onClick={() => setShowSettingsMenu((prev) => !prev)}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5",
+                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
                       ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all" 
@@ -3057,7 +3058,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                         setShowSettingsMenu(false);
                       }}
                       className={cn(
-                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5",
+                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                         isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-900/10",
                         "hover:-translate-y-0 transition-all"
                       )}
@@ -3076,7 +3077,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                         setShowSettingsMenu(false);
                       }}
                       className={cn(
-                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5",
+                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                         isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-900/10",
                         "hover:-translate-y-0 transition-all"
                       )}
@@ -3128,11 +3129,10 @@ Return ONLY a single JSON object (no array, no wrapper):
                       playSound("click");
                     }}
                     className={cn(
-                      "rounded-2xl border px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible",
-                      glassPanelClass,
+                      "rounded-2xl px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible active:scale-95",
                       isActive
                         ? "bg-gradient-to-br from-fuchsia-500/90 to-blue-500/90 text-white shadow-lg border-transparent"
-                        : "",
+                        : glassPanelClass,
                       isComplete && !isActive && "text-green-300 border-green-400/40"
                     )}
                   >
@@ -3253,7 +3253,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                     </div>
                   </div>
                   <CardContent className="p-5 space-y-3">
-                    <div>
+                    <div className="-mt-1">
                       <h2 className="text-2xl font-black tracking-tight">{cardStack[0].title}</h2>
                       <p className={cn("text-sm mt-2 leading-relaxed", subTextClass)}>{cardStack[0].description}</p>
                     </div>
@@ -3291,7 +3291,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                   size="lg"
                   variant="ghost"
                   className={cn(
-                    "size-16 rounded-full border-2 text-red-400 hover:text-red-500 transition-all",
+                    "size-16 rounded-full border-2 text-red-400 hover:text-red-500 transition-all active:scale-95",
                     isDarkMode 
                       ? "border-slate-400/40 bg-white/5 hover:scale-105 hover:bg-slate-400 hover:border-slate-400 dark:hover:bg-slate-400" 
                       : "border-white/30 bg-white/10 hover:scale-105 hover:bg-white hover:border-white"
@@ -3320,7 +3320,7 @@ Return ONLY a single JSON object (no array, no wrapper):
             {showContinueButton && !currentCategoryComplete && (
               <Button
                 onClick={handleContinueToNextCategory}
-                className={cn("w-full rounded-2xl py-4 font-semibold", primaryGradientButton)}
+                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
               >
                 <ChevronRight className="size-4 mr-2" />
                 Jump to Next Category
@@ -3330,7 +3330,7 @@ Return ONLY a single JSON object (no array, no wrapper):
             {currentCategoryComplete && completedCategories.size < 6 && (
               <Button
                 onClick={handleContinueToNextCategory}
-                className={cn("w-full rounded-2xl py-4 font-semibold", primaryGradientButton)}
+                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
               >
                 <ChevronRight className="size-4 mr-2" />
                 Continue to Next Category
@@ -3340,7 +3340,7 @@ Return ONLY a single JSON object (no array, no wrapper):
             {completedCategories.size === 6 && (
               <Button
                 onClick={() => setAppState("questionnaire")}
-                className={cn("w-full rounded-2xl py-4 font-semibold", primaryGradientButton)}
+                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
               >
                 <ChevronRight className="size-4 mr-2" />
                 Continue to Questionnaire
