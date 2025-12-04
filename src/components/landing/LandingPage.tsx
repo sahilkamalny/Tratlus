@@ -4,6 +4,7 @@ import { useSound } from '@/contexts/SoundContext';
 import { Map, Compass, ChevronRight, Volume2, VolumeX, Volume1, Settings, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import SafeAreaWrapper from '@/components/ui/SafeAreaWrapper';
 import logo from '/logo.svg';
 
 export const LandingPage = ({ onStart }: { onStart: () => void }) => {
@@ -35,8 +36,9 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
   const accentBorderClass = isDarkMode ? "border-white/20 text-white/80 bg-white/5" : "border-white/30 text-slate-700 bg-white/10";
 
   return (
-        <div className={`h-screen relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-blue-600 text-white selection:bg-blue-200 selection:text-blue-900'}`}>
-        
+    <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+      <div className={`h-full relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-blue-600 text-white selection:bg-blue-200 selection:text-blue-900'}`}>
+
         {/* Settings Menu */}
         <div className="absolute top-6 right-6 z-50">
           <div className="relative">
@@ -132,7 +134,7 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
             <div className={`absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] ${isDarkMode ? 'bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]' : 'bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]'}`} />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 h-screen flex flex-col justify-center items-center text-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-center items-center text-center">
             {/* Floating Icons */}
             <div className={`absolute top-[15%] left-[5%] md:top-1/4 md:left-[15%] backdrop-blur-lg p-2 md:p-4 rounded-2xl border shadow-2xl animate-[bounce_6s_infinite] ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
                 <Map className={`${isDarkMode ? 'text-fuchsia-500' : 'text-fuchsia-600'} w-6 h-6 md:w-8 md:h-8`} />
@@ -194,6 +196,7 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
                 ))}
             </div>
         </div>
-    </div>
+      </div>
+    </SafeAreaWrapper>
   );
 };
