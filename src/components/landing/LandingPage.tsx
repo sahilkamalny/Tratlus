@@ -1,78 +1,16 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useSound } from '@/contexts/SoundContext';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { Map, Compass, ChevronRight, Volume2, VolumeX, Volume1 } from 'lucide-react';
+import { Map, Compass, ChevronRight, Volume2, VolumeX, Volume1, Settings, Sun, Moon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import logo from '/logo.svg';
 
-const SoundControls = () => {
-    const { isMuted, setIsMuted, volume, setVolume } = useSound();
-    return (
-        <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3 group">
-            <button 
-            onClick={() => setIsMuted(!isMuted)}
-            className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-full shadow-2xl hover:scale-110 active:scale-90 transition-all relative z-10"
-            >
-            {isMuted ? (
-                <VolumeX className="text-red-400 w-6 h-6" />
-            ) : volume === 0 ? (
-                <VolumeX className="text-slate-400 w-6 h-6" />
-            ) : volume < 0.5 ? (
-                <Volume1 className="text-blue-400 w-6 h-6" />
-            ) : (
-                <Volume2 className="text-blue-400 w-6 h-6" />
-            )}
-            </button>
-
-            {/* Volume Slider - Reveals on Group Hover */}
-            <div className="w-0 overflow-hidden group-hover:w-32 transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-2 rounded-full shadow-xl flex items-center">
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="1" 
-                    step="0.01" 
-                    value={volume}
-                    style={{
-                        background: `linear-gradient(to right, ${isMuted ? '#f87171' : '#60a5fa'} 0%, ${isMuted ? '#f87171' : '#60a5fa'} ${volume * 100}%, rgba(255, 255, 255, 0.2) ${volume * 100}%, rgba(255, 255, 255, 0.2) 100%)`
-                    }}
-                    onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setVolume(val);
-                        if(isMuted && val > 0) setIsMuted(false);
-                    }}
-                    className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
-                />
-                <style>{`
-                    input[type=range]::-webkit-slider-thumb {
-                        -webkit-appearance: none;
-                        height: 12px;
-                        width: 12px;
-                        border-radius: 50%;
-                        background: #ffffff;
-                        cursor: pointer;
-                        margin-top: -3px;
-                        box-shadow: 0 0 5px rgba(0,0,0,0.2);
-                    }
-                    input[type=range]::-webkit-slider-runnable-track {
-                        width: 100%;
-                        height: 6px;
-                        cursor: pointer;
-                        background: transparent;
-                        border-radius: 10px;
-                        border: none;
-                    }
-                `}</style>
-            </div>
-            </div>
-        </div>
-    )
-}
-
 export const LandingPage = ({ onStart }: { onStart: () => void }) => {
-  const { isDarkMode } = useTheme();
-  const { playSound } = useSound();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { isMuted, setIsMuted, volume, playSound } = useSound();
   const [isFlushing, setIsFlushing] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
   const handleStartClick = () => {
     playSound('success');
@@ -83,38 +21,112 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
     }, 800);
   };
 
+  const handleThemeToggle = () => {
+    playSound("click");
+    toggleTheme();
+    setShowSettingsMenu(false);
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
+    setShowSettingsMenu(false);
+  };
+
+  const accentBorderClass = isDarkMode ? "border-white/20 text-white/80 bg-white/5" : "border-white/30 text-slate-700 bg-white/10";
+
   return (
     <div className={`h-screen relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-blue-600 text-white selection:bg-blue-200 selection:text-blue-900'}`}>
         
-        <SoundControls />
-
-        {/* Theme Toggle */}
+        {/* Settings Menu */}
         <div className="absolute top-6 right-6 z-50">
-          <ThemeToggle />
+          <div className="relative">
+            <Button
+              variant="ghost"
+              onClick={() => setShowSettingsMenu((prev) => !prev)}
+              className={cn(
+                "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
+                accentBorderClass,
+                isDarkMode 
+                  ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all" 
+                  : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all"
+              )}
+              aria-label="Open settings menu"
+            >
+              <Settings className="size-4" />
+            </Button>
+            {showSettingsMenu && (
+              <div 
+                className={cn(
+                  "absolute right-0 top-[calc(100%+0.5rem)] flex flex-col rounded-2xl z-30 overflow-hidden",
+                  accentBorderClass
+                )}
+                style={{ width: '40px' }}
+              >
+                <Button
+                  variant="ghost"
+                  onClick={handleThemeToggle}
+                  className={cn(
+                    "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
+                    accentBorderClass,
+                    isDarkMode 
+                      ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
+                      : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
+                  )}
+                  aria-label="Toggle theme"
+                >
+                  {isDarkMode ? (
+                    <Moon className="size-4" />
+                  ) : (
+                    <Sun className="size-4" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleMuteToggle}
+                  className={cn(
+                    "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
+                    accentBorderClass,
+                    isDarkMode 
+                      ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
+                      : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
+                  )}
+                  aria-label="Toggle sound"
+                >
+                  {isMuted ? (
+                    <VolumeX className="size-4" />
+                  ) : volume < 0.35 ? (
+                    <Volume1 className="size-4" />
+                  ) : (
+                    <Volume2 className="size-4" />
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Background Gradients */}
-        <div className={`absolute inset-0 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-gradient-to-b from-blue-50 via-blue-200 to-blue-600'}`} />
+        <div className={`absolute inset-0 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-gradient-to-br from-blue-400 via-blue-300 to-blue-600'}`} style={{ zIndex: 0 }} />
 
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] rounded-full blur-[150px] animate-pulse duration-[8s] ${
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+            <div className={`absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[150px] sm:blur-[200px] ${
                 isDarkMode 
-                ? 'bg-blue-600/20' 
-                : 'bg-purple-500/50 mix-blend-multiply' 
-            }`} />
+                ? 'bg-fuchsia-500/45 sm:bg-fuchsia-500/26' 
+                : 'bg-fuchsia-600/52 sm:bg-fuchsia-600/45' 
+            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
             
-            <div className={`absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] rounded-full blur-[150px] animate-pulse duration-[10s] ${
+            <div className={`absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[150px] sm:blur-[200px] ${
                 isDarkMode 
-                ? 'bg-purple-600/10' 
-                : 'bg-blue-600/50 mix-blend-multiply'
-            }`} />
+                ? 'bg-blue-500/41 sm:bg-blue-500/22' 
+                : 'bg-white/80 sm:bg-white/70'
+            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
             
-            <div className={`absolute bottom-0 left-[20%] w-[60vw] h-[60vw] rounded-full blur-[150px] animate-pulse duration-[12s] ${
+            <div className={`absolute bottom-0 left-[20%] w-[60vw] h-[60vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[150px] sm:blur-[200px] ${
                 isDarkMode 
-                ? 'bg-indigo-600/10' 
-                : 'bg-indigo-500/50 mix-blend-multiply'
-            }`} />
+                ? 'bg-purple-500/41 sm:bg-purple-500/22' 
+                : 'bg-violet-600/75 sm:bg-violet-600/65'
+            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
             
             {/* Grid Overlay */}
             <div className={`absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] ${isDarkMode ? 'bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]' : 'bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]'}`} />

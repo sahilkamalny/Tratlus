@@ -37,8 +37,20 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const playSound = useCallback((type: string) => {
-    if (isMuted || !audioCtxRef.current) return;
+    if (isMuted) return;
+    
+    // Ensure AudioContext is initialized and resumed
+    if (!audioCtxRef.current) {
+      initAudio();
+    }
+    
+    if (!audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
+    
+    // Resume if suspended
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(console.error);
+    }
     
     const masterGainNode = ctx.createGain();
     masterGainNode.gain.value = volume;
@@ -157,6 +169,19 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
     }
+
+    // Resume AudioContext when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume().catch(console.error);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   return (

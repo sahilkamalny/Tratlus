@@ -63,6 +63,8 @@ import {
   VolumeX,
   Volume1,
   Menu,
+  Settings,
+  FastForward,
 } from "lucide-react";
 import { LandingPage } from "@/components/landing/LandingPage";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -388,16 +390,41 @@ function App() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isAutoCompleting, setIsAutoCompleting] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  // Random phrases for swipe feedback
+  const getSwipeRightPhrase = useCallback((category: CategoryName) => {
+    const phrases: Record<CategoryName, string[]> = {
+      Locations: ["Yeah!", "Nice", "I Like That", "Sweet", "Yes!", "Perfect", "Love It"],
+      Food: ["Delicious", "Yum!", "Tasty", "Mouthwatering", "Yes!", "I Want This", "Looks Good"],
+      Activities: ["Fun!", "Exciting", "Yes!", "Let's Go", "Awesome", "I'm In", "Perfect"],
+      Accommodations: ["Cozy", "Nice", "Perfect", "Yes!", "I Like It", "Comfy", "Great"],
+      Transportation: ["Fast", "Convenient", "Yes!", "Good", "Perfect", "I'll Take It"],
+      Vibes: ["Vibes!", "Yes!", "Perfect", "Love It", "Nice", "This Is It", "Sweet"],
+    };
+    const categoryPhrases = phrases[category] || phrases.Locations;
+    return categoryPhrases[Math.floor(Math.random() * categoryPhrases.length)];
+  }, []);
+
+  const getSwipeLeftPhrase = useCallback((category: CategoryName) => {
+    const phrases: Record<CategoryName, string[]> = {
+      Locations: ["Nah", "Nope", "Skip", "Next", "Pass", "Not For Me"],
+      Food: ["Gross", "Disgusting", "Ew!", "Nah", "No Thanks", "Pass"],
+      Activities: ["Nah", "Not My Thing", "Skip", "Pass", "No Thanks", "Next"],
+      Accommodations: ["Nah", "Skip", "Not For Me", "Pass", "Next", "No Thanks"],
+      Transportation: ["Nah", "Skip", "Pass", "Next", "No Thanks"],
+      Vibes: ["Nah", "Nope", "Skip", "Pass", "Not For Me", "Next"],
+    };
+    const categoryPhrases = phrases[category] || phrases.Locations;
+    return categoryPhrases[Math.floor(Math.random() * categoryPhrases.length)];
+  }, []);
+
   const handleThemeToggle = useCallback(() => {
-    playSound("switch");
+    playSound("click");
     toggleTheme();
   }, [playSound, toggleTheme]);
   const handleMuteToggle = useCallback(() => {
     if (isMuted) {
       setIsMuted(false);
-      setTimeout(() => playSound("click"), 0);
     } else {
-      playSound("cancel");
       setIsMuted(true);
     }
   }, [isMuted, playSound, setIsMuted]);
@@ -1753,10 +1780,10 @@ Return ONLY a single JSON object (no array, no wrapper):
   const currentCategoryComplete = categoryProgress[currentCategory.name] >= currentRequiredSwipes;
   const pageBgClass = isDarkMode
     ? "from-slate-950 via-slate-900 to-slate-950 text-white"
-    : "from-white via-white to-white text-slate-900";
+    : "from-blue-400 via-blue-300 to-blue-600 text-slate-900";
     const glassHeaderClass = isDarkMode
-      ? "bg-white/5 border-white/10 shadow-[0_20px_60px_-25px_rgba(59,130,246,0.7)] backdrop-blur-md"
-      : "bg-white/30 border-white/30 shadow-[0_20px_60px_-25px_rgba(37,99,235,0.7)] backdrop-blur-md";
+      ? "border-white/10 shadow-[0_20px_60px_-25px_rgba(59,130,246,0.7)] backdrop-blur-md"
+      : "border-white/30 shadow-[0_20px_60px_-25px_rgba(37,99,235,0.7)] backdrop-blur-md";
     const glassPanelClass = isDarkMode
       ? "bg-white/10 border-white/10 text-white"
       : "bg-white/15 border-white/30 text-slate-900";
@@ -2945,42 +2972,41 @@ Return ONLY a single JSON object (no array, no wrapper):
       )}
       style={{ touchAction: 'none' }}
     >
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ zIndex: 0 }}>
         {/* Fuchsia blob - top left */}
         <div className={cn(
-          "absolute top-0 left-0 w-[200vw] h-[200vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
+          "absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[150px] sm:blur-[200px]",
           isDarkMode 
             ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" 
             : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
-        )} style={{ transform: 'translate(-40%, -40%)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+        )} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
         
-        {/* Blue blob - middle right */}
+        {/* White blob - middle right */}
         <div className={cn(
-          "absolute top-1/3 right-0 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
+          "absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[150px] sm:blur-[200px]",
           isDarkMode 
             ? "bg-blue-500/41 sm:bg-blue-500/22" 
-            : "bg-purple-600/48 sm:bg-purple-600/41"
-        )} style={{ transform: 'translate(40%, 0)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
+            : "bg-white/80 sm:bg-white/70"
+        )} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
         
         {/* Purple blob - bottom left */}
         <div className={cn(
-          "absolute bottom-0 left-1/4 w-[180vw] h-[180vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
+          "absolute bottom-0 left-[20%] w-[60vw] h-[60vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[150px] sm:blur-[200px]",
           isDarkMode 
             ? "bg-purple-500/41 sm:bg-purple-500/22" 
-            : "bg-violet-600/48 sm:bg-violet-600/41"
-        )} style={{ transform: 'translate(-25%, 30%)', animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
-        <div
-          className={cn(
-            "absolute inset-0 mix-blend-overlay opacity-50 bg-[size:80px_80px]",
-            isDarkMode
-              ? "bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)]"
-              : "bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)]"
-          )}
-        />
+            : "bg-violet-600/75 sm:bg-violet-600/65"
+        )} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
+        {/* Grid Overlay */}
+        <div className={cn(
+          "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+          isDarkMode 
+            ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+            : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+        )} />
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <header className={cn("px-4 pt-4 pb-2 md:px-6 md:pt-6 md:pb-3", glassHeaderClass)}>
+      <div className="relative z-10 flex flex-col h-screen">
+        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#1C243A' : '#74ADCF' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
@@ -3002,8 +3028,8 @@ Return ONLY a single JSON object (no array, no wrapper):
                     "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 transition-all"
+                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all" 
+                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all"
                   )}
                   aria-label="Reset"
                 >
@@ -3017,8 +3043,8 @@ Return ONLY a single JSON object (no array, no wrapper):
                     "rounded-2xl border text-[11px] font-semibold px-3 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all disabled:opacity-60" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 transition-all disabled:opacity-60"
+                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all disabled:opacity-60" 
+                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all disabled:opacity-60"
                   )}
                 >
                   {isAutoCompleting ? (
@@ -3034,20 +3060,18 @@ Return ONLY a single JSON object (no array, no wrapper):
                     "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
                     accentBorderClass,
                     isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 transition-all" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 transition-all"
+                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all" 
+                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all"
                   )}
                   aria-label="Open settings menu"
                 >
-                  <Menu className="size-4" />
+                  <Settings className="size-4" />
                 </Button>
                 {showSettingsMenu && (
                   <div 
                     className={cn(
-                      "absolute right-0 top-[calc(100%+0.5rem)] flex flex-col rounded-2xl backdrop-blur-xl z-30 overflow-hidden",
-                      isDarkMode 
-                        ? "bg-slate-900/20 border border-white/10" 
-                        : "bg-white/20 border border-slate-200/40"
+                      "absolute right-0 top-[calc(100%+0.5rem)] flex flex-col rounded-2xl z-30 overflow-hidden",
+                      accentBorderClass
                     )}
                     style={{ width: '40px' }}
                   >
@@ -3056,18 +3080,21 @@ Return ONLY a single JSON object (no array, no wrapper):
                       onClick={() => {
                         handleThemeToggle();
                         setShowSettingsMenu(false);
+                        playSound("switch");
                       }}
                       className={cn(
                         "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                        isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-900/10",
-                        "hover:-translate-y-0 transition-all"
+                        accentBorderClass,
+                        isDarkMode 
+                          ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
+                          : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
                       )}
                       aria-label="Toggle theme"
                     >
                       {isDarkMode ? (
-                        <Moon className="size-3" />
+                        <Moon className="size-4" />
                       ) : (
-                        <Sun className="size-3" />
+                        <Sun className="size-4" />
                       )}
                     </Button>
                     <Button
@@ -3078,17 +3105,19 @@ Return ONLY a single JSON object (no array, no wrapper):
                       }}
                       className={cn(
                         "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                        isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-900/10",
-                        "hover:-translate-y-0 transition-all"
+                        accentBorderClass,
+                        isDarkMode 
+                          ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
+                          : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
                       )}
                       aria-label="Toggle sound"
                     >
                       {isMuted ? (
-                        <VolumeX className="size-3" />
+                        <VolumeX className="size-4" />
                       ) : volume < 0.35 ? (
-                        <Volume1 className="size-3" />
+                        <Volume1 className="size-4" />
                       ) : (
-                        <Volume2 className="size-3" />
+                        <Volume2 className="size-4" />
                       )}
                     </Button>
                   </div>
@@ -3129,11 +3158,12 @@ Return ONLY a single JSON object (no array, no wrapper):
                       playSound("click");
                     }}
                     className={cn(
-                      "rounded-2xl px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible active:scale-95",
+                      "rounded-2xl px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible",
                       isActive
                         ? "bg-gradient-to-br from-fuchsia-500/90 to-blue-500/90 text-white shadow-lg border-transparent"
-                        : glassPanelClass,
-                      isComplete && !isActive && "text-green-300 border-green-400/40"
+                        : cn(glassPanelClass, isDarkMode ? "bg-white/10 border-white/10" : "bg-white/30 border-white/30"),
+                      isComplete && !isActive && "text-green-300 border-green-400/40",
+                      !isActive && "hover:scale-110 hover:shadow-xl hover:brightness-110 active:scale-110 active:shadow-xl active:brightness-110"
                     )}
                   >
                     <div className="relative">
@@ -3158,7 +3188,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                           transform="rotate(-90 18 18)"
                         />
                       </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">{cat.icon}</div>
+                      <div className={cn("absolute inset-0 flex items-center justify-center", isActive && isComplete ? "text-white" : "")}>{cat.icon}</div>
                     </div>
                   </button>
                 );
@@ -3167,8 +3197,8 @@ Return ONLY a single JSON object (no array, no wrapper):
           </div>
         </header>
 
-        <main className="flex-1 flex items-center justify-center px-4 py-4 md:py-8">
-          <div className="relative w-full max-w-md h-[430px] sm:h-[500px]">
+        <main className="flex-1 flex items-center justify-center px-4 overflow-hidden" style={{ paddingTop: '2.5rem', paddingBottom: '1.5rem' }}>
+          <div className="relative w-full max-w-md" style={{ height: 'calc(100vh - 320px)', maxHeight: '550px' }}>
             {cardStack.slice(1, 3).map((card, idx) => (
               <div
                 key={card.id + "-bg-" + idx}
@@ -3226,7 +3256,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                     style={{ opacity: Math.max(0, dragOffset.x / 120) * 0.8 }}
                   >
                     <div className="bg-green-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest rotate-6 border border-white/40">
-                      LIKE
+                      {getSwipeRightPhrase(currentCategory.name)}
                     </div>
                   </div>
                   <div
@@ -3234,7 +3264,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                     style={{ opacity: Math.max(0, -dragOffset.x / 120) * 0.8 }}
                   >
                     <div className="bg-red-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest -rotate-6 border border-white/40">
-                      SKIP
+                      {getSwipeLeftPhrase(currentCategory.name)}
                     </div>
                   </div>
 
@@ -3253,11 +3283,11 @@ Return ONLY a single JSON object (no array, no wrapper):
                     </div>
                   </div>
                   <CardContent className="p-5 space-y-3">
-                    <div className="-mt-1">
+                    <div className="-mt-6">
                       <h2 className="text-2xl font-black tracking-tight">{cardStack[0].title}</h2>
                       <p className={cn("text-sm mt-2 leading-relaxed", subTextClass)}>{cardStack[0].description}</p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 -mt-1">
                       {cardStack[0].tags.map((tag) => (
                         <Badge
                           key={tag}
@@ -3278,24 +3308,19 @@ Return ONLY a single JSON object (no array, no wrapper):
           </div>
         </main>
 
-        <footer className="p-4">
-          <div
-            className={cn(
-              "max-w-md mx-auto rounded-[28px] border p-5 backdrop-blur-2xl space-y-4",
-              glassPanelClass
-            )}
-          >
+        <footer className="p-4 flex items-center justify-center flex-shrink-0">
             {cardStack.length > 0 ? (
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-6 items-center">
                 <Button
                   size="lg"
                   variant="ghost"
                   className={cn(
-                    "size-16 rounded-full border-2 text-red-400 hover:text-red-500 transition-all active:scale-95",
+                    "size-16 rounded-full border-2 transition-all active:scale-95 relative z-50",
                     isDarkMode 
-                      ? "border-slate-400/40 bg-white/5 hover:scale-105 hover:bg-slate-400 hover:border-slate-400 dark:hover:bg-slate-400" 
-                      : "border-white/30 bg-white/10 hover:scale-105 hover:bg-white hover:border-white"
+                      ? "border-[#181818] bg-[#181818] text-red-500 hover:scale-105 hover:!bg-[#181818] hover:!border-[#181818] hover:text-red-500 active:!bg-[#181818] active:!border-[#181818] active:text-red-500" 
+                      : "border-white bg-white text-red-500 hover:scale-105 hover:bg-white hover:border-white hover:text-red-500 active:bg-white active:border-white active:text-red-500"
                   )}
+                  style={isDarkMode ? { backgroundColor: '#181818', borderColor: '#181818' } : undefined}
                   onClick={() => handleSwipe("left")}
                 >
                   <X className="size-7" />
@@ -3310,43 +3335,59 @@ Return ONLY a single JSON object (no array, no wrapper):
                 >
                   <Check className="size-7" />
                 </Button>
+                {completedCategories.size === 6 ? (
+                  <Button
+                    onClick={() => setAppState("questionnaire")}
+                    size="lg"
+                    className={cn(
+                      "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
+                      "bg-green-500 hover:bg-green-600"
+                    )}
+                  >
+                    <FastForward className="size-7" />
+                  </Button>
+                ) : (showContinueButton && !currentCategoryComplete) || (currentCategoryComplete && completedCategories.size < 6) ? (
+                  <Button
+                    onClick={handleContinueToNextCategory}
+                    size="lg"
+                    className={cn(
+                      "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
+                      "bg-green-500 hover:bg-green-600"
+                    )}
+                  >
+                    <FastForward className="size-7" />
+                  </Button>
+                ) : null}
+              </div>
+            ) : completedCategories.size === 6 ? (
+              <div className="flex justify-center gap-6 items-center">
+                <Button
+                  size="lg"
+                  className={cn(
+                    "size-16 rounded-full flex items-center justify-center text-white text-2xl font-black hover:scale-105 active:scale-95 transition-all",
+                    primaryGradientButton
+                  )}
+                  onClick={() => {}}
+                  disabled
+                >
+                  <Check className="size-7" />
+                </Button>
+                <Button
+                  onClick={() => setAppState("questionnaire")}
+                  size="lg"
+                  className={cn(
+                    "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
+                    "bg-green-500 hover:bg-green-600"
+                  )}
+                >
+                  <FastForward className="size-7" />
+                </Button>
               </div>
             ) : (
               <p className={cn("text-center text-sm font-semibold", subTextClass)}>
-                You’ve seen every card in this category.
+                You've seen every card in this category.
               </p>
             )}
-
-            {showContinueButton && !currentCategoryComplete && (
-              <Button
-                onClick={handleContinueToNextCategory}
-                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
-              >
-                <ChevronRight className="size-4 mr-2" />
-                Jump to Next Category
-              </Button>
-            )}
-
-            {currentCategoryComplete && completedCategories.size < 6 && (
-              <Button
-                onClick={handleContinueToNextCategory}
-                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
-              >
-                <ChevronRight className="size-4 mr-2" />
-                Continue to Next Category
-              </Button>
-            )}
-
-            {completedCategories.size === 6 && (
-              <Button
-                onClick={() => setAppState("questionnaire")}
-                className={cn("w-full rounded-2xl py-4 font-semibold active:scale-95", primaryGradientButton)}
-              >
-                <ChevronRight className="size-4 mr-2" />
-                Continue to Questionnaire
-              </Button>
-            )}
-          </div>
         </footer>
       </div>
 

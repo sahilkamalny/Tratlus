@@ -22,8 +22,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // Add 'dark' class to body if in dark mode
   React.useEffect(() => {
     const body = window.document.body;
+    body.style.willChange = 'background-color';
     body.classList.remove(isDarkMode ? 'light' : 'dark');
     body.classList.add(isDarkMode ? 'dark' : 'light');
+    // Remove will-change after transition
+    setTimeout(() => {
+      body.style.willChange = 'auto';
+    }, 500);
   }, [isDarkMode]);
 
   return (
