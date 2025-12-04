@@ -3006,7 +3006,7 @@ Return ONLY a single JSON object (no array, no wrapper):
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
-        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#1C243A' : '#61A5F2' }}>
+        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#5C9AFB' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
