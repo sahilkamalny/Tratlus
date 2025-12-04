@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import SafeAreaWrapper from "@/components/ui/SafeAreaWrapper";
 import {
   Check,
   X,
@@ -1908,36 +1909,41 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "loading") {
     return (
-      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-8 pb-8">
-            <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
-            <h2 className="text-xl font-bold text-amber-900 mb-2">Preparing Your Experience</h2>
-            <p className="text-amber-700">Loading travel cards and preferences...</p>
-          </CardContent>
-        </Card>
-      </div>
+      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
+          <Card className="w-full max-w-md text-center">
+            <CardContent className="pt-8 pb-8">
+              <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
+              <h2 className="text-xl font-bold text-amber-900 mb-2">Preparing Your Experience</h2>
+              <p className="text-amber-700">Loading travel cards and preferences...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </SafeAreaWrapper>
     );
   }
 
   if (appState === "generating") {
     return (
-      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-8 pb-8">
-            <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
-            <h2 className="text-xl font-bold text-amber-900 mb-2">Creating Your Perfect Trip</h2>
-            <p className="text-amber-700">Analyzing your preferences and crafting a personalized itinerary...</p>
-          </CardContent>
-        </Card>
-      </div>
+      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
+          <Card className="w-full max-w-md text-center">
+            <CardContent className="pt-8 pb-8">
+              <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
+              <h2 className="text-xl font-bold text-amber-900 mb-2">Creating Your Perfect Trip</h2>
+              <p className="text-amber-700">Analyzing your preferences and crafting a personalized itinerary...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </SafeAreaWrapper>
     );
   }
 
   if (appState === "itinerary" && itinerary) {
     return (
-      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-2xl mx-auto">
+      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto">
+          <div className="max-w-2xl mx-auto">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle className="text-2xl text-amber-900">{itinerary.destination}</CardTitle>
@@ -2686,13 +2692,15 @@ Return ONLY a single JSON object (no array, no wrapper):
           </DialogContent>
         </Dialog>
       </div>
+    </SafeAreaWrapper>
     );
   }
 
   if (appState === "questionnaire") {
     return (
-      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-lg mx-auto">
+      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto">
+          <div className="max-w-lg mx-auto">
           <div className="mb-6">
             <Progress value={(questionnaireStep / 3) * 100} className="h-2" />
             <p className="text-center text-sm text-amber-700 mt-2">Step {questionnaireStep} of 3</p>
@@ -3061,20 +3069,22 @@ Return ONLY a single JSON object (no array, no wrapper):
             </Card>
           )}
         </div>
-      </div>
+          </div>
+        </SafeAreaWrapper>
     );
   }
 
   // Swiping UI
   return (
-    <div
-      className={cn(
-        "h-[100svh] relative flex flex-col overflow-hidden transition-colors duration-500",
-        "bg-gradient-to-br",
-        pageBgClass
-      )}
-      style={{ touchAction: 'none' }}
-    >
+    <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
+      <div
+        className={cn(
+          "h-full relative flex flex-col overflow-hidden transition-colors duration-500",
+          "bg-gradient-to-br",
+          pageBgClass
+        )}
+        style={{ touchAction: 'none' }}
+      >
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ zIndex: 0 }}>
         {/* Fuchsia blob - top left */}
         <div
@@ -3119,8 +3129,9 @@ Return ONLY a single JSON object (no array, no wrapper):
         )} />
       </div>
 
-      <div className="relative z-10 flex flex-col h-full">
-        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#509BDE' }}>
+      <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={false}>
+        <div className="relative z-10 flex flex-col h-full">
+          <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#509BDE' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
@@ -3312,7 +3323,7 @@ Return ONLY a single JSON object (no array, no wrapper):
         </header>
 
         <main className="flex-1 flex items-center justify-center px-4 overflow-hidden" style={{ paddingTop: '2.5rem', paddingBottom: '1.5rem' }}>
-          <div className="relative w-full max-w-md" style={{ height: 'calc(100vh - 320px)', maxHeight: '550px' }}>
+          <div className="relative w-full max-w-md h-full max-h-[550px]">
 
             {cardStack[0] &&
               (topCardReady ? (
@@ -3404,7 +3415,7 @@ Return ONLY a single JSON object (no array, no wrapper):
           </div>
         </main>
 
-        <footer className="pt-4 flex items-center justify-center flex-shrink-0 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <footer className="pt-4 flex items-center justify-center flex-shrink-0 pb-[max(1.5rem,0.5rem)]">
             {cardStack.length > 0 ? (
               <div className="flex justify-center gap-6 items-center">
                 <Button
@@ -3488,7 +3499,8 @@ Return ONLY a single JSON object (no array, no wrapper):
               </p>
             )}
         </footer>
-      </div>
+        </div>
+      </SafeAreaWrapper>
 
       {showBadge && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-in fade-in duration-500">
@@ -3530,5 +3542,6 @@ Return ONLY a single JSON object (no array, no wrapper):
         </div>
       )}
     </div>
+      </SafeAreaWrapper>
   );
 } 
