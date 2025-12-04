@@ -1922,7 +1922,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "generating") {
     return (
-      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
+      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-8">
             <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
@@ -1936,7 +1936,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "itinerary" && itinerary) {
     return (
-      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-hidden overflow-y-auto">
+      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-2xl mx-auto">
           <Card className="mb-4">
             <CardHeader>
@@ -2691,7 +2691,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "questionnaire") {
     return (
-      <div className="h-screen bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-hidden overflow-y-auto">
+      <div className="h-[100svh] bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-lg mx-auto">
           <div className="mb-6">
             <Progress value={(questionnaireStep / 3) * 100} className="h-2" />
@@ -3404,7 +3404,7 @@ Return ONLY a single JSON object (no array, no wrapper):
           </div>
         </main>
 
-        <footer className="pt-4 flex items-center justify-center flex-shrink-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <footer className="pt-4 flex items-center justify-center flex-shrink-0 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             {cardStack.length > 0 ? (
               <div className="flex justify-center gap-6 items-center">
                 <Button
