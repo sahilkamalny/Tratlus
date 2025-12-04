@@ -3006,7 +3006,7 @@ Return ONLY a single JSON object (no array, no wrapper):
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
-        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#1C243A' : '#74ADCF' }}>
+        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#1C243A' : '#61A5F2' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
@@ -3317,10 +3317,10 @@ Return ONLY a single JSON object (no array, no wrapper):
                   className={cn(
                     "size-16 rounded-full border-2 transition-all active:scale-95 relative z-50",
                     isDarkMode 
-                      ? "border-[#181818] bg-[#181818] text-red-500 hover:scale-105 hover:!bg-[#181818] hover:!border-[#181818] hover:text-red-500 active:!bg-[#181818] active:!border-[#181818] active:text-red-500" 
+                      ? "border-[#000000] bg-[#000000] text-red-500 hover:scale-105 hover:!bg-[#000000] hover:!border-[#000000] hover:text-red-500 active:!bg-[#000000] active:!border-[#000000] active:text-red-500" 
                       : "border-white bg-white text-red-500 hover:scale-105 hover:bg-white hover:border-white hover:text-red-500 active:bg-white active:border-white active:text-red-500"
                   )}
-                  style={isDarkMode ? { backgroundColor: '#181818', borderColor: '#181818' } : undefined}
+                  style={isDarkMode ? { backgroundColor: '#000000', borderColor: '#000000' } : undefined}
                   onClick={() => handleSwipe("left")}
                 >
                   <X className="size-7" />
