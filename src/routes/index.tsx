@@ -387,7 +387,6 @@ function App() {
   const [showBadge, setShowBadge] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showContinueButton, setShowContinueButton] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isAutoCompleting, setIsAutoCompleting] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [currentRightPhrase, setCurrentRightPhrase] = useState<string>("");
@@ -734,11 +733,11 @@ function App() {
 
   // Initialize phrases when a new card appears
   useEffect(() => {
-    if (cardStack.length > 0 && !isAnimating && currentCategory) {
+    if (cardStack.length > 0 && swipeDirection === null && currentCategory) {
       setCurrentRightPhrase(getSwipeRightPhrase(currentCategory.name));
       setCurrentLeftPhrase(getSwipeLeftPhrase(currentCategory.name));
     }
-  }, [cardStack.length, currentCategory?.name, isAnimating, getSwipeRightPhrase, getSwipeLeftPhrase]);
+  }, [cardStack.length, currentCategory?.name, swipeDirection, getSwipeRightPhrase, getSwipeLeftPhrase]);
 
   useEffect(() => {
     if (cardStack.length === 0) return;
@@ -770,82 +769,81 @@ function App() {
     }
   }, [appState, showSettingsMenu]);
 
-  const handleSwipe = useCallback((direction: "left" | "right") => {
-    // Prevent swiping during animation or if no cards
-    if (cardStack.length === 0 || isAnimating) return;
-    playSound(direction === "right" ? "success" : "cancel");
+  const handleSwipeAnimationEnd = () => {
+    if (!swipeDirection) return; // Only fire for the swipe-out transition
 
     const card = cardStack[0];
-    setIsAnimating(true);
-    setSwipeDirection(direction);
+    if (!card) return;
+
+    // Update preference scores locally (no database)
+    const scoreChange = swipeDirection === "right" ? 1 : -1;
+    const newScores = { ...preferenceScores };
+
+    for (const tag of card.tags) {
+      newScores[tag] = (newScores[tag] || 0) + scoreChange;
+    }
+    setPreferenceScores(newScores);
+
+    // Add card to swiped set
+    setSwipedCardIds(prev => new Set([...prev, card.id]));
+
+    // Update category progress locally (no database)
+    const newCount = categoryProgress[currentCategory.name] + 1;
+    const requiredSwipes = REQUIRED_SWIPES_MAP[currentCategory.name];
+    const isComplete = newCount >= requiredSwipes;
+
+    setCategoryProgress(prev => ({
+      ...prev,
+      [currentCategory.name]: newCount,
+    }));
+
+    // Check for category completion (first time hitting required swipes)
+    if (isComplete && !completedCategories.has(currentCategory.name)) {
+      const newCompleted = new Set(completedCategories);
+      newCompleted.add(currentCategory.name);
+      setCompletedCategories(newCompleted);
+      setShowBadge(currentCategory.name);
+      setTimeout(() => setShowBadge(null), 2000);
+
+      // Check if all categories are now complete
+      if (newCompleted.size === CATEGORIES.length) {
+        setShowConfetti(true);
+        setTimeout(() => {
+          setShowConfetti(false);
+          setAppState("questionnaire");
+        }, 3000);
+      }
+    }
     
+    // Remove card from stack and reset animation state
+    setCardStack(prev => prev.slice(1));
+    setSwipeDirection(null);
+    setDragOffset({ x: 0, y: 0 });
+    
+    // Generate new phrases for next card
+    const newStack = cardStack.slice(1);
+    if (newStack.length === 0) {
+      setShowContinueButton(true);
+    } else {
+      setTimeout(() => {
+        setCurrentRightPhrase(getSwipeRightPhrase(currentCategory.name));
+        setCurrentLeftPhrase(getSwipeLeftPhrase(currentCategory.name));
+      }, 100);
+    }
+  };
+
+  const handleSwipe = useCallback((direction: "left" | "right") => {
+    // Prevent swiping during animation or if no cards
+    if (cardStack.length === 0 || swipeDirection) return;
+    playSound(direction === "right" ? "success" : "cancel");
+
     // Set phrases for this swipe
     setCurrentRightPhrase(getSwipeRightPhrase(currentCategory.name));
     setCurrentLeftPhrase(getSwipeLeftPhrase(currentCategory.name));
-
-    // Animate out
-    setTimeout(() => {
-      // Update preference scores locally (no database)
-      const scoreChange = direction === "right" ? 1 : -1;
-      const newScores = { ...preferenceScores };
-
-      for (const tag of card.tags) {
-        newScores[tag] = (newScores[tag] || 0) + scoreChange;
-      }
-      setPreferenceScores(newScores);
-
-      // Add card to swiped set
-      setSwipedCardIds(prev => new Set([...prev, card.id]));
-
-      // Update category progress locally (no database)
-      const newCount = categoryProgress[currentCategory.name] + 1;
-      const requiredSwipes = REQUIRED_SWIPES_MAP[currentCategory.name];
-      const isComplete = newCount >= requiredSwipes;
-
-      setCategoryProgress(prev => ({
-        ...prev,
-        [currentCategory.name]: newCount,
-      }));
-
-      // Remove card from stack first
-      const newStack = cardStack.slice(1);
-      setCardStack(newStack);
-
-      // Check for category completion (first time hitting required swipes)
-      if (isComplete && !completedCategories.has(currentCategory.name)) {
-        const newCompleted = new Set(completedCategories);
-        newCompleted.add(currentCategory.name);
-        setCompletedCategories(newCompleted);
-        setShowBadge(currentCategory.name);
-        setTimeout(() => setShowBadge(null), 2000);
-
-        // Check if all categories are now complete
-        if (newCompleted.size === CATEGORIES.length) {
-          setShowConfetti(true);
-          setTimeout(() => {
-            setShowConfetti(false);
-            setAppState("questionnaire");
-          }, 3000);
-        }
-      }
-
-      // Show continue button if no more cards left
-      if (newStack.length === 0) {
-        setShowContinueButton(true);
-      }
-
-      setSwipeDirection(null);
-      setDragOffset({ x: 0, y: 0 });
-      setIsAnimating(false);
-      // Generate new phrases for next card
-      if (newStack.length > 0) {
-        setTimeout(() => {
-          setCurrentRightPhrase(getSwipeRightPhrase(currentCategory.name));
-          setCurrentLeftPhrase(getSwipeLeftPhrase(currentCategory.name));
-        }, 100);
-      }
-    }, 600);
-  }, [cardStack, currentCategory, categoryProgress, completedCategories, preferenceScores, isAnimating, playSound, getSwipeRightPhrase, getSwipeLeftPhrase]);
+    
+    // Trigger animation
+    setSwipeDirection(direction);
+  }, [cardStack.length, swipeDirection, playSound, getSwipeRightPhrase, getSwipeLeftPhrase, currentCategory.name]);
 
   // Touch/Mouse handlers
   const handleDragStart = (clientX: number, clientY: number) => {
@@ -866,7 +864,7 @@ function App() {
     setIsDragging(false);
 
     // Don't process drag if animating
-    if (isAnimating) {
+    if (swipeDirection) {
       setDragOffset({ x: 0, y: 0 });
       return;
     }
@@ -1866,7 +1864,7 @@ Return ONLY a single JSON object (no array, no wrapper):
     : "from-blue-400 via-blue-300 to-blue-600 text-slate-900";
     const glassHeaderClass = isDarkMode
       ? "border-white/10 shadow-[0_20px_60px_-25px_rgba(59,130,246,0.7)] backdrop-blur-md"
-      : "border-white/30 shadow-[0_20px_60px_-25px_rgba(88,28,135,0.9)] backdrop-blur-md";
+      : "border-white/30 shadow-[0_20px_60px_-25px_rgba(0,0,0,0.9)] backdrop-blur-md";
     const glassPanelClass = isDarkMode
       ? "bg-white/10 border-white/10 text-white"
       : "bg-white/15 border-white/30 text-slate-900";
@@ -3100,7 +3098,7 @@ Return ONLY a single JSON object (no array, no wrapper):
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
-        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#6969FF' }}>
+        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#77B1D4' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
@@ -3313,16 +3311,14 @@ Return ONLY a single JSON object (no array, no wrapper):
                   onTouchEnd={handleDragEnd}
                 >
                   <Card
+                    onTransitionEnd={handleSwipeAnimationEnd}
                     className={cn(
-                      "h-full overflow-hidden border backdrop-blur-2xl transition-transform duration-600 ease-out",
+                      "h-full overflow-hidden border backdrop-blur-2xl transition-all duration-600 ease-out",
                       glassPanelClass,
                       "shadow-[0_35px_80px_-40px_rgba(15,23,42,0.8)]",
                       swipeDirection === "right" && "translate-x-[115%] rotate-6 opacity-0",
                       swipeDirection === "left" && "-translate-x-[115%] -rotate-6 opacity-0"
                     )}
-                    style={{
-                      transition: swipeDirection ? "transform 0.6s ease-out, opacity 0.6s ease-out" : "transform 0.3s ease-out",
-                    }}
                   >
                     <div className="absolute inset-0 pointer-events-none rounded-[24px] border border-white/20" />
                     <div
