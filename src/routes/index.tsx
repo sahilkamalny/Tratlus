@@ -392,6 +392,36 @@ function App() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [currentRightPhrase, setCurrentRightPhrase] = useState<string>("");
   const [currentLeftPhrase, setCurrentLeftPhrase] = useState<string>("");
+  const [topCardReady, setTopCardReady] = useState(true);
+  const imageCacheRef = useRef<Record<string, boolean>>({});
+
+  const preloadImage = useCallback((url?: string) => {
+    return new Promise<void>((resolve) => {
+      if (!url) {
+        resolve();
+        return;
+      }
+      if (imageCacheRef.current[url]) {
+        resolve();
+        return;
+      }
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        imageCacheRef.current[url] = true;
+        resolve();
+      };
+      img.onerror = () => resolve();
+    });
+  }, []);
+  const preloadImageBatch = useCallback(
+    (urls: string[]) => {
+      urls.forEach((url) => {
+        preloadImage(url);
+      });
+    },
+    [preloadImage]
+  );
   // Random phrases for swipe feedback
   const getSwipeRightPhrase = useCallback((category: CategoryName) => {
     const phrases: Record<CategoryName, string[]> = {
@@ -672,6 +702,7 @@ function App() {
   // Start swiping - preload all cards
   const handleStartSwiping = useCallback(async () => {
     setAppState("loading");
+    setShowSettingsMenu(false);
 
     // Preload all cards by category
     const cardsByCategory: Record<CategoryName, TravelCard[]> = {
@@ -696,9 +727,10 @@ function App() {
 
     // Initialize progress (fresh start - no database)
     initializeProgress();
+    preloadImageBatch(TRAVEL_CARDS.map((card) => card.imageUrl));
 
     setAppState("swiping");
-  }, [initializeProgress]);
+  }, [initializeProgress, preloadImageBatch]);
 
   // Initialize phrases when a new card appears
   useEffect(() => {
@@ -707,6 +739,36 @@ function App() {
       setCurrentLeftPhrase(getSwipeLeftPhrase(currentCategory.name));
     }
   }, [cardStack.length, currentCategory?.name, isAnimating, getSwipeRightPhrase, getSwipeLeftPhrase]);
+
+  useEffect(() => {
+    if (cardStack.length === 0) return;
+    const upcomingUrls = cardStack.slice(0, 6).map((card) => card.imageUrl);
+    preloadImageBatch(upcomingUrls);
+  }, [cardStack, preloadImageBatch]);
+
+  useEffect(() => {
+    if (!cardStack[0]) return;
+    const url = cardStack[0].imageUrl;
+    if (!url) return;
+    if (imageCacheRef.current[url]) {
+      setTopCardReady(true);
+      return;
+    }
+    setTopCardReady(false);
+    preloadImage(url).then(() => setTopCardReady(true));
+  }, [cardStack, preloadImage]);
+
+  useEffect(() => {
+    if (cardStack.length === 0) {
+      setTopCardReady(true);
+    }
+  }, [cardStack.length]);
+
+  useEffect(() => {
+    if (appState !== "swiping" && showSettingsMenu) {
+      setShowSettingsMenu(false);
+    }
+  }, [appState, showSettingsMenu]);
 
   const handleSwipe = useCallback((direction: "left" | "right") => {
     // Prevent swiping during animation or if no cards
@@ -783,7 +845,7 @@ function App() {
         }, 100);
       }
     }, 600);
-  }, [cardStack, currentCategory, categoryProgress, completedCategories, preferenceScores, isAnimating, playSound]);
+  }, [cardStack, currentCategory, categoryProgress, completedCategories, preferenceScores, isAnimating, playSound, getSwipeRightPhrase, getSwipeLeftPhrase]);
 
   // Touch/Mouse handlers
   const handleDragStart = (clientX: number, clientY: number) => {
@@ -1804,7 +1866,7 @@ Return ONLY a single JSON object (no array, no wrapper):
     : "from-blue-400 via-blue-300 to-blue-600 text-slate-900";
     const glassHeaderClass = isDarkMode
       ? "border-white/10 shadow-[0_20px_60px_-25px_rgba(59,130,246,0.7)] backdrop-blur-md"
-      : "border-white/30 shadow-[0_20px_60px_-25px_rgba(37,99,235,0.7)] backdrop-blur-md";
+      : "border-white/30 shadow-[0_20px_60px_-25px_rgba(88,28,135,0.9)] backdrop-blur-md";
     const glassPanelClass = isDarkMode
       ? "bg-white/10 border-white/10 text-white"
       : "bg-white/15 border-white/30 text-slate-900";
@@ -2995,51 +3057,39 @@ Return ONLY a single JSON object (no array, no wrapper):
     >
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ zIndex: 0 }}>
         {/* Fuchsia blob - top left */}
-        <div className={cn(
-          "absolute top-0 left-0 w-[100vw] h-[100vh] rounded-full blur-[150px] sm:blur-[200px]",
-          isDarkMode 
-            ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" 
-            : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
-        )} style={{ 
-          animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          transform: 'translate(-20%, -20%)',
-          width: '80vw',
-          height: '80vw',
-          maxWidth: '800px',
-          maxHeight: '800px'
-        }} />
+        <div
+          className={cn(
+            "absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[150px] sm:blur-[200px]",
+            isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
+          )}
+          style={{
+            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+          }}
+        />
         
-        {/* Blue/blob - middle right */}
-        <div className={cn(
-          "absolute top-0 right-0 w-[100vw] h-[100vh] rounded-full blur-[150px] sm:blur-[200px]",
-          isDarkMode 
-            ? "bg-blue-500/41 sm:bg-blue-500/22" 
-            : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
-        )} style={{ 
-          animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
-          animationDelay: '0.5s',
-          transform: 'translate(20%, 30%)',
-          width: '70vw',
-          height: '70vw',
-          maxWidth: '700px',
-          maxHeight: '700px'
-        }} />
+        {/* Blue blob - middle right */}
+        <div
+          className={cn(
+            "absolute top-[30%] -right-[20%] w-[70vw] h-[70vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[150px] sm:blur-[200px]",
+            isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/60 sm:bg-blue-500/40"
+          )}
+          style={{
+            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            animationDelay: "0.5s",
+          }}
+        />
         
         {/* Purple blob - bottom left */}
-        <div className={cn(
-          "absolute bottom-0 left-0 w-[100vw] h-[100vh] rounded-full blur-[150px] sm:blur-[200px]",
-          isDarkMode 
-            ? "bg-purple-500/41 sm:bg-purple-500/22" 
-            : "bg-purple-600/90 sm:bg-purple-600/80"
-        )} style={{ 
-          animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
-          animationDelay: '1s',
-          transform: 'translate(20%, 10%)',
-          width: '60vw',
-          height: '60vw',
-          maxWidth: '600px',
-          maxHeight: '600px'
-        }} />
+        <div
+          className={cn(
+            "absolute bottom-0 left-[20%] w-[60vw] h-[60vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[150px] sm:blur-[200px]",
+            isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-purple-800/95 sm:bg-purple-800/85"
+          )}
+          style={{
+            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            animationDelay: "1s",
+          }}
+        />
         {/* Grid Overlay */}
         <div className={cn(
           "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
@@ -3050,7 +3100,7 @@ Return ONLY a single JSON object (no array, no wrapper):
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
-        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#5C9AFB' }}>
+        <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#6969FF' }}>
           <div className="max-w-xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-3">
               <h1
@@ -3244,90 +3294,95 @@ Return ONLY a single JSON object (no array, no wrapper):
         <main className="flex-1 flex items-center justify-center px-4 overflow-hidden" style={{ paddingTop: '2.5rem', paddingBottom: '1.5rem' }}>
           <div className="relative w-full max-w-md" style={{ height: 'calc(100vh - 320px)', maxHeight: '550px' }}>
 
-            {cardStack[0] && (
-              <div
-                ref={cardRef}
-                className="absolute inset-x-0 top-0 h-full cursor-grab active:cursor-grabbing"
-                style={{
-                  transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${dragOffset.x * 0.05}deg)`,
-                  transition: isDragging ? "none" : "transform 0.3s ease-out",
-                  zIndex: 20,
-                }}
-                onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
-                onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
-                onMouseUp={handleDragEnd}
-                onMouseLeave={handleDragEnd}
-                onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
-                onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
-                onTouchEnd={handleDragEnd}
-              >
-                <Card
-                  className={cn(
-                    "h-full overflow-hidden border backdrop-blur-2xl",
-                    glassPanelClass,
-                    "shadow-[0_35px_80px_-40px_rgba(15,23,42,0.8)]",
-                    swipeDirection === "right" && "translate-x-[150%] rotate-12 opacity-0",
-                    swipeDirection === "left" && "-translate-x-[150%] -rotate-12 opacity-0"
-                  )}
+            {cardStack[0] &&
+              (topCardReady ? (
+                <div
+                  ref={cardRef}
+                  className="absolute inset-x-0 top-0 h-full cursor-grab active:cursor-grabbing"
                   style={{
-                    transition: swipeDirection ? "transform 0.6s ease-out, opacity 0.6s ease-out" : (isDragging ? "none" : "transform 0.3s ease-out")
+                    transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${dragOffset.x * 0.05}deg)`,
+                    transition: isDragging ? "none" : "transform 0.3s ease-out",
+                    zIndex: 20,
                   }}
+                  onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+                  onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
+                  onMouseUp={handleDragEnd}
+                  onMouseLeave={handleDragEnd}
+                  onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
+                  onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
+                  onTouchEnd={handleDragEnd}
                 >
-                  <div className="absolute inset-0 pointer-events-none rounded-[24px] border border-white/20" />
-                  <div
-                    className="absolute inset-0 bg-green-500/20 z-10 flex items-center justify-center transition-opacity"
-                    style={{ opacity: swipeDirection === "right" ? 0.8 : Math.max(0, dragOffset.x / 120) * 0.8 }}
+                  <Card
+                    className={cn(
+                      "h-full overflow-hidden border backdrop-blur-2xl transition-transform duration-600 ease-out",
+                      glassPanelClass,
+                      "shadow-[0_35px_80px_-40px_rgba(15,23,42,0.8)]",
+                      swipeDirection === "right" && "translate-x-[115%] rotate-6 opacity-0",
+                      swipeDirection === "left" && "-translate-x-[115%] -rotate-6 opacity-0"
+                    )}
+                    style={{
+                      transition: swipeDirection ? "transform 0.6s ease-out, opacity 0.6s ease-out" : "transform 0.3s ease-out",
+                    }}
                   >
-                    <div className="bg-green-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest rotate-6 border border-white/40">
-                      {currentRightPhrase || getSwipeRightPhrase(currentCategory.name)}
+                    <div className="absolute inset-0 pointer-events-none rounded-[24px] border border-white/20" />
+                    <div
+                      className="absolute inset-0 bg-green-500/20 z-10 flex items-center justify-center transition-opacity"
+                      style={{ opacity: swipeDirection === "right" ? 0.8 : Math.max(0, dragOffset.x / 120) * 0.8 }}
+                    >
+                      <div className="bg-green-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest rotate-6 border border-white/40">
+                        {currentRightPhrase || getSwipeRightPhrase(currentCategory.name)}
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="absolute inset-0 bg-red-500/20 z-10 flex items-center justify-center transition-opacity"
-                    style={{ opacity: swipeDirection === "left" ? 0.8 : Math.max(0, -dragOffset.x / 120) * 0.8 }}
-                  >
-                    <div className="bg-red-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest -rotate-6 border border-white/40">
-                      {currentLeftPhrase || getSwipeLeftPhrase(currentCategory.name)}
+                    <div
+                      className="absolute inset-0 bg-red-500/20 z-10 flex items-center justify-center transition-opacity"
+                      style={{ opacity: swipeDirection === "left" ? 0.8 : Math.max(0, -dragOffset.x / 120) * 0.8 }}
+                    >
+                      <div className="bg-red-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest -rotate-6 border border-white/40">
+                        {currentLeftPhrase || getSwipeLeftPhrase(currentCategory.name)}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="relative h-[60%]">
-                    <img src={cardStack[0].imageUrl} alt={cardStack[0].title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge
-                        className={cn(
-                          "bg-gradient-to-r text-[11px] font-black tracking-widest uppercase border-none text-white",
-                          badgeGradientClass
-                        )}
-                      >
-                        {currentCategory.displayName}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-5 space-y-3">
-                    <div className="-mt-6">
-                      <h2 className="text-2xl font-black tracking-tight">{cardStack[0].title}</h2>
-                      <p className={cn("text-sm mt-2 leading-relaxed", subTextClass)}>{cardStack[0].description}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2 -mt-1">
-                      {cardStack[0].tags.map((tag) => (
+                    <div className="relative h-[60%]">
+                      <img src={cardStack[0].imageUrl} alt={cardStack[0].title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+                      <div className="absolute top-4 left-4">
                         <Badge
-                          key={tag}
-                          variant="outline"
                           className={cn(
-                            "text-[11px] font-semibold uppercase border-white/20 rounded-full px-3 py-1",
-                            isDarkMode ? "text-white/80" : "text-slate-700"
+                            "bg-gradient-to-r text-[11px] font-black tracking-widest uppercase border-none text-white",
+                            badgeGradientClass
                           )}
                         >
-                          {tag}
+                          {currentCategory.displayName}
                         </Badge>
-                      ))}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                    <CardContent className="p-5 space-y-3">
+                      <div className="-mt-6">
+                        <h2 className="text-2xl font-black tracking-tight">{cardStack[0].title}</h2>
+                        <p className={cn("text-sm mt-2 leading-relaxed", subTextClass)}>{cardStack[0].description}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 -mt-1">
+                        {cardStack[0].tags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className={cn(
+                              "text-[11px] font-semibold uppercase border-white/20 rounded-full px-3 py-1",
+                              isDarkMode ? "text-white/80" : "text-slate-700"
+                            )}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center rounded-[32px] bg-white/50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-200 font-semibold text-sm z-20 backdrop-blur-lg">
+                  Preparing card...
+                </div>
+              ))}
           </div>
         </main>
 
