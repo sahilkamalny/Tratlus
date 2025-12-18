@@ -1890,7 +1890,7 @@ Return ONLY a single JSON object (no array, no wrapper):
       : "border-white/30 shadow-[0_20px_60px_-25px_rgba(0,0,0,1)] backdrop-blur-md";
     const glassPanelClass = isDarkMode
       ? "bg-white/10 border-white/10 text-white"
-      : "bg-white/15 border-white/30 text-slate-900";
+      : "bg-white/70 border-white/50 text-indigo-950 shadow-[0_8px_32px_rgba(31,38,135,0.15)] backdrop-blur-md";
   const subTextClass = isDarkMode ? "text-slate-400" : "text-slate-600";
   const badgeGradientClass = isDarkMode
     ? "from-fuchsia-500 via-purple-500 to-sky-500"
@@ -1910,14 +1910,28 @@ Return ONLY a single JSON object (no array, no wrapper):
   if (appState === "loading") {
     return (
       <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
-          <Card className="w-full max-w-md text-center">
-            <CardContent className="pt-8 pb-8">
-              <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
-              <h2 className="text-xl font-bold text-amber-900 mb-2">Preparing Your Experience</h2>
-              <p className="text-amber-700">Loading travel cards and preferences...</p>
-            </CardContent>
-          </Card>
+        <div className={cn("h-full relative flex items-center justify-center p-4 overflow-hidden", pageBgClass)}>
+          {/* Background Blobs (Simplified for Loading) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+             <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 animate-pulse", isDarkMode ? "bg-fuchsia-500" : "bg-blue-500")} />
+          </div>
+          
+          <div className={cn("relative z-10 w-full max-w-md text-center p-8 rounded-3xl border backdrop-blur-xl shadow-2xl space-y-6", glassPanelClass)}>
+            <div className="relative mx-auto size-24 flex items-center justify-center">
+              <div className={cn("absolute inset-0 rounded-full animate-ping opacity-20", isDarkMode ? "bg-fuchsia-500" : "bg-blue-600")} />
+              <div className={cn("absolute inset-2 rounded-full animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-500" : "bg-blue-600")} />
+              <Loader2 className={cn("relative z-10 size-10 animate-spin", isDarkMode ? "text-white" : "text-blue-600")} />
+            </div>
+            
+            <div>
+              <h2 className={cn("text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r", isDarkMode ? "from-white to-slate-400" : "from-slate-900 to-slate-600")}>
+                Preparing...
+              </h2>
+              <p className={cn("font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                Loading your personalized adventure.
+              </p>
+            </div>
+          </div>
         </div>
       </SafeAreaWrapper>
     );
@@ -1926,304 +1940,433 @@ Return ONLY a single JSON object (no array, no wrapper):
   if (appState === "generating") {
     return (
       <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 flex items-center justify-center p-4 overflow-hidden">
-          <Card className="w-full max-w-md text-center">
-            <CardContent className="pt-8 pb-8">
-              <Loader2 className="size-16 animate-spin mx-auto mb-4 text-cyan-600" />
-              <h2 className="text-xl font-bold text-amber-900 mb-2">Creating Your Perfect Trip</h2>
-              <p className="text-amber-700">Analyzing your preferences and crafting a personalized itinerary...</p>
-            </CardContent>
-          </Card>
+        <div className={cn(
+          "h-full relative flex items-center justify-center p-4 overflow-hidden", 
+          isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500"
+        )}>
+          {/* Background Blobs */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+             <div className={cn("absolute top-1/4 left-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-600" : "bg-fuchsia-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '4s' }} />
+             <div className={cn("absolute bottom-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-30", isDarkMode ? "bg-blue-600" : "bg-blue-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '5s' }} />
+             {/* Grid Overlay */}
+             <div className={cn("absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+                isDarkMode 
+                  ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+                  : "bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)]"
+             )} />
+          </div>
+          
+          <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-12">
+            
+            {/* Pulsing Orb Centerpiece */}
+            <div className="relative size-40 flex items-center justify-center">
+              <div className={cn("absolute inset-0 rounded-full blur-xl animate-pulse opacity-50", isDarkMode ? "bg-fuchsia-500" : "bg-white/60")} />
+              <div className="absolute inset-4 rounded-full border-2 border-white/20 animate-[spin_10s_linear_infinite]" />
+              <div className="absolute inset-8 rounded-full border-2 border-white/40 animate-[spin_15s_linear_infinite_reverse]" />
+              <div className={cn("size-20 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.5)] flex items-center justify-center animate-bounce", isDarkMode ? "bg-gradient-to-br from-fuchsia-500 to-indigo-600" : "bg-gradient-to-br from-fuchsia-400 to-indigo-500")}>
+                <Sparkles className="size-10 text-white animate-pulse" />
+              </div>
+            </div>
+
+            <div className="text-center space-y-4">
+               <h2 className={cn("text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r drop-shadow-sm pb-2", isDarkMode ? "from-fuchsia-400 via-purple-400 to-blue-400" : "text-white")}>
+                Crafting Your Journey
+              </h2>
+              <div className={cn("text-sm font-medium uppercase tracking-widest px-4 py-2 rounded-full border backdrop-blur-md inline-block", isDarkMode ? "bg-white/5 border-white/10 text-slate-400" : "bg-white/20 border-white/30 text-white/90")}>
+                 <span className="animate-pulse">AI Engine Analyzing...</span>
+              </div>
+            </div>
+
+            {/* Glass Tip Card */}
+            <div className={cn("w-full p-6 rounded-2xl border backdrop-blur-xl shadow-2xl transform transition-all hover:scale-[1.02]", isDarkMode ? glassPanelClass : "bg-white/10 border-white/20 text-white")}>
+                <div className="flex items-center gap-3 mb-3">
+                   <div className={cn("p-2 rounded-full", isDarkMode ? "bg-white/10" : "bg-white/20")}>
+                      <Compass className={cn("size-5", isDarkMode ? "text-fuchsia-400" : "text-white")} />
+                   </div>
+                   <span className={cn("text-xs font-bold uppercase tracking-wider", isDarkMode ? "text-slate-400" : "text-white/80")}>Travel Tip</span>
+                </div>
+                <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-200" : "text-white")}>
+                   "Did you know? The best itineraries mix planned activities with unstructured time for spontaneous discovery."
+                </p>
+            </div>
+
+          </div>
         </div>
       </SafeAreaWrapper>
     );
   }
 
   if (appState === "itinerary" && itinerary) {
+    const primaryGradientButton = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20";
+    // Glass panel styles specific to itinerary
+    const glassCardClass = isDarkMode
+      ? "bg-slate-900/60 border-white/10 text-white shadow-xl backdrop-blur-xl"
+      : "bg-white/60 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
+      
+    const timelineLineClass = isDarkMode ? "bg-white/10" : "bg-indigo-500/20";
+    const dayHeaderClass = isDarkMode ? "bg-slate-800/80 text-white" : "bg-white/80 text-indigo-900";
+    
+    const pageBgClass = isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-rose-200 via-sky-200 to-indigo-200";
+
     return (
       <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto">
-          <div className="max-w-2xl mx-auto">
-          <Card className="mb-4">
-            <CardHeader>
-              <CardTitle className="text-2xl text-amber-900">{itinerary.destination}</CardTitle>
-              <CardDescription>
-                {itinerary.tripDates.startDate} - {itinerary.tripDates.endDate}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          {itinerary.days.map((day, dayIndex) => (
-            <Card key={day.dayNumber} className="mb-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-amber-800">
-                  Day {day.dayNumber} - {day.date}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {day.activities.map((activity, actIndex) => {
-                  const isTransportBetween = activity.type === "transport-between";
-
-                  // Transport-between blocks are rendered smaller but now draggable
-                  if (isTransportBetween) {
-                    return (
-                      <div
-                        key={`${day.dayNumber}-${actIndex}`}
-                        className={cn(
-                          "flex items-center gap-2 py-1.5 px-3 rounded bg-slate-100 border border-slate-200 text-slate-600 cursor-grab active:cursor-grabbing transition-all",
-                          draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95",
-                          dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-cyan-400 border-2 bg-cyan-50"
-                        )}
-                        draggable
-                        onDragStart={(e) => {
-                          e.stopPropagation();
-                          handleActivityDragStart(dayIndex, actIndex);
-                        }}
-                        onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
-                        onDrop={() => handleActivityDrop(dayIndex, actIndex)}
-                        onDragEnd={handleActivityDragEnd}
-                      >
-                        <GripVertical className="size-3 text-slate-400" />
-                        <Car className="size-3.5 text-slate-400" />
-                        <span className="text-xs font-medium text-slate-500 min-w-[55px]">
-                          {activity.time}
-                        </span>
-                        <span className="text-xs flex-1">{activity.title}</span>
-                        <span className="text-xs text-slate-500">{activity.description}</span>
-                        {activity.estimatedCost > 0 && (
-                          <span className="text-xs text-green-600">${activity.estimatedCost}</span>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  // Main activity blocks - larger and draggable
-                  return (
-                    <div
-                      key={`${day.dayNumber}-${actIndex}`}
-                      className={cn(
-                        "flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-100 cursor-pointer hover:bg-amber-100 hover:border-amber-200 transition-all group",
-                        draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95",
-                        dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-cyan-400 border-2 bg-cyan-50",
-                        refreshingActivityPosition?.dayIndex === dayIndex && refreshingActivityPosition?.actIndex === actIndex && "opacity-50"
-                      )}
-                      onClick={() => {
-                        setSelectedActivity(activity);
-                        setSelectedActivityPosition({ dayIndex, actIndex });
-                        setActivityDialogOpen(true);
-                      }}
-                      draggable
-                      onDragStart={(e) => {
-                        e.stopPropagation();
-                        handleActivityDragStart(dayIndex, actIndex);
-                      }}
-                      onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
-                      onDrop={() => handleActivityDrop(dayIndex, actIndex)}
-                      onDragEnd={handleActivityDragEnd}
-                    >
-                      {/* Drag Handle */}
-                      <div
-                        className="flex items-center self-stretch cursor-grab active:cursor-grabbing text-amber-400 hover:text-amber-600"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <GripVertical className="size-4" />
-                      </div>
-                      <div className="text-sm font-medium text-cyan-700 min-w-[70px]">
-                        {activity.time}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-amber-900">{activity.title}</h4>
-                          <Info className="size-3.5 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <p className="text-sm text-amber-700">{activity.location}</p>
-                        <p className="text-sm text-amber-600 mt-1">{activity.description}</p>
-                      </div>
-                      <div className="text-right flex flex-col items-end gap-1">
-                        <span className="text-sm font-medium text-green-700">
-                          ${activity.estimatedCost}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7 text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleInlineRefreshActivity(dayIndex, actIndex);
-                            }}
-                            disabled={refreshingActivityPosition?.dayIndex === dayIndex && refreshingActivityPosition?.actIndex === actIndex}
-                          >
-                            {refreshingActivityPosition?.dayIndex === dayIndex && refreshingActivityPosition?.actIndex === actIndex ? (
-                              <Loader2 className="size-3.5 animate-spin" />
-                            ) : (
-                              <RefreshCw className="size-3.5" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7 text-red-500 hover:text-red-700 hover:bg-red-50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteActivity(dayIndex, actIndex);
-                            }}
-                          >
-                            <Trash2 className="size-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Add Activity Button */}
-                <Button
-                  variant="outline"
-                  className="w-full border-dashed border-amber-300 text-amber-600 hover:bg-amber-50 hover:border-amber-400"
-                  onClick={() => {
-                    setAddActivityDayIndex(dayIndex);
-                    setAddActivityDialogOpen(true);
-                  }}
-                >
-                  <Plus className="size-4 mr-2" />
-                  Add Activity
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-
-          <Card className="mb-4">
-            <CardContent className="flex items-center justify-between py-4">
-              <span className="text-lg font-bold text-amber-900">Total Estimated Cost</span>
-              <span className="text-2xl font-bold text-green-700">
-                ${itinerary.totalEstimatedCost.toLocaleString()}
-              </span>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              onClick={() => setAppState("questionnaire")}
-              variant="outline"
-              className="flex-1"
-            >
-              <ChevronLeft className="size-4 mr-2" />
-              Back to Questionnaire
-            </Button>
-            <Button
-              onClick={handleReOptimize}
-              className="flex-1 bg-cyan-600 hover:bg-cyan-700"
-              disabled={isGenerating}
-            >
-              <RefreshCw className="size-4 mr-2" />
-              Re-optimize Itinerary
-            </Button>
-            <Button
-              onClick={handleReset}
-              variant="outline"
-              className="border-red-300 text-red-600 hover:bg-red-50"
-            >
-              <RotateCcw className="size-4 mr-2" />
-              Start Over
-            </Button>
-          </div>
-
-          {/* Export & Share Buttons */}
-          <div className="flex gap-2 flex-wrap mt-4">
-            <Button
-              onClick={handleExportPDF}
-              variant="outline"
-              className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50"
-            >
-              <Download className="size-4 mr-2" />
-              Export PDF
-            </Button>
-            <Button
-              onClick={() => {
-                if (!itinerary) return;
-                const subject = encodeURIComponent(`My ${itinerary.destination} Itinerary`);
-                const body = encodeURIComponent(
-                  `Check out my travel itinerary for ${itinerary.destination}!\n\n` +
-                  `Dates: ${itinerary.tripDates.startDate} - ${itinerary.tripDates.endDate}\n` +
-                  `Total Estimated Cost: $${itinerary.totalEstimatedCost}\n\n` +
-                  itinerary.days.map(day =>
-                    `Day ${day.dayNumber} (${day.date}):\n` +
-                    day.activities.map(act => `  - ${act.time}: ${act.title} at ${act.location}`).join('\n')
-                  ).join('\n\n') +
-                  '\n\nGenerated by Tratlus'
-                );
-                window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
-              }}
-              variant="outline"
-              className="flex-1 border-cyan-300 text-cyan-700 hover:bg-cyan-50"
-            >
-              <Mail className="size-4 mr-2" />
-              Email Itinerary
-            </Button>
-            <Button
-              onClick={() => {
-                if (!itinerary) return;
-                // Create Google Calendar event URL for the first day
-                const startDate = itinerary.tripDates.startDate.replace(/-/g, '');
-                const endDate = itinerary.tripDates.endDate.replace(/-/g, '');
-                const title = encodeURIComponent(`Trip to ${itinerary.destination}`);
-                const details = encodeURIComponent(
-                  `Travel itinerary for ${itinerary.destination}\n\n` +
-                  `Total Estimated Cost: $${itinerary.totalEstimatedCost}\n\n` +
-                  itinerary.days.map(day =>
-                    `Day ${day.dayNumber}:\n` +
-                    day.activities.map(act => `${act.time}: ${act.title}`).join('\n')
-                  ).join('\n\n')
-                );
-                const location = encodeURIComponent(itinerary.destination);
-                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}&location=${location}`;
-                window.open(calendarUrl, '_blank');
-              }}
-              variant="outline"
-              className="flex-1 border-green-300 text-green-700 hover:bg-green-50"
-            >
-              <CalendarPlus className="size-4 mr-2" />
-              Add to Calendar
-            </Button>
-          </div>
-
-          {/* Explore & Map Buttons */}
-          <div className="flex gap-2 flex-wrap mt-4">
-            <Button
-              onClick={() => setShowNearbyActivities(true)}
-              variant="outline"
-              className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50"
-              disabled={isLoadingNearby}
-            >
-              {isLoadingNearby ? (
-                <>
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <Compass className="size-4 mr-2" />
-                  Nearby Activities
-                </>
+        <div 
+          className={cn(
+            "h-full relative overflow-hidden transition-colors duration-500",
+            pageBgClass
+          )}
+        >
+          {/* Animated Background - Shared */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+             <div className={cn(
+                "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
+                isDarkMode ? "bg-fuchsia-500/20" : "bg-fuchsia-600/30"
               )}
-            </Button>
-            <Button
-              onClick={handleOpenMapView}
-              variant="outline"
-              className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
-            >
-              <Map className="size-4 mr-2" />
-              View Map
-            </Button>
+              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
+            />
+            <div className={cn(
+                "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
+                isDarkMode ? "bg-blue-500/20" : "bg-blue-500/30"
+              )}
+              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
+            />
+             <div className={cn(
+               "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+               isDarkMode 
+                 ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+                 : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+             )} />
+          </div>
+
+          <div className="h-full overflow-y-auto relative z-10 scrollbar-hide">
+            {/* Top Controls */}
+            <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    handleThemeToggle();
+                    playSound("switch");
+                  }}
+                  className={cn(
+                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
+                    isDarkMode ? "text-slate-400 hover:text-white" : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
+                  )}
+                >
+                   {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleMuteToggle}
+                  className={cn(
+                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
+                    isDarkMode ? "text-slate-400 hover:text-white" : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
+                  )}
+                >
+                   {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
+                </Button>
+            </div>
+            
+            {/* Hero Header */}
+            <div className="relative pt-12 pb-8 px-6 text-center z-10">
+               <div className={cn(
+                 "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border backdrop-blur-md",
+                 isDarkMode ? "bg-white/10 border-white/10 text-slate-300" : "bg-white/40 border-white/20 text-indigo-900"
+               )}>
+                  Itinerary Ready
+               </div>
+               <h1 className={cn(
+                  "text-4xl md:text-6xl font-black tracking-tight mb-2 bg-clip-text text-transparent pb-2",
+                  isDarkMode 
+                    ? "bg-gradient-to-r from-fuchsia-400 to-blue-400" 
+                    : "bg-gradient-to-r from-fuchsia-600 to-blue-600"
+               )}>
+                  {itinerary.destination}
+               </h1>
+               <p className={cn("text-lg font-medium opacity-80", isDarkMode ? "text-slate-300" : "text-indigo-900")}>
+                  {itinerary.tripDates.startDate} — {itinerary.tripDates.endDate}
+               </p>
+               
+               {/* Primary Actions */}
+               <div className="flex justify-center gap-3 mt-6">
+                  <Button 
+                    onClick={() => setShowNearbyActivities(true)}
+                    className={cn(
+                      "rounded-full px-6 font-bold shadow-lg transition-transform hover:scale-105 active:scale-95",
+                      primaryGradientButton
+                    )}
+                  >
+                    <Compass className="size-4 mr-2" /> Explore Nearby
+                  </Button>
+                  <Button 
+                    onClick={handleOpenMapView}
+                    className={cn(
+                      "rounded-full px-6 font-bold border shadow-md transition-transform hover:scale-105 active:scale-95",
+                      isDarkMode ? "bg-white/10 border-white/10 text-white hover:bg-white/20" : "bg-white/60 border-white/40 text-indigo-900 hover:bg-white/80"
+                    )}
+                  >
+                    <Map className="size-4 mr-2" /> Map View
+                  </Button>
+               </div>
+            </div>
+
+            <div className="max-w-3xl mx-auto px-4 pb-32">
+              
+              {/* Cost Summary Card */}
+              <div className={cn("rounded-2xl p-6 mb-8 flex items-center justify-between", glassCardClass)}>
+                <div className="flex items-center gap-4">
+                   <div className={cn("p-3 rounded-xl", isDarkMode ? "bg-green-500/20" : "bg-green-100")}>
+                      <DollarSign className={cn("size-6", isDarkMode ? "text-green-400" : "text-green-600")} />
+                   </div>
+                   <div>
+                      <p className="text-xs font-bold uppercase opacity-60">Estimated Total</p>
+                      <p className={cn("text-2xl font-black", isDarkMode ? "text-green-400" : "text-green-700")}>
+                         ${itinerary.totalEstimatedCost.toLocaleString()}
+                      </p>
+                   </div>
+                </div>
+                 <Button
+                    onClick={handleReOptimize}
+                    variant="ghost"
+                    className="rounded-full size-10 p-0 hover:bg-white/10"
+                    disabled={isGenerating}
+                  >
+                    <RefreshCw className={cn("size-5", isGenerating && "animate-spin")} />
+                  </Button>
+              </div>
+
+              {/* Timeline Items */}
+              {itinerary.days.map((day, dayIndex) => (
+                <div key={day.dayNumber} className="relative pl-8 pb-8 last:pb-0">
+                  {/* Timeline Line */}
+                  <div className={cn("absolute left-[11px] top-8 bottom-0 w-[2px]", timelineLineClass)} />
+                  
+                  {/* Day Header Dot */}
+                  <div className={cn(
+                    "absolute left-0 top-1 size-6 rounded-full border-4 shadow-lg z-10",
+                    isDarkMode ? "border-slate-950 bg-fuchsia-500" : "border-indigo-50 bg-fuchsia-500"
+                  )} />
+
+                  <div className="mb-6">
+                     <h3 className={cn("text-xl font-black inline-flex items-center gap-2", isDarkMode ? "text-white" : "text-indigo-950")}>
+                        Day {day.dayNumber} <span className="text-sm font-medium opacity-60 font-sans">{day.date}</span>
+                     </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    {day.activities.map((activity, actIndex) => {
+                      const isTransportBetween = activity.type === "transport-between";
+
+                      if (isTransportBetween) {
+                         return (
+                            <div
+                              key={`${day.dayNumber}-${actIndex}`}
+                              draggable
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                handleActivityDragStart(dayIndex, actIndex);
+                              }}
+                              onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
+                              onDrop={() => handleActivityDrop(dayIndex, actIndex)}
+                              onDragEnd={handleActivityDragEnd}
+                              className={cn(
+                                "relative ml-[-12px] flex items-center gap-3 py-2 px-3 rounded-lg border backdrop-blur-sm transition-all cursor-grab active:cursor-grabbing group",
+                                isDarkMode 
+                                  ? "bg-slate-900/40 border-white/5 hover:bg-slate-800/60" 
+                                  : "bg-white/40 border-white/20 hover:bg-white/60",
+                                draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95",
+                                dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-fuchsia-500/50 bg-fuchsia-500/10"
+                              )}
+                            >
+                               <div className="p-1.5 rounded-full bg-slate-500/20 text-slate-500">
+                                  <Car className="size-3" />
+                               </div>
+                               <div className="flex-1 min-w-0 flex items-center gap-2 text-xs font-medium opacity-70">
+                                  <span>{activity.time}</span>
+                                  <span className="w-1 h-1 rounded-full bg-current" />
+                                  <span className="truncate">{activity.title}</span>
+                               </div>
+                               <div className="opacity-0 group-hover:opacity-100 transition-opacity px-2 cursor-grab text-slate-400">
+                                  <GripVertical className="size-3" />
+                               </div>
+                            </div>
+                         );
+                      }
+
+                      return (
+                        <div
+                          key={`${day.dayNumber}-${actIndex}`}
+                          onClick={() => {
+                            setSelectedActivity(activity);
+                            setSelectedActivityPosition({ dayIndex, actIndex });
+                            setActivityDialogOpen(true);
+                          }}
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation();
+                            handleActivityDragStart(dayIndex, actIndex);
+                          }}
+                          onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
+                          onDrop={() => handleActivityDrop(dayIndex, actIndex)}
+                          onDragEnd={handleActivityDragEnd}
+                          className={cn(
+                            "group relative rounded-2xl p-4 border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer",
+                            glassCardClass,
+                            draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95 ring-2 ring-fuchsia-500",
+                            dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-fuchsia-500 bg-fuchsia-500/10",
+                            refreshingActivityPosition?.dayIndex === dayIndex && refreshingActivityPosition?.actIndex === actIndex && "opacity-50 animate-pulse"
+                          )}
+                        >
+                           <div className="flex gap-4">
+                              {/* Left Column: Time & Icon */}
+                              <div className="flex flex-col items-center gap-2 pt-1">
+                                 <div className={cn(
+                                    "p-2.5 rounded-xl text-white shadow-md",
+                                    activity.type === 'food' ? "bg-orange-500" :
+                                    activity.type === 'attraction' ? "bg-cyan-500" :
+                                    activity.type === 'activity' ? "bg-green-500" :
+                                    "bg-indigo-500"
+                                 )}>
+                                    {activity.type === 'food' ? <Utensils className="size-4" /> :
+                                     activity.type === 'attraction' ? <Camera className="size-4" /> :
+                                     activity.type === 'activity' ? <Compass className="size-4" /> :
+                                     <MapPin className="size-4" />}
+                                 </div>
+                                 <span className="text-xs font-bold opacity-60 text-center leading-tight w-[60px]">
+                                    {activity.time}
+                                 </span>
+                              </div>
+
+                              {/* Right Column: Content */}
+                              <div className="flex-1 min-w-0">
+                                 <div className="flex justify-between items-start gap-2">
+                                    <h4 className={cn("font-bold text-lg leading-tight", isDarkMode ? "text-white" : "text-slate-900")}>
+                                       {activity.title}
+                                    </h4>
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 cursor-grab active:cursor-grabbing p-1">
+                                       <GripVertical className="size-4" />
+                                    </div>
+                                 </div>
+                                 
+                                 <div className="flex items-center gap-1.5 mt-1 text-xs font-medium opacity-70 mb-2">
+                                    <MapPin className="size-3" />
+                                    <span className="truncate">{activity.location}</span>
+                                    {activity.rating && (
+                                       <>
+                                          <span className="mx-1">•</span>
+                                          <Star className="size-3 text-yellow-500 fill-yellow-500" />
+                                          <span>{activity.rating}</span>
+                                       </>
+                                    )}
+                                 </div>
+
+                                 <p className={cn("text-xs line-clamp-2 leading-relaxed mb-3", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                                    {activity.description}
+                                 </p>
+                                 
+                                 <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-1">
+                                    <span className={cn("text-sm font-bold", isDarkMode ? "text-green-400" : "text-green-600")}>
+                                       ${activity.estimatedCost}
+                                    </span>
+                                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                                       <Button 
+                                          size="icon" 
+                                          variant="ghost" 
+                                          className="size-8 rounded-full hover:bg-white/10"
+                                          onClick={() => handleInlineRefreshActivity(dayIndex, actIndex)}
+                                       >
+                                          <RefreshCw className="size-3.5" />
+                                       </Button>
+                                       <Button 
+                                          size="icon" 
+                                          variant="ghost" 
+                                          className="size-8 rounded-full hover:bg-red-500/20 text-red-500"
+                                          onClick={() => handleDeleteActivity(dayIndex, actIndex)}
+                                       >
+                                          <Trash2 className="size-3.5" />
+                                       </Button>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Add Activity Button */}
+                    <button
+                       onClick={() => {
+                          setAddActivityDayIndex(dayIndex);
+                          setAddActivityDialogOpen(true);
+                       }}
+                       className={cn(
+                          "w-full py-3 rounded-xl border border-dashed flex items-center justify-center gap-2 text-sm font-bold transition-all hover:scale-[1.01] active:scale-95",
+                          isDarkMode 
+                             ? "border-white/20 text-slate-400 hover:bg-white/5 hover:text-white" 
+                             : "border-indigo-300 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700"
+                       )}
+                    >
+                       <Plus className="size-4" /> Add Activity to Day {day.dayNumber}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Floating Action Bar */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md">
+               <div className={cn(
+                  "rounded-2xl p-2 flex items-center justify-between shadow-2xl backdrop-blur-xl border",
+                  isDarkMode ? "bg-slate-900/80 border-white/20" : "bg-white/80 border-white/40"
+               )}>
+                  <Button 
+                     variant="ghost" 
+                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
+                     onClick={() => setAppState("questionnaire")}
+                  >
+                     <ChevronLeft className="size-5" />
+                     <span className="text-[10px]">Back</span>
+                  </Button>
+                   <div className="w-px h-8 bg-white/20" />
+                  <Button 
+                     variant="ghost" 
+                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
+                     onClick={handleExportPDF}
+                  >
+                     <Download className="size-5" />
+                     <span className="text-[10px]">Export</span>
+                  </Button>
+                  <Button 
+                     variant="ghost" 
+                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
+                     onClick={() => {
+                        // Email Logic
+                         if (!itinerary) return;
+                         window.open(`mailto:?subject=Trip to ${itinerary.destination}&body=Check out my itinerary!`, '_blank');
+                     }}
+                  >
+                     <Mail className="size-5" />
+                     <span className="text-[10px]">Email</span>
+                  </Button>
+                  <div className="w-px h-8 bg-white/20" />
+                  <Button 
+                     variant="ghost" 
+                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-600"
+                     onClick={handleReset}
+                  >
+                     <RotateCcw className="size-5" />
+                     <span className="text-[10px]">Reset</span>
+                  </Button>
+               </div>
+            </div>
+
           </div>
         </div>
 
         {/* Nearby Activities Panel */}
         <Dialog open={showNearbyActivities} onOpenChange={setShowNearbyActivities}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className={cn("max-w-2xl max-h-[85vh] overflow-y-auto", glassCardClass)}>
             <DialogHeader>
-              <DialogTitle className="text-amber-900 flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2">
                 <Compass className="size-5" />
                 Nearby Activities in {itinerary.destination}
               </DialogTitle>
@@ -2231,7 +2374,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                 Select activities to add to your itinerary
               </DialogDescription>
             </DialogHeader>
-
+            
             {/* Category Filter */}
             <div className="flex gap-2 flex-wrap mt-4">
               {[ 
@@ -2247,7 +2390,9 @@ Return ONLY a single JSON object (no array, no wrapper):
                   onClick={() => setNearbyCategory(cat.id)}
                   className={cn(
                     "text-xs",
-                    nearbyCategory === cat.id && "bg-amber-600 hover:bg-amber-700"
+                    nearbyCategory === cat.id 
+                      ? (isDarkMode ? "bg-fuchsia-500 hover:bg-fuchsia-600" : "bg-indigo-600 hover:bg-indigo-700")
+                      : (isDarkMode ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-white/40 border-white/20")
                   )}
                 >
                   {cat.icon}
@@ -2260,10 +2405,10 @@ Return ONLY a single JSON object (no array, no wrapper):
             <div className="mt-4 space-y-3">
               {isLoadingNearby ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="size-8 animate-spin text-amber-600" />
+                  <Loader2 className="size-8 animate-spin text-fuchsia-500" />
                 </div>
               ) : nearbyActivities.length === 0 ? (
-                <p className="text-center text-amber-600 py-8">
+                <p className={cn("text-center py-8", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                   No nearby activities found. Try refreshing.
                 </p>
               ) : (
@@ -2272,25 +2417,37 @@ Return ONLY a single JSON object (no array, no wrapper):
                   .map((activity, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-amber-50 border border-amber-100"
+                      className={cn(
+                        "p-3 rounded-lg border",
+                        isDarkMode ? "bg-white/5 border-white/5" : "bg-white/40 border-white/20"
+                      )}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            {activity.type === "food" && <Utensils className="size-4 text-amber-600" />}
-                            {activity.type === "attraction" && <Camera className="size-4 text-cyan-600" />}
-                            {activity.type === "activity" && <Compass className="size-4 text-green-600" />}
-                            <h4 className="font-medium text-amber-900">{activity.title}</h4>
+                             <div className={cn(
+                                "p-1.5 rounded-md text-white shadow-sm",
+                                activity.type === 'food' ? "bg-orange-500" :
+                                activity.type === 'attraction' ? "bg-cyan-500" :
+                                activity.type === 'activity' ? "bg-green-500" :
+                                "bg-indigo-500"
+                             )}>
+                                {activity.type === 'food' ? <Utensils className="size-3" /> :
+                                 activity.type === 'attraction' ? <Camera className="size-3" /> :
+                                 activity.type === 'activity' ? <Compass className="size-3" /> :
+                                 <MapPin className="size-3" />}
+                             </div>
+                            <h4 className={cn("font-medium", isDarkMode ? "text-white" : "text-slate-900")}>{activity.title}</h4>
                             {activity.rating && (
-                              <div className="flex items-center gap-1 text-xs text-yellow-600">
+                              <div className="flex items-center gap-1 text-xs text-yellow-500">
                                 <Star className="size-3 fill-yellow-500" />
                                 {activity.rating}
                               </div>
                             )}
                           </div>
-                          <p className="text-sm text-amber-700 mt-1">{activity.location}</p>
-                          <p className="text-sm text-amber-600">{activity.description}</p>
-                          <span className="text-sm font-medium text-green-700">
+                          <p className={cn("text-sm mt-1", isDarkMode ? "text-slate-400" : "text-slate-600")}>{activity.location}</p>
+                          <p className={cn("text-sm mt-1", isDarkMode ? "text-slate-500" : "text-slate-500")}>{activity.description}</p>
+                          <span className={cn("text-sm font-medium", isDarkMode ? "text-green-400" : "text-green-600")}>
                             ${activity.estimatedCost}
                           </span>
                         </div>
@@ -2300,7 +2457,10 @@ Return ONLY a single JSON object (no array, no wrapper):
                               key={dayIdx}
                               size="sm"
                               variant="outline"
-                              className="text-xs border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+                              className={cn(
+                                "text-xs h-7",
+                                isDarkMode ? "border-white/10 hover:bg-white/10" : "border-white/30 hover:bg-white/20"
+                              )}
                               onClick={() => handleAddNearbyActivity(activity, dayIdx)}
                             >
                               <Plus className="size-3 mr-1" />
@@ -2318,9 +2478,9 @@ Return ONLY a single JSON object (no array, no wrapper):
 
         {/* Map View Dialog */}
         <Dialog open={showMapView} onOpenChange={setShowMapView}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className={cn("max-w-4xl max-h-[90vh] overflow-y-auto", glassCardClass)}>
             <DialogHeader>
-              <DialogTitle className="text-amber-900 flex items-center gap-2">
+              <DialogTitle className={cn("flex items-center gap-2", isDarkMode ? "text-white" : "text-amber-900")}>
                 <Map className="size-5" />
                 Trip Map - {itinerary.destination}
               </DialogTitle>
@@ -2490,7 +2650,7 @@ Return ONLY a single JSON object (no array, no wrapper):
 
         {/* Activity Detail Dialog */}
         <Dialog open={activityDialogOpen} onOpenChange={setActivityDialogOpen}>
-          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogContent className={cn("max-w-md max-h-[85vh] overflow-y-auto", glassCardClass)}>
             {selectedActivity && (
               <>
                 <DialogHeader>
@@ -2501,9 +2661,9 @@ Return ONLY a single JSON object (no array, no wrapper):
                     {selectedActivity.type === 'accommodation' && <Bed className="size-5 text-purple-600" />}
                     {selectedActivity.type === 'activity' && <Compass className="size-5 text-green-600" />}
                     {!selectedActivity.type && <MapPin className="size-5 text-amber-600" />}
-                    <DialogTitle className="text-amber-900">{selectedActivity.title}</DialogTitle>
+                    <DialogTitle className={cn(isDarkMode ? "text-white" : "text-amber-900")}>{selectedActivity.title}</DialogTitle>
                   </div>
-                  <DialogDescription className="flex items-center gap-2 text-amber-700">
+                  <DialogDescription className={cn("flex items-center gap-2", isDarkMode ? "text-slate-300" : "text-amber-700")}>
                     <MapPin className="size-4" />
                     {selectedActivity.location}
                   </DialogDescription>
@@ -2526,32 +2686,32 @@ Return ONLY a single JSON object (no array, no wrapper):
                   {selectedActivity.rating && (
                     <div className="flex items-center gap-2">
                       <Star className="size-4 text-yellow-500 fill-yellow-500" />
-                      <span className="font-medium text-amber-900">{selectedActivity.rating.toFixed(1)}</span>
-                      <span className="text-amber-600 text-sm">/ 5.0</span>
+                      <span className={cn("font-medium", isDarkMode ? "text-amber-400" : "text-amber-700")}>{selectedActivity.rating.toFixed(1)}</span>
+                      <span className={cn("text-sm", isDarkMode ? "text-slate-400" : "text-slate-500")}>/ 5.0</span>
                     </div>
                   )}
 
                   {/* Description */}
                   <div>
-                    <h4 className="font-medium text-amber-900 mb-2">Description</h4>
-                    <p className="text-amber-700 text-sm leading-relaxed">{selectedActivity.description}</p>
+                    <h4 className={cn("font-medium mb-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>Description</h4>
+                    <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>{selectedActivity.description}</p>
                   </div>
 
                   {/* Detailed Info */}
                   {selectedActivity.detailedInfo && (
                     <div>
-                      <h4 className="font-medium text-amber-900 mb-2 flex items-center gap-2">
+                      <h4 className={cn("font-medium mb-2 flex items-center gap-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>
                         <Info className="size-4" />
                         More Details
                       </h4>
-                      <p className="text-amber-700 text-sm leading-relaxed">{selectedActivity.detailedInfo}</p>
+                      <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>{selectedActivity.detailedInfo}</p>
                     </div>
                   )}
 
                   {/* Menu Highlights (for food activities) */}
                   {selectedActivity.menuHighlights && selectedActivity.menuHighlights.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-amber-900 mb-2 flex items-center gap-2">
+                      <h4 className={cn("font-medium mb-2 flex items-center gap-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>
                         <Utensils className="size-4" />
                         Menu Highlights
                       </h4>
@@ -2613,9 +2773,9 @@ Return ONLY a single JSON object (no array, no wrapper):
 
         {/* Add Activity Dialog */}
         <Dialog open={addActivityDialogOpen} onOpenChange={setAddActivityDialogOpen}>
-          <DialogContent className="max-w-sm">
+          <DialogContent className={cn("max-w-sm", glassCardClass)}>
             <DialogHeader>
-              <DialogTitle className="text-amber-900">Add New Activity</DialogTitle>
+              <DialogTitle className={cn(isDarkMode ? "text-white" : "text-amber-900")}>Add New Activity</DialogTitle>
               <DialogDescription>
                 {addActivityDayIndex !== null && itinerary && (
                   <>Add an activity for Day {itinerary.days[addActivityDayIndex].dayNumber}</>
@@ -2691,396 +2851,534 @@ Return ONLY a single JSON object (no array, no wrapper):
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+
     </SafeAreaWrapper>
     );
   }
 
   if (appState === "questionnaire") {
+    // Glass panel styles specific to questionnaire
+    const glassCardClass = isDarkMode
+      ? "bg-slate-900/40 border-white/10 text-white shadow-2xl backdrop-blur-xl"
+      : "bg-white/40 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
+    
+    const inputClass = isDarkMode
+      ? "bg-slate-950/50 border-white/10 text-white placeholder:text-slate-500 focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20"
+      : "bg-white/60 border-white/40 text-slate-900 placeholder:text-slate-500 focus:border-blue-500/50 focus:ring-blue-500/20";
+
+    const tileClass = (isActive: boolean) => cn(
+      "cursor-pointer transition-all duration-300 relative overflow-hidden rounded-xl border p-4 flex flex-col gap-2 h-full",
+      isActive 
+        ? (isDarkMode 
+            ? "bg-fuchsia-500/20 border-fuchsia-500/50 text-white shadow-[0_0_20px_rgba(217,70,239,0.2)]" 
+            : "bg-blue-500/10 border-blue-500/50 text-slate-900 shadow-[0_0_20px_rgba(59,130,246,0.15)]") 
+        : (isDarkMode 
+            ? "bg-white/5 border-white/5 hover:bg-white/10 text-slate-300" 
+            : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
+    );
+
     return (
       <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className="h-full bg-gradient-to-b from-amber-50 to-green-50 p-4 overflow-y-auto">
-          <div className="max-w-lg mx-auto">
-          <div className="mb-6">
-            <Progress value={(questionnaireStep / 3) * 100} className="h-2" />
-            <p className="text-center text-sm text-amber-700 mt-2">Step {questionnaireStep} of 3</p>
+        <div 
+          className={cn(
+            "h-full relative overflow-hidden transition-colors duration-500",
+            pageBgClass
+          )}
+        >
+          {/* Animated Background - Shared with Landing/Swipe */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+             <div className={cn(
+                "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
+                isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
+              )}
+              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
+            />
+            <div className={cn(
+                "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
+                isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
+              )}
+              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
+            />
+            <div className={cn(
+                "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
+                isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
+              )}
+              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "1s" }}
+            />
+             <div className={cn(
+               "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+               isDarkMode 
+                 ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+                 : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+             )} />
           </div>
 
-          {questionnaireStep === 1 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-amber-900">Food Preferences</CardTitle>
-                <CardDescription>Tell us about your dining preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <Label className="mb-3 block">Dietary Requirements</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Vegetarian", "Vegan", "Gluten-Free", "Halal", "Kosher", "None"].map((diet) => (
-                      <label key={diet} className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={dietaryNeeds.includes(diet)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setDietaryNeeds([...dietaryNeeds, diet]);
-                            } else {
-                              setDietaryNeeds(dietaryNeeds.filter((d) => d !== diet));
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{diet}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+          <div className="h-full overflow-y-auto relative z-10 p-4 md:p-6 pb-24">
+            
+            {/* Top Controls */}
+            <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    handleThemeToggle();
+                    playSound("switch");
+                  }}
+                  className={cn(
+                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
+                    isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-indigo-900 hover:bg-white/40"
+                  )}
+                >
+                   {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleMuteToggle}
+                  className={cn(
+                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
+                    isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-indigo-900 hover:bg-white/40"
+                  )}
+                >
+                   {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
+                </Button>
+                <button 
+                   onClick={() => setAppState("landing")}
+                   className={cn("p-2 rounded-full transition-colors active:scale-95", isDarkMode ? "hover:bg-white/10 text-slate-400 hover:text-white" : "hover:bg-white/40 text-slate-600 hover:text-indigo-900")}
+                >
+                   <X className="size-6" />
+                </button>
+            </div>
 
-                <div>
-                  <Label className="mb-3 block">Food Allergies</Label>
-                  <Input
-                    placeholder="e.g., peanuts, shellfish, dairy..."
-                    value={foodAllergies}
-                    onChange={(e) => setFoodAllergies(e.target.value)}
-                  />
-                  <p className="text-xs text-amber-600 mt-1">List any food allergies separated by commas</p>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Meal Budget</Label>
-                  <div className="flex gap-2">
-                    {["$", "$$", "$$$", "$$$$"].map((budget) => (
-                      <Button
-                        key={budget}
-                        variant={mealBudget === budget ? "default" : "outline"}
-                        onClick={() => setMealBudget(budget)}
-                        className="flex-1"
-                      >
-                        {budget}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Food Adventurousness: {foodAdventurousness}/10</Label>
-                  <Slider
-                    value={[foodAdventurousness]}
-                    onValueChange={([val]) => setFoodAdventurousness(val)}
-                    min={1}
-                    max={10}
-                    step={1}
-                  />
-                  <div className="flex justify-between text-xs text-amber-600 mt-1">
-                    <span>Familiar</span>
-                    <span>Adventurous</span>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Favorite Cuisines</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["Italian", "Chinese", "Japanese", "Mexican", "Indian", "Thai", "French", "Mediterranean", "American", "Korean", "Vietnamese", "Greek", "African"].map((cuisine) => (
-                      <label key={cuisine} className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={favoriteCuisines.includes(cuisine)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFavoriteCuisines([...favoriteCuisines, cuisine]);
-                            } else {
-                              setFavoriteCuisines(favoriteCuisines.filter((c) => c !== cuisine));
-                            }
-                          }}
-                        />
-                        <span className="text-xs">{cuisine}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setAppState("swiping")} className="flex-1 active:scale-95">
-                    <ChevronLeft className="size-4 mr-2" /> Back to Swiping
-                  </Button>
-                  <Button onClick={() => setQuestionnaireStep(2)} className="flex-1 bg-cyan-600 hover:bg-cyan-700 active:scale-95">
-                    Next <ChevronRight className="size-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {questionnaireStep === 2 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-amber-900">Transportation & Accommodation</CardTitle>
-                <CardDescription>How do you like to travel and where do you stay?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <Label className="mb-3 block">Transportation Method</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Uber/Lyft", "Transit", "Rental", "Flight", "Bike", "Walk", "Limousine"].map((method) => (
-                      <label key={method} className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={transportationMethod.includes(method)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setTransportationMethod([...transportationMethod, method]);
-                            } else {
-                              setTransportationMethod(transportationMethod.filter((m) => m !== method));
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{method}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Priority</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {[ 
-                      { value: "speed" as const, label: "Speed", desc: "Fastest route" },
-                      { value: "cost" as const, label: "Cost", desc: "Cheapest option" },
-                      { value: "comfort" as const, label: "Comfort", desc: "Most comfortable" },
-                    ].map((option) => (
-                      <Button
-                        key={option.value}
-                        variant={transportationPriority === option.value ? "default" : "outline"}
-                        onClick={() => setTransportationPriority(option.value)}
-                        className="flex-1 flex-col h-auto py-3"
-                      >
-                        <span>{option.label}</span>
-                        <span className="text-xs opacity-70">{option.desc}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Accommodation Type</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Hotel", "Resort", "Airbnb", "Hostel", "Boutique", "Villa"].map((type) => (
-                      <label key={type} className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={accommodationType.includes(type)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setAccommodationType([...accommodationType, type]);
-                            } else {
-                              setAccommodationType(accommodationType.filter((t) => t !== type));
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{type}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Must-Have Amenities</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Pool", "Gym", "WiFi", "Kitchen", "Parking", "AC"].map((amenity) => (
-                      <label key={amenity} className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={amenities.includes(amenity)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setAmenities([...amenities, amenity]);
-                            } else {
-                              setAmenities(amenities.filter((a) => a !== amenity));
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{amenity}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-3 block">Star Rating: {starRatingMin} - {starRatingMax} stars</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <Label className="text-xs text-amber-600">Minimum</Label>
-                      <Slider
-                        value={[starRatingMin]}
-                        onValueChange={([val]) => {
-                          setStarRatingMin(val);
-                          if (val > starRatingMax) setStarRatingMax(val);
-                        }}
-                        min={1}
-                        max={5}
-                        step={1}
+            <div className="max-w-2xl mx-auto">
+              
+              {/* Header */}
+              <div className="mb-8 text-center">
+                 <h2 className={cn(
+                    "text-3xl font-black bg-clip-text text-transparent mb-2 uppercase tracking-wide",
+                    isDarkMode 
+                      ? "bg-gradient-to-r from-fuchsia-400 to-blue-400" 
+                      : "bg-gradient-to-r from-fuchsia-600 to-blue-600"
+                 )}>
+                    Plan Your Journey
+                 </h2>
+                 <p className={cn("text-sm font-medium", subTextClass)}>
+                    Step {questionnaireStep} of 3: {
+                      questionnaireStep === 1 ? "Taste & Preferences" : 
+                      questionnaireStep === 2 ? "Style & Comfort" : "Logistics"
+                    }
+                 </p>
+                 
+                 {/* Progress Indicator */}
+                 <div className="flex justify-center gap-2 mt-4">
+                    {[1, 2, 3].map(step => (
+                      <div 
+                        key={step} 
+                        className={cn(
+                          "h-1.5 rounded-full transition-all duration-500",
+                          step === questionnaireStep 
+                            ? "w-8 bg-gradient-to-r from-fuchsia-500 to-blue-500" 
+                            : step < questionnaireStep
+                              ? "w-2 bg-green-500"
+                              : "w-2 bg-slate-200/20"
+                        )}
                       />
+                    ))}
+                 </div>
+              </div>
+
+              {/* Form Content */}
+              <div className={cn("rounded-3xl p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 border", glassCardClass)}>
+                
+                {questionnaireStep === 1 && (
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Utensils className="size-5 text-fuchsia-500" />
+                        Dietary Preferences
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {["Vegetarian", "Vegan", "Gluten-Free", "Halal", "Kosher", "None"].map((diet) => (
+                           <div 
+                              key={diet}
+                              onClick={() => {
+                                if (dietaryNeeds.includes(diet)) {
+                                  setDietaryNeeds(dietaryNeeds.filter((d) => d !== diet));
+                                } else {
+                                  // If selecting "None", clear others. If selecting others, clear "None"
+                                  if (diet === "None") setDietaryNeeds(["None"]);
+                                  else setDietaryNeeds([...dietaryNeeds.filter(d => d !== "None"), diet]);
+                                }
+                              }}
+                              className={tileClass(dietaryNeeds.includes(diet))}
+                           >
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-sm">{diet}</span>
+                                {dietaryNeeds.includes(diet) && <Check className="size-4 text-fuchsia-500" />}
+                              </div>
+                           </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <Label className="text-xs text-amber-600">Maximum</Label>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                       <div>
+                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                            Allergies
+                          </Label>
+                          <Input
+                            placeholder="e.g. Peanuts, Shellfish..."
+                            value={foodAllergies}
+                            onChange={(e) => setFoodAllergies(e.target.value)}
+                            className={cn("h-12 rounded-xl", inputClass)}
+                          />
+                       </div>
+                       
+                       <div>
+                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                             Meal Budget
+                          </Label>
+                          <div className="flex gap-2">
+                            {["$", "$$", "$$$", "$$$$"].map((budget) => (
+                              <button
+                                key={budget}
+                                onClick={() => setMealBudget(budget)}
+                                className={cn(
+                                  "flex-1 h-12 rounded-xl border font-bold transition-all",
+                                  mealBudget === budget
+                                    ? (isDarkMode 
+                                        ? "bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400" 
+                                        : "bg-fuchsia-500/10 border-fuchsia-500 text-fuchsia-600")
+                                    : (isDarkMode 
+                                        ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
+                                        : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
+                                )}
+                              >
+                                {budget}
+                              </button>
+                            ))}
+                          </div>
+                       </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between mb-4">
+                        <Label className={cn("block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                          Culinary Adventurousness
+                        </Label>
+                        <span className="font-bold text-fuchsia-500">{foodAdventurousness}/10</span>
+                      </div>
                       <Slider
-                        value={[starRatingMax]}
-                        onValueChange={([val]) => {
-                          setStarRatingMax(val);
-                          if (val < starRatingMin) setStarRatingMin(val);
-                        }}
+                        value={[foodAdventurousness]}
+                        onValueChange={([val]) => setFoodAdventurousness(val)}
                         min={1}
-                        max={5}
+                        max={10}
                         step={1}
+                        className="py-4"
                       />
+                      <div className="flex justify-between text-xs font-medium opacity-60 mt-1">
+                        <span>Safe & Familiar</span>
+                        <span>Exotic & Wild</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className={cn("mb-4 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                        Favorite Cuisines
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {["Italian", "Chinese", "Japanese", "Mexican", "Indian", "Thai", "French", "Mediterranean", "American", "Korean", "Vietnamese", "Greek", "African"].map((cuisine) => (
+                          <button
+                            key={cuisine}
+                            onClick={() => {
+                              if (favoriteCuisines.includes(cuisine)) {
+                                setFavoriteCuisines(favoriteCuisines.filter((c) => c !== cuisine));
+                              } else {
+                                setFavoriteCuisines([...favoriteCuisines, cuisine]);
+                              }
+                            }}
+                            className={cn(
+                              "px-4 py-2 rounded-full text-xs font-bold border transition-all",
+                              favoriteCuisines.includes(cuisine)
+                                ? "bg-gradient-to-r from-fuchsia-500 to-blue-500 text-white border-transparent"
+                                : (isDarkMode 
+                                    ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
+                                    : "bg-white/40 border-white/20 hover:bg-white/60 text-slate-600")
+                            )}
+                          >
+                            {cuisine}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex justify-between text-xs text-amber-600 mt-1">
-                    <span>1 star</span>
-                    <span>5 stars</span>
-                  </div>
-                </div>
+                )}
 
-                <div>
-                  <Label className="mb-3 block">Price Per Night: ${pricePerNight}</Label>
-                  <Slider
-                    value={[pricePerNight]}
-                    onValueChange={([val]) => setPricePerNight(val)}
-                    min={50}
-                    max={500}
-                    step={25}
-                  />
-                  <div className="flex justify-between text-xs text-amber-600 mt-1">
-                    <span>$50</span>
-                    <span>$500</span>
-                  </div>
-                </div>
+                {questionnaireStep === 2 && (
+                   <div className="space-y-8">
+                      <div>
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                          <Car className="size-5 text-blue-500" />
+                          Transportation
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {[ 
+                            { id: "Uber/Lyft", icon: Car }, 
+                            { id: "Transit", icon: Bus }, 
+                            { id: "Rental", icon: Car }, 
+                            { id: "Flight", icon: Plane },
+                            { id: "Bike", icon: Navigation }, 
+                            { id: "Walk", icon: MapPin },
+                          ].map((item) => (
+                             <div 
+                                key={item.id}
+                                onClick={() => {
+                                  if (transportationMethod.includes(item.id)) {
+                                    setTransportationMethod(transportationMethod.filter((m) => m !== item.id));
+                                  } else {
+                                    setTransportationMethod([...transportationMethod, item.id]);
+                                  }
+                                }}
+                                className={tileClass(transportationMethod.includes(item.id))}
+                             >
+                                <item.icon className="size-5 opacity-70" />
+                                <span className="font-semibold text-xs">{item.id}</span>
+                             </div>
+                          ))}
+                        </div>
+                      </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setQuestionnaireStep(1)} className="flex-1">
-                    <ChevronLeft className="size-4 mr-2" /> Back
-                  </Button>
-                  <Button onClick={() => setQuestionnaireStep(3)} className="flex-1 bg-cyan-600 hover:bg-cyan-700">
-                    Next <ChevronRight className="size-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      <div>
+                        <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                           Travel Priority
+                        </Label>
+                        <div className="grid grid-cols-3 gap-3">
+                           {[ 
+                              { value: "speed" as const, label: "Speed", icon: FastForward },
+                              { value: "cost" as const, label: "Budget", icon: DollarSign },
+                              { value: "comfort" as const, label: "Comfort", icon: Coffee },
+                            ].map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => setTransportationPriority(option.value)}
+                                className={tileClass(transportationPriority === option.value)}
+                              >
+                                <option.icon className="size-5 opacity-70 mb-1" />
+                                <span className="font-bold text-sm">{option.label}</span>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
 
-          {questionnaireStep === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-amber-900">Trip Details</CardTitle>
-                <CardDescription>When and where are you going?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="mb-2 block">Wake Up Time</Label>
-                    <Input
-                      type="time"
-                      value={wakeUpTime}
-                      onChange={(e) => setWakeUpTime(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label className="mb-2 block">Sleep Time</Label>
-                    <Input
-                      type="time"
-                      value={sleepTime}
-                      onChange={(e) => setSleepTime(e.target.value)}
-                    />
-                  </div>
-                </div>
+                      <div>
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2 pt-4 border-t border-white/10">
+                          <Home className="size-5 text-green-500" />
+                          Accommodation
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {["Hotel", "Resort", "Airbnb", "Hostel", "Boutique", "Villa"].map((type) => (
+                               <div 
+                                  key={type}
+                                  onClick={() => {
+                                    if (accommodationType.includes(type)) {
+                                      setAccommodationType(accommodationType.filter((t) => t !== type));
+                                    } else {
+                                      setAccommodationType([...accommodationType, type]);
+                                    }
+                                  }}
+                                  className={tileClass(accommodationType.includes(type))}
+                               >
+                                  <span className="font-semibold text-sm">{type}</span>
+                               </div>
+                            ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label className={cn("mb-4 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                          Budget per Night: <span className="text-blue-500">${pricePerNight}</span>
+                        </Label>
+                        <Slider
+                          value={[pricePerNight]}
+                          onValueChange={([val]) => setPricePerNight(val)}
+                          min={50}
+                          max={1000}
+                          step={50}
+                          className="py-4"
+                        />
+                         <div className="flex justify-between text-xs font-medium opacity-60 mt-1">
+                          <span>$50</span>
+                          <span>$1000+</span>
+                        </div>
+                      </div>
+                   </div>
+                )}
 
-                <div>
-                  <Label className="mb-3 block">Trip Dates</Label>
-                  <Calendar
-                    mode="range"
-                    selected={tripDates}
-                    onSelect={(range) => setTripDates(range as { from: Date | undefined; to: Date | undefined })}
-                    numberOfMonths={1}
-                    className="rounded-md border"
-                  />
-                </div>
+                {questionnaireStep === 3 && (
+                   <div className="space-y-8">
+                      <div>
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                           <Map className="size-5 text-indigo-500" />
+                           Trip Logistics
+                        </h3>
+                        
+                        <div className="space-y-4">
+                           <div>
+                              <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                                 Where are you going?
+                              </Label>
+                               <div className="flex gap-2">
+                                  <Input
+                                    placeholder="Destination City/Country"
+                                    value={destination}
+                                    onChange={(e) => setDestination(e.target.value)}
+                                    disabled={surpriseMe}
+                                    className={cn("h-12 rounded-xl flex-1", inputClass)}
+                                  />
+                                   <button
+                                      onClick={() => {
+                                          setSurpriseMe(!surpriseMe);
+                                          if (!surpriseMe) setDestination("");
+                                      }}
+                                      className={cn(
+                                          "px-4 rounded-xl border flex flex-col items-center justify-center min-w-[80px]",
+                                          surpriseMe 
+                                            ? (isDarkMode ? "bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400" : "bg-fuchsia-500/10 border-fuchsia-500 text-fuchsia-600")
+                                            : (isDarkMode ? "bg-white/5 border-white/10" : "bg-white/40 border-white/20")
+                                      )}
+                                   >
+                                      <Sparkles className="size-4 mb-1" />
+                                      <span className="text-[10px] font-bold uppercase">Surprise</span>
+                                   </button>
+                               </div>
+                           </div>
+                           
+                           <div>
+                              <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                                 Departing From
+                              </Label>
+                                <Input
+                                    placeholder="Origin City"
+                                    value={departureLocation}
+                                    onChange={(e) => setDepartureLocation(e.target.value)}
+                                    className={cn("h-12 rounded-xl", inputClass)}
+                                />
+                           </div>
 
-                <div>
-                  <Label className="mb-3 block">Departing From</Label>
-                  <Input
-                    placeholder="Where will you be leaving from?"
-                    value={departureLocation}
-                    onChange={(e) => setDepartureLocation(e.target.value)}
-                  />
-                </div>
+                           <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                 <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                                    Start Date
+                                 </Label>
+                                 <Input type="date" className={cn("h-12 rounded-xl", inputClass)} 
+                                    onChange={(e) => setTripDates(prev => ({ ...prev, from: e.target.value ? new Date(e.target.value) : undefined }))}
+                                 />
+                              </div>
+                               <div>
+                                 <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                                    End Date
+                                 </Label>
+                                 <Input type="date" className={cn("h-12 rounded-xl", inputClass)} 
+                                    onChange={(e) => setTripDates(prev => ({ ...prev, to: e.target.value ? new Date(e.target.value) : undefined }))}
+                                 />
+                              </div>
+                           </div>
+                        </div>
+                      </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <Label>Destination</Label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox
-                        checked={surpriseMe}
-                        onCheckedChange={(checked) => setSurpriseMe(checked as boolean)}
-                      />
-                      <span className="text-sm">Surprise me!</span>
-                    </label>
-                  </div>
-                  <Input
-                    placeholder="Where do you want to go?"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    disabled={surpriseMe}
-                  />
-                </div>
+                      <div>
+                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                              Travelers
+                          </Label>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5, "6+"].map((num) => (
+                               <button
+                                  key={num}
+                                  onClick={() => setNumberOfTravelers(typeof num === 'string' ? 6 : num)}
+                                  className={cn(
+                                     "flex-1 h-12 rounded-xl border font-bold text-lg",
+                                     numberOfTravelers === (typeof num === 'string' ? 6 : num)
+                                      ? (isDarkMode 
+                                          ? "bg-blue-500/20 border-blue-500 text-blue-400" 
+                                          : "bg-blue-500/10 border-blue-500 text-blue-600")
+                                      : (isDarkMode 
+                                          ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
+                                          : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
+                                  )}
+                               >
+                                  {num}
+                               </button>
+                            ))}
+                          </div>
+                      </div>
+                   </div>
+                )}
+              </div>
 
-                <div>
-                  <Label className="mb-3 block">Number of Travelers</Label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5, "6+"].map((num) => (
-                      <Button
-                        key={num}
-                        variant={numberOfTravelers === (typeof num === "string" ? 6 : num) ? "default" : "outline"}
-                        onClick={() => setNumberOfTravelers(typeof num === "string" ? 6 : num)}
-                        className="flex-1"
-                      >
-                        {num}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+               {/* Navigation Buttons */}
+               <div className="flex gap-4 mt-8">
+                  {questionnaireStep === 1 ? (
+                     <button 
+                        onClick={() => setAppState("swiping")}
+                        className={cn(
+                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95",
+                           isDarkMode ? "bg-white/5 text-white hover:bg-white/10" : "bg-white/40 text-slate-800 hover:bg-white/50"
+                        )}
+                     >
+                        <ChevronLeft className="size-5" /> Back
+                     </button>
+                  ) : (
+                     <button 
+                        onClick={() => setQuestionnaireStep(prev => prev - 1)}
+                        className={cn(
+                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95",
+                           isDarkMode ? "bg-white/5 text-white hover:bg-white/10" : "bg-white/40 text-slate-800 hover:bg-white/50"
+                        )}
+                     >
+                        <ChevronLeft className="size-5" /> Previous
+                     </button>
+                  )}
 
-                <div>
-                  <Label className="mb-3 block">Total Budget (Optional)</Label>
-                  <Input
-                    type="number"
-                    placeholder="Enter total budget in $"
-                    value={totalBudget || ""}
-                    onChange={(e) => setTotalBudget(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </div>
+                  {questionnaireStep < 3 ? (
+                     <button 
+                        onClick={() => setQuestionnaireStep(prev => prev + 1)}
+                        className={cn(
+                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white shadow-lg",
+                           primaryGradientButton
+                        )}
+                     >
+                        Next Step <ChevronRight className="size-5" />
+                     </button>
+                  ) : (
+                     <button 
+                        onClick={handleGenerateItinerary}
+                        disabled={(!tripDates.from || !tripDates.to || !departureLocation.trim() || (!surpriseMe && !destination.trim()))}
+                        className={cn(
+                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed",
+                           primaryGradientButton
+                        )}
+                     >
+                        {isGenerating ? <Loader2 className="size-5 animate-spin" /> : <Sparkles className="size-5" />}
+                        Generate Itinerary
+                     </button>
+                  )}
+               </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setQuestionnaireStep(2)} className="flex-1">
-                    <ChevronLeft className="size-4 mr-2" /> Back
-                  </Button>
-                  <Button
-                    onClick={handleGenerateItinerary}
-                    className="flex-1 bg-cyan-600 hover:bg-cyan-700"
-                    disabled={!tripDates.from || !tripDates.to || !departureLocation.trim() || (!surpriseMe && !destination.trim())}
-                  >
-                    Generate Itinerary
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            </div>
+          </div>
         </div>
-          </div>
-        </SafeAreaWrapper>
+      </SafeAreaWrapper>
     );
   }
 
-  // Swiping UI
+  // Swiping UI (uses pageBgClass, glassPanelClass, accentBorderClass etc. from earlier)
+  const swipeGlassPanelClass = isDarkMode 
+    ? "bg-slate-900/60 border-white/10 text-white shadow-xl backdrop-blur-xl" 
+    : "bg-white/60 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
+
   return (
     <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
       <div
         className={cn(
           "h-full relative flex flex-col overflow-hidden transition-colors duration-500",
-          "bg-gradient-to-br",
           pageBgClass
         )}
         style={{ touchAction: 'none' }}
@@ -3090,7 +3388,7 @@ Return ONLY a single JSON object (no array, no wrapper):
         <div
           className={cn(
             "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-600/52 sm:bg-fuchsia-600/45"
+            isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
           )}
           style={{
             animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -3101,7 +3399,7 @@ Return ONLY a single JSON object (no array, no wrapper):
         <div
           className={cn(
             "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/60 sm:bg-blue-500/40" 
+            isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
           )}
           style={{
             animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -3113,7 +3411,7 @@ Return ONLY a single JSON object (no array, no wrapper):
         <div
           className={cn(
             "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-purple-800/95 sm:bg-purple-800/85"
+            isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
           )}
           style={{
             animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -3125,9 +3423,11 @@ Return ONLY a single JSON object (no array, no wrapper):
           "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
           isDarkMode 
             ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-            : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+            : "bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)]"
         )} />
-      </div>
+        </div>
+
+
 
       <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={false}>
         <div className="relative z-10 flex flex-col h-full">
@@ -3146,107 +3446,62 @@ Return ONLY a single JSON object (no array, no wrapper):
                 Swipe Deck
               </h1>
               <div className="flex items-center gap-2 relative">
-                <Button
-                  variant="ghost"
+                <button
                   onClick={handleReset}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                    accentBorderClass,
-                    isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all"
+                     "rounded-full p-2 transition-all active:scale-95",
+                     isDarkMode 
+                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
+                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
                   )}
                   aria-label="Reset"
                 >
-                  <RotateCcw className="size-3" />
-                </Button>
-                <Button
-                  variant="ghost"
+                  <RotateCcw className="size-5" />
+                </button>
+                <button
                   onClick={handleAutoComplete}
                   disabled={isAutoCompleting}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-3 py-1.5 active:scale-95",
-                    accentBorderClass,
-                    isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all disabled:opacity-60" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all disabled:opacity-60"
+                     "rounded-full p-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                     isDarkMode 
+                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
+                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
                   )}
                 >
                   {isAutoCompleting ? (
-                    <Loader2 className="size-3 animate-spin" />
+                    <Loader2 className="size-5 animate-spin" />
                   ) : (
-                    <Sparkles className="size-3" />
+                    <Sparkles className="size-5" />
                   )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowSettingsMenu((prev) => !prev)}
+                </button>
+                <div className="flex items-center gap-2">
+               <button
+                  onClick={() => {
+                     handleThemeToggle();
+                     playSound('switch');
+                  }}
                   className={cn(
-                    "rounded-2xl border text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                    accentBorderClass,
-                    isDarkMode 
-                      ? "hover:-translate-y-0.5 hover:bg-white/10 active:-translate-y-0.5 active:bg-white/10 transition-all" 
-                      : "hover:-translate-y-0.5 hover:bg-slate-900/10 active:-translate-y-0.5 active:bg-slate-900/10 transition-all"
+                     "rounded-full p-2 transition-all active:scale-95",
+                     isDarkMode 
+                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
+                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
                   )}
-                  aria-label="Open settings menu"
-                >
-                  <Settings className="size-4" />
-                </Button>
-                {showSettingsMenu && (
-                  <div 
-                    className={cn(
-                      "absolute right-0 top-[calc(100%+0.5rem)] flex flex-col rounded-2xl z-30 overflow-hidden",
-                      accentBorderClass
-                    )}
-                    style={{ width: '40px' }}
-                  >
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        handleThemeToggle();
-                        setShowSettingsMenu(false);
-                        playSound("switch");
-                      }}
-                      className={cn(
-                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                        accentBorderClass,
-                        isDarkMode 
-                          ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
-                          : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
-                      )}
-                      aria-label="Toggle theme"
-                    >
-                      {isDarkMode ? (
-                        <Moon className="size-4" />
-                      ) : (
-                        <Sun className="size-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        handleMuteToggle();
-                        setShowSettingsMenu(false);
-                      }}
-                      className={cn(
-                        "rounded-none border-0 text-[11px] font-semibold px-2 py-1.5 active:scale-95",
-                        accentBorderClass,
-                        isDarkMode 
-                          ? "hover:-translate-y-0 hover:bg-white/10 active:-translate-y-0 active:bg-white/10 transition-all" 
-                          : "hover:-translate-y-0 hover:bg-slate-900/10 active:-translate-y-0 active:bg-slate-900/10 transition-all"
-                      )}
-                      aria-label="Toggle sound"
-                    >
-                      {isMuted ? (
-                        <VolumeX className="size-4" />
-                      ) : volume < 0.35 ? (
-                        <Volume1 className="size-4" />
-                      ) : (
-                        <Volume2 className="size-4" />
-                      )}
-                    </Button>
-                  </div>
-                )}
+               >
+                  {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
+               </button>
+               
+               <button
+                  onClick={handleMuteToggle}
+                  className={cn(
+                     "rounded-full p-2 transition-all active:scale-95",
+                     isDarkMode 
+                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
+                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
+                  )}
+               >
+                  {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
+               </button>
+            </div>
               </div>
             </div>
 
@@ -3286,7 +3541,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                       "rounded-2xl px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible",
                       isActive
                         ? "bg-gradient-to-br from-fuchsia-500/90 to-blue-500/90 text-white shadow-lg border-transparent"
-                        : cn(glassPanelClass, isDarkMode ? "bg-white/10 border-white/10" : "bg-white/30 border-white/30"),
+                        : cn(swipeGlassPanelClass, isDarkMode ? "bg-white/10 border-white/10" : "bg-white/30 border-white/30"),
                       isComplete && !isActive && "text-green-300 border-green-400/40",
                       !isActive && "hover:scale-110 hover:shadow-xl hover:brightness-110 active:scale-110 active:shadow-xl active:brightness-110"
                     )}
@@ -3347,7 +3602,7 @@ Return ONLY a single JSON object (no array, no wrapper):
                     onTransitionEnd={handleSwipeAnimationEnd}
                     className={cn(
                       "h-full overflow-hidden border backdrop-blur-2xl transition-all duration-600 ease-out",
-                      glassPanelClass,
+                      swipeGlassPanelClass,
                       "shadow-[0_35px_80px_-40px_rgba(15,23,42,0.8)]",
                       swipeDirection === "right" && "translate-x-[115%] rotate-6 opacity-0",
                       swipeDirection === "left" && "-translate-x-[115%] -rotate-6 opacity-0"
@@ -3422,12 +3677,11 @@ Return ONLY a single JSON object (no array, no wrapper):
                   size="lg"
                   variant="ghost"
                   className={cn(
-                    "size-16 rounded-full border-2 transition-all active:scale-95 relative z-50",
+                    "size-16 rounded-full flex items-center justify-center transition-all active:scale-95 backdrop-blur-xl border relative z-50",
                     isDarkMode 
-                      ? "border-[#000000] bg-[#000000] text-red-500 hover:scale-105 hover:!bg-[#000000] hover:!border-[#000000] hover:text-red-500 active:!bg-[#000000] active:!border-[#000000] active:text-red-500" 
-                      : "border-white bg-white text-red-500 hover:scale-105 hover:bg-white hover:border-white hover:text-red-500 active:bg-white active:border-white active:text-red-500"
+                      ? "bg-white/5 border-white/10 text-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.4)] hover:border-red-500/50 hover:bg-red-500/10" 
+                      : "bg-white/40 border-white/40 text-red-600 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:border-red-500/50 hover:bg-red-500/10"
                   )}
-                  style={isDarkMode ? { backgroundColor: '#000000', borderColor: '#000000' } : undefined}
                   onClick={() => handleSwipe("left")}
                 >
                   <X className="size-7" />
@@ -3435,8 +3689,10 @@ Return ONLY a single JSON object (no array, no wrapper):
                 <Button
                   size="lg"
                   className={cn(
-                    "size-16 rounded-full flex items-center justify-center text-white text-2xl font-black hover:scale-105 active:scale-95 transition-all",
-                    primaryGradientButton
+                    "size-16 rounded-full flex items-center justify-center transition-all active:scale-95 backdrop-blur-xl border",
+                     isDarkMode 
+                      ? "bg-white/5 border-white/10 text-green-400 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] hover:border-green-500/50 hover:bg-green-500/10" 
+                      : "bg-white/40 border-white/40 text-green-600 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:border-green-500/50 hover:bg-green-500/10"
                   )}
                   onClick={() => handleSwipe("right")}
                 >
@@ -3470,29 +3726,32 @@ Return ONLY a single JSON object (no array, no wrapper):
                 ) : null}
               </div>
             ) : completedCategories.size === 6 ? (
-              <div className="flex justify-center gap-6 items-center">
-                <Button
-                  size="lg"
-                  className={cn(
-                    "size-16 rounded-full flex items-center justify-center text-white text-2xl font-black hover:scale-105 active:scale-95 transition-all",
-                    primaryGradientButton
-                  )}
-                  onClick={() => {}}
-                  disabled
-                >
-                  <Check className="size-7" />
-                </Button>
-                <Button
-                  onClick={() => setAppState("questionnaire")}
-                  size="lg"
-                  className={cn(
-                    "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
-                    "bg-green-500 hover:bg-green-600"
-                  )}
-                >
-                  <FastForward className="size-7" />
-                </Button>
-              </div>
+              <div className="flex justify-center gap-4 mt-8 opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards">
+                 <button 
+                    onClick={handleReset}
+                    className={cn(
+                       "rounded-full p-3 transition-all active:scale-95 group",
+                       isDarkMode 
+                          ? "text-slate-500 hover:text-white hover:bg-white/10" 
+                          : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
+                    )}
+                 >
+                    <RefreshCw className="size-5 group-hover:rotate-180 transition-transform duration-500" />
+                 </button>
+                  <button 
+                     onClick={handleAutoComplete}
+                     disabled={isAutoCompleting}
+                     className={cn(
+                        "rounded-full p-3 transition-all active:scale-95 group",
+                        isDarkMode 
+                           ? "text-slate-500 hover:text-white hover:bg-white/10" 
+                           : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm",
+                        isAutoCompleting && "opacity-50 cursor-not-allowed"
+                     )}
+                  >
+                     <FastForward className="size-5 group-hover:translate-x-1 transition-transform" />
+                  </button>
+               </div>
             ) : (
               <p className={cn("text-center text-sm font-semibold", subTextClass)}>
                 You've seen every card in this category.
