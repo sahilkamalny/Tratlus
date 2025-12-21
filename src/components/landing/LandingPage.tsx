@@ -33,11 +33,39 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
   const accentBorderClass = isDarkMode ? "border-white/20 text-white/80 bg-white/5" : "border-white/30 text-slate-700 bg-white/10";
 
   return (
-    <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-      <div className={`h-full relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-slate-50 text-slate-900 selection:bg-fuchsia-200 selection:text-fuchsia-900'}`}>
-        
+    <div className={`h-[100svh] relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-white selection:bg-blue-500 selection:text-white' : 'bg-slate-50 text-slate-900 selection:bg-fuchsia-200 selection:text-fuchsia-900'}`}>
+      {/* Background Gradients - Extends into safe area notch */}
+      <div className={`absolute inset-0 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-gradient-to-br from-rose-200 via-sky-200 to-indigo-200'}`} style={{ zIndex: 0 }} />
+
+      {/* Animated Background Elements - Extends into safe area notch */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+           {/* Same blobs, kept compatible */}
+           <div className={`absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px] ${
+              isDarkMode 
+              ? 'bg-fuchsia-500/45 sm:bg-fuchsia-500/26' 
+              : 'bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply' 
+          }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+          
+          <div className={`absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px] ${
+              isDarkMode 
+              ? 'bg-blue-500/41 sm:bg-blue-500/22' 
+              : 'bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply'
+          }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
+          
+          <div className={`absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px] ${
+              isDarkMode 
+              ? 'bg-purple-500/41 sm:bg-purple-500/22' 
+              : 'bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply'
+          }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
+          
+          {/* Grid Overlay */}
+          <div className={`absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] ${isDarkMode ? 'bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]' : 'bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)]'}`} />
+      </div>
+
+      {/* Content wrapper with safe area padding */}
+      <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full">
         {/* Header Controls */}
-        <div className="absolute top-6 right-6 z-50">
+        <div className="absolute top-[calc(env(safe-area-inset-top)+1.5rem)] right-6 z-50">
             <nav className="flex items-center gap-2 md:gap-4">
                 <button 
                     onClick={() => {
@@ -71,34 +99,6 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
                     Get App
                 </button>
             </nav>
-        </div>
-
-        {/* Background Gradients - TUNED INTENSITY */}
-        <div className={`absolute inset-0 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-gradient-to-br from-rose-200 via-sky-200 to-indigo-200'}`} style={{ zIndex: 0 }} />
-
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-             {/* Same blobs, kept compatible */}
-             <div className={`absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px] ${
-                isDarkMode 
-                ? 'bg-fuchsia-500/45 sm:bg-fuchsia-500/26' 
-                : 'bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply' 
-            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
-            
-            <div className={`absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px] ${
-                isDarkMode 
-                ? 'bg-blue-500/41 sm:bg-blue-500/22' 
-                : 'bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply'
-            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }} />
-            
-            <div className={`absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px] ${
-                isDarkMode 
-                ? 'bg-purple-500/41 sm:bg-purple-500/22' 
-                : 'bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply'
-            }`} style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }} />
-            
-            {/* Grid Overlay */}
-            <div className={`absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] ${isDarkMode ? 'bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]' : 'bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)]'}`} />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-center items-center text-center">
@@ -163,7 +163,7 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
                 ))}
             </div>
         </div>
-      </div>
-    </SafeAreaWrapper>
+      </SafeAreaWrapper>
+    </div>
   );
 };

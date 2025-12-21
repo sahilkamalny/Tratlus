@@ -1909,13 +1909,14 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "loading") {
     return (
-      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className={cn("h-full relative flex items-center justify-center p-4 overflow-hidden", pageBgClass)}>
-          {/* Background Blobs (Simplified for Loading) */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-             <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 animate-pulse", isDarkMode ? "bg-fuchsia-500" : "bg-blue-500")} />
-          </div>
-          
+      <div className={cn("h-[100svh] relative flex items-center justify-center overflow-hidden", pageBgClass)}>
+        {/* Background Blobs - Extends into safe area notch */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 animate-pulse", isDarkMode ? "bg-fuchsia-500" : "bg-blue-500")} />
+        </div>
+        
+        {/* Content with safe area padding */}
+        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full flex items-center justify-center p-4">
           <div className={cn("relative z-10 w-full max-w-md text-center p-8 rounded-3xl border backdrop-blur-xl shadow-2xl space-y-6", glassPanelClass)}>
             <div className="relative mx-auto size-24 flex items-center justify-center">
               <div className={cn("absolute inset-0 rounded-full animate-ping opacity-20", isDarkMode ? "bg-fuchsia-500" : "bg-blue-600")} />
@@ -1932,30 +1933,32 @@ Return ONLY a single JSON object (no array, no wrapper):
               </p>
             </div>
           </div>
-        </div>
-      </SafeAreaWrapper>
+        </SafeAreaWrapper>
+      </div>
     );
   }
 
+
   if (appState === "generating") {
     return (
-      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div className={cn(
-          "h-full relative flex items-center justify-center p-4 overflow-hidden", 
-          isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500"
-        )}>
-          {/* Background Blobs */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-             <div className={cn("absolute top-1/4 left-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-600" : "bg-fuchsia-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '4s' }} />
-             <div className={cn("absolute bottom-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-30", isDarkMode ? "bg-blue-600" : "bg-blue-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '5s' }} />
-             {/* Grid Overlay */}
-             <div className={cn("absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-                isDarkMode 
-                  ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-                  : "bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)]"
-             )} />
-          </div>
-          
+      <div className={cn(
+        "h-[100svh] relative flex items-center justify-center overflow-hidden", 
+        isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500"
+      )}>
+        {/* Background Blobs - Extends into safe area notch */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           <div className={cn("absolute top-1/4 left-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-600" : "bg-fuchsia-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '4s' }} />
+           <div className={cn("absolute bottom-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-30", isDarkMode ? "bg-blue-600" : "bg-blue-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '5s' }} />
+           {/* Grid Overlay */}
+           <div className={cn("absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+              isDarkMode 
+                ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+                : "bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)]"
+           )} />
+        </div>
+        
+        {/* Content with safe area padding */}
+        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full flex items-center justify-center p-4">
           <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-12">
             
             {/* Pulsing Orb Centerpiece */}
@@ -1991,10 +1994,11 @@ Return ONLY a single JSON object (no array, no wrapper):
             </div>
 
           </div>
-        </div>
-      </SafeAreaWrapper>
+        </SafeAreaWrapper>
+      </div>
     );
   }
+
 
   if (appState === "itinerary" && itinerary) {
     const primaryGradientButton = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20";
@@ -2009,35 +2013,36 @@ Return ONLY a single JSON object (no array, no wrapper):
     const pageBgClass = isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-rose-200 via-sky-200 to-indigo-200";
 
     return (
-      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div 
-          className={cn(
-            "h-full relative overflow-hidden transition-colors duration-500",
-            pageBgClass
-          )}
-        >
-          {/* Animated Background - Shared */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-             <div className={cn(
-                "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-                isDarkMode ? "bg-fuchsia-500/20" : "bg-fuchsia-600/30"
-              )}
-              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
-            />
-            <div className={cn(
-                "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-                isDarkMode ? "bg-blue-500/20" : "bg-blue-500/30"
-              )}
-              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
-            />
-             <div className={cn(
-               "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-               isDarkMode 
-                 ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-                 : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
-             )} />
-          </div>
+      <div 
+        className={cn(
+          "h-[100svh] relative overflow-hidden transition-colors duration-500",
+          pageBgClass
+        )}
+      >
+        {/* Animated Background - Extends into safe area notch */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           <div className={cn(
+              "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
+              isDarkMode ? "bg-fuchsia-500/20" : "bg-fuchsia-600/30"
+            )}
+            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
+          />
+          <div className={cn(
+              "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
+              isDarkMode ? "bg-blue-500/20" : "bg-blue-500/30"
+            )}
+            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
+          />
+           <div className={cn(
+             "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+             isDarkMode 
+               ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+               : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+           )} />
+        </div>
 
+        {/* Content with safe area padding */}
+        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full">
           <div className="h-full overflow-y-auto relative z-10 scrollbar-hide">
             {/* Top Controls */}
             <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
@@ -2360,7 +2365,6 @@ Return ONLY a single JSON object (no array, no wrapper):
             </div>
 
           </div>
-        </div>
 
         {/* Nearby Activities Panel */}
         <Dialog open={showNearbyActivities} onOpenChange={setShowNearbyActivities}>
@@ -2852,9 +2856,11 @@ Return ONLY a single JSON object (no array, no wrapper):
           </DialogContent>
         </Dialog>
 
-    </SafeAreaWrapper>
+        </SafeAreaWrapper>
+      </div>
     );
   }
+
 
   if (appState === "questionnaire") {
     // Glass panel styles specific to questionnaire
@@ -2878,41 +2884,42 @@ Return ONLY a single JSON object (no array, no wrapper):
     );
 
     return (
-      <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-        <div 
-          className={cn(
-            "h-full relative overflow-hidden transition-colors duration-500",
-            pageBgClass
-          )}
-        >
-          {/* Animated Background - Shared with Landing/Swipe */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-             <div className={cn(
-                "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-                isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
-              )}
-              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
-            />
-            <div className={cn(
-                "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-                isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
-              )}
-              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
-            />
-            <div className={cn(
-                "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
-                isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
-              )}
-              style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "1s" }}
-            />
-             <div className={cn(
-               "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-               isDarkMode 
-                 ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-                 : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
-             )} />
-          </div>
+      <div 
+        className={cn(
+          "h-[100svh] relative overflow-hidden transition-colors duration-500",
+          pageBgClass
+        )}
+      >
+        {/* Animated Background - Extends into safe area notch */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           <div className={cn(
+              "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
+              isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
+            )}
+            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
+          />
+          <div className={cn(
+              "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
+              isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
+            )}
+            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
+          />
+          <div className={cn(
+              "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
+              isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
+            )}
+            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "1s" }}
+          />
+           <div className={cn(
+             "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
+             isDarkMode 
+               ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
+               : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+           )} />
+        </div>
 
+        {/* Content with safe area padding */}
+        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full">
           <div className="h-full overflow-y-auto relative z-10 p-4 md:p-6 pb-24">
             
             {/* Top Controls */}
@@ -3364,10 +3371,11 @@ Return ONLY a single JSON object (no array, no wrapper):
 
             </div>
           </div>
-        </div>
-      </SafeAreaWrapper>
+        </SafeAreaWrapper>
+      </div>
     );
   }
+
 
   // Swiping UI (uses pageBgClass, glassPanelClass, accentBorderClass etc. from earlier)
   const swipeGlassPanelClass = isDarkMode 
@@ -3375,14 +3383,14 @@ Return ONLY a single JSON object (no array, no wrapper):
     : "bg-white/60 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
 
   return (
-    <SafeAreaWrapper fullHeight={true} includeTop={true} includeBottom={true}>
-      <div
-        className={cn(
-          "h-full relative flex flex-col overflow-hidden transition-colors duration-500",
-          pageBgClass
-        )}
-        style={{ touchAction: 'none' }}
-      >
+    <div
+      className={cn(
+        "h-[100svh] relative flex flex-col overflow-hidden transition-colors duration-500",
+        pageBgClass
+      )}
+      style={{ touchAction: 'none' }}
+    >
+      {/* Background - Extends into safe area notch */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ zIndex: 0 }}>
         {/* Fuchsia blob - top left */}
         <div
@@ -3425,11 +3433,10 @@ Return ONLY a single JSON object (no array, no wrapper):
             ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
             : "bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)]"
         )} />
-        </div>
+      </div>
 
-
-
-      <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={false}>
+      {/* Content with safe area padding */}
+      <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={false} className="h-full">
         <div className="relative z-10 flex flex-col h-full">
           <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#509BDE' }}>
           <div className="max-w-xl mx-auto space-y-3">
@@ -3801,6 +3808,5 @@ Return ONLY a single JSON object (no array, no wrapper):
         </div>
       )}
     </div>
-      </SafeAreaWrapper>
   );
 } 
