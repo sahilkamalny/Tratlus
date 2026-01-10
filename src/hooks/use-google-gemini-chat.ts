@@ -14,6 +14,7 @@ export interface Activity {
   location: string;
   description: string;
   estimatedCost: number;
+  duration?: string;
   type?: 'food' | 'attraction' | 'transportation' | 'accommodation' | 'activity' | 'transport-between';
   detailedInfo?: string;
   websiteUrl?: string;
@@ -165,14 +166,14 @@ Include 4-6 MAIN activities per day, PLUS transport-between blocks connecting ea
         generationConfig,
         safetySettings,
         history: [
-            {
-                role: "user",
-                parts: [{ text: systemPrompt }],
-            },
-            {
-                role: "model",
-                parts: [{ text: "Okay, I am ready to generate a travel itinerary. Please provide the user's preferences."}]
-            }
+          {
+            role: "user",
+            parts: [{ text: systemPrompt }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "Okay, I am ready to generate a travel itinerary. Please provide the user's preferences." }]
+          }
         ],
       });
 
@@ -187,7 +188,7 @@ Include 4-6 MAIN activities per day, PLUS transport-between blocks connecting ea
         let cleanedResponse = rawResponse.trim();
         const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch && jsonMatch[0]) {
-            cleanedResponse = jsonMatch[0];
+          cleanedResponse = jsonMatch[0];
         } else if (cleanedResponse.startsWith('```json')) {
           cleanedResponse = cleanedResponse.replace(/^```json\n?/, '').replace(/\n?```$/, '');
         } else if (cleanedResponse.startsWith('```')) {
@@ -230,5 +231,6 @@ Include 4-6 MAIN activities per day, PLUS transport-between blocks connecting ea
         itinerary,
         rawResponse,
       };
-    },  });
+    },
+  });
 }

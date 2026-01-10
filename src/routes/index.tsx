@@ -12,30 +12,21 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import SafeAreaWrapper from "@/components/ui/SafeAreaWrapper";
 import {
-  Check,
-  X,
   MapPin,
   Utensils,
   Compass,
   Home,
   Car,
   Sparkles,
-  ChevronRight,
   ChevronLeft,
   Trash2,
   RefreshCw,
   Loader2,
-  Award,
-  PartyPopper,
-  Plane,
   RotateCcw,
   Star,
   ExternalLink,
@@ -65,9 +56,13 @@ import {
   Volume1,
   Menu,
   Settings,
-  FastForward,
 } from "lucide-react";
 import { LandingPage } from "@/components/landing/LandingPage";
+import { LoadingPage } from "@/components/pages/LoadingPage";
+import { GeneratingPage } from "@/components/pages/GeneratingPage";
+import { QuestionnairePage } from "@/components/pages/QuestionnairePage";
+import { SwipePage } from "@/components/pages/SwipePage";
+import { ItineraryPage, type NearbyActivity } from "@/components/pages/ItineraryPage";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSound } from "@/contexts/SoundContext";
 import { RotateDeviceOverlay } from "@/components/ui/RotateDeviceOverlay";
@@ -532,12 +527,24 @@ function App() {
   const [dragOverActivity, setDragOverActivity] = useState<{ dayIndex: number; actIndex: number } | null>(null);
   const [refreshingActivityPosition, setRefreshingActivityPosition] = useState<{ dayIndex: number; actIndex: number } | null>(null);
   const [showNearbyActivities, setShowNearbyActivities] = useState(false);
-  const [nearbyActivities, setNearbyActivities] = useState<Activity[]>([]);
+  const [nearbyActivities, setNearbyActivities] = useState<NearbyActivity[]>([]);
   const [isLoadingNearby, setIsLoadingNearby] = useState(false);
   const [nearbyCategory, setNearbyCategory] = useState<string>("all");
   const [showMapView, setShowMapView] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [isLoadingMap, setIsLoadingMap] = useState(false);
+  // Additional state for ItineraryPage component
+  const [editingActivity, setEditingActivity] = useState<{ dayIndex: number; actIndex: number } | null>(null);
+  const [addingActivityForDay, setAddingActivityForDay] = useState<number | null>(null);
+  const [newActivityForm, setNewActivityForm] = useState({
+    title: '',
+    time: '12:00',
+    duration: '2 hours',
+    location: '',
+    description: '',
+    estimatedCost: '',
+    type: 'activity'
+  });
 
   const { mutate: generateItinerary, isPending: isGenerating } = useGenerateItineraryMutation();
 
@@ -658,6 +665,12 @@ function App() {
     }
     setShowContinueButton(false);
   }, [completedCategories, currentCategoryIndex, playSound]);
+
+  // Skip to questionnaire - allows users to skip remaining swipes
+  const handleSkipToQuestionnaire = useCallback(() => {
+    playSound("click");
+    setAppState("questionnaire");
+  }, [playSound]);
 
   const handleAutoComplete = useCallback(() => {
     if (isAutoCompleting) return;
@@ -969,6 +982,25 @@ Please create a detailed day-by-day itinerary that aligns with these preferences
           setAppState("itinerary");
           // Pre-fetch nearby activities in the background, passing the new itinerary directly
           handleFetchNearbyActivities(data.itinerary);
+          // Pre-load map coordinates so map is ready when user clicks Map View
+          if (data.itinerary?.destination) {
+            setIsLoadingMap(true);
+            fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.itinerary.destination)}&limit=1`,
+              { headers: { 'Accept': 'application/json' } }
+            )
+              .then(res => res.json())
+              .then(coords => {
+                if (coords && coords.length > 0) {
+                  setMapCoordinates({
+                    lat: parseFloat(coords[0].lat),
+                    lon: parseFloat(coords[0].lon),
+                  });
+                }
+              })
+              .catch(err => console.error("Error geocoding:", err))
+              .finally(() => setIsLoadingMap(false));
+          }
         },
         onError: (error) => {
           console.error("Error generating itinerary:", error);
@@ -1215,7 +1247,16 @@ Include realistic ratings (3.5-5.0), real addresses, and accurate costs in USD.`
               console.warn("No activities found in response, generating fallback");
             }
 
-            setNearbyActivities(activities);
+            // Convert Activity[] to NearbyActivity[] format
+            const nearbyItems: NearbyActivity[] = activities.map(act => ({
+              title: act.title,
+              location: act.location,
+              description: act.description,
+              estimatedCost: act.estimatedCost,
+              type: act.type || 'activity',
+              rating: act.rating
+            }));
+            setNearbyActivities(nearbyItems);
           } catch (error) {
             console.error("Error parsing nearby activities:", error, data.rawResponse);
             setNearbyActivities([]);
@@ -1231,11 +1272,22 @@ Include realistic ratings (3.5-5.0), real addresses, and accurate costs in USD.`
   };
 
   // Add nearby activity to a specific day in the itinerary
-  const handleAddNearbyActivity = (activity: Activity, dayIndex: number) => {
+  const handleAddNearbyActivity = (activity: NearbyActivity, dayIndex: number) => {
     if (!itinerary) return;
 
     const newDays = [...itinerary.days];
-    const updatedActivities = [...newDays[dayIndex].activities, activity];
+    // Convert NearbyActivity to Activity format with default time
+    const activityWithTime: Activity = {
+      title: activity.title,
+      location: activity.location,
+      description: activity.description,
+      estimatedCost: activity.estimatedCost,
+      type: (activity.type as Activity['type']) || 'activity',
+      rating: activity.rating,
+      time: '12:00 PM', // Default time for new activities
+      duration: activity.type === 'food' ? '1-2 hours' : '2-3 hours',
+    };
+    const updatedActivities = [...newDays[dayIndex].activities, activityWithTime];
 
     // Sort activities by time
     updatedActivities.sort((a, b) => {
@@ -1706,39 +1758,48 @@ Return ONLY a single JSON object (no array, no wrapper):
   const handleActivityDragEnd = () => {
     setDraggedActivity(null);
     setDragOverActivity(null);
-  };
+  }
 
-  // Geocode destination to get coordinates for the map
+  const handleOpenAddActivity = (dayIndex: number) => {
+    setAddingActivityForDay(dayIndex);
+    setNewActivityForm({
+      title: '',
+      time: '12:00',
+      duration: '2 hours',
+      location: '',
+      description: '',
+      estimatedCost: '',
+      type: 'activity'
+    });
+  };;
+
+  // Open map view - coordinates are preloaded when itinerary is generated
   const handleOpenMapView = async () => {
     if (!itinerary) return;
-
     setShowMapView(true);
-    setIsLoadingMap(true);
-
-    try {
-      // Use Nominatim API to geocode the destination
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(itinerary.destination)}&limit=1`,
-        {
-          headers: {
-            'Accept': 'application/json',
+    
+    // Fallback: if coordinates weren't loaded yet, fetch them now
+    if (!mapCoordinates && !isLoadingMap) {
+      setIsLoadingMap(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(itinerary.destination)}&limit=1`,
+          { headers: { 'Accept': 'application/json' } }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setMapCoordinates({
+              lat: parseFloat(data[0].lat),
+              lon: parseFloat(data[0].lon),
+            });
           }
         }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setMapCoordinates({
-            lat: parseFloat(data[0].lat),
-            lon: parseFloat(data[0].lon),
-          });
-        }
+      } catch (error) {
+        console.error("Error geocoding destination:", error);
+      } finally {
+        setIsLoadingMap(false);
       }
-    } catch (error) {
-      console.error("Error geocoding destination:", error);
-    } finally {
-      setIsLoadingMap(false);
     }
   };
 
@@ -1909,1904 +1970,160 @@ Return ONLY a single JSON object (no array, no wrapper):
 
   if (appState === "loading") {
     return (
-      <div className={cn("h-[100svh] relative flex items-center justify-center overflow-hidden", pageBgClass)}>
-        {/* Background Blobs - Extends into safe area notch */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-           <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 animate-pulse", isDarkMode ? "bg-fuchsia-500" : "bg-blue-500")} />
-        </div>
-        
-        {/* Content with safe area padding */}
-        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full flex items-center justify-center p-4">
-          <div className={cn("relative z-10 w-full max-w-md text-center p-8 rounded-3xl border backdrop-blur-xl shadow-2xl space-y-6", glassPanelClass)}>
-            <div className="relative mx-auto size-24 flex items-center justify-center">
-              <div className={cn("absolute inset-0 rounded-full animate-ping opacity-20", isDarkMode ? "bg-fuchsia-500" : "bg-blue-600")} />
-              <div className={cn("absolute inset-2 rounded-full animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-500" : "bg-blue-600")} />
-              <Loader2 className={cn("relative z-10 size-10 animate-spin", isDarkMode ? "text-white" : "text-blue-600")} />
-            </div>
-            
-            <div>
-              <h2 className={cn("text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r", isDarkMode ? "from-white to-slate-400" : "from-slate-900 to-slate-600")}>
-                Preparing...
-              </h2>
-              <p className={cn("font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                Loading your personalized adventure.
-              </p>
-            </div>
-          </div>
-        </SafeAreaWrapper>
-      </div>
+      <LoadingPage 
+        isDarkMode={isDarkMode} 
+        pageBgClass={pageBgClass} 
+        glassPanelClass={glassPanelClass} 
+      />
     );
   }
-
 
   if (appState === "generating") {
     return (
-      <div className={cn(
-        "h-[100svh] relative flex items-center justify-center overflow-hidden", 
-        isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500"
-      )}>
-        {/* Background Blobs - Extends into safe area notch */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-           <div className={cn("absolute top-1/4 left-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-40", isDarkMode ? "bg-fuchsia-600" : "bg-fuchsia-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '4s' }} />
-           <div className={cn("absolute bottom-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full blur-[120px] animate-pulse opacity-30", isDarkMode ? "bg-blue-600" : "bg-blue-300 mix-blend-hard-light opacity-80")} style={{ animationDuration: '5s' }} />
-           {/* Grid Overlay */}
-           <div className={cn("absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-              isDarkMode 
-                ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-                : "bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)]"
-           )} />
-        </div>
-        
-        {/* Content with safe area padding */}
-        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full flex items-center justify-center p-4">
-          <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-12">
-            
-            {/* Pulsing Orb Centerpiece */}
-            <div className="relative size-40 flex items-center justify-center">
-              <div className={cn("absolute inset-0 rounded-full blur-xl animate-pulse opacity-50", isDarkMode ? "bg-fuchsia-500" : "bg-white/60")} />
-              <div className="absolute inset-4 rounded-full border-2 border-white/20 animate-[spin_10s_linear_infinite]" />
-              <div className="absolute inset-8 rounded-full border-2 border-white/40 animate-[spin_15s_linear_infinite_reverse]" />
-              <div className={cn("size-20 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.5)] flex items-center justify-center animate-bounce", isDarkMode ? "bg-gradient-to-br from-fuchsia-500 to-indigo-600" : "bg-gradient-to-br from-fuchsia-400 to-indigo-500")}>
-                <Sparkles className="size-10 text-white animate-pulse" />
-              </div>
-            </div>
-
-            <div className="text-center space-y-4">
-               <h2 className={cn("text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r drop-shadow-sm pb-2", isDarkMode ? "from-fuchsia-400 via-purple-400 to-blue-400" : "text-white")}>
-                Crafting Your Journey
-              </h2>
-              <div className={cn("text-sm font-medium uppercase tracking-widest px-4 py-2 rounded-full border backdrop-blur-md inline-block", isDarkMode ? "bg-white/5 border-white/10 text-slate-400" : "bg-white/20 border-white/30 text-white/90")}>
-                 <span className="animate-pulse">AI Engine Analyzing...</span>
-              </div>
-            </div>
-
-            {/* Glass Tip Card */}
-            <div className={cn("w-full p-6 rounded-2xl border backdrop-blur-xl shadow-2xl transform transition-all hover:scale-[1.02]", isDarkMode ? glassPanelClass : "bg-white/10 border-white/20 text-white")}>
-                <div className="flex items-center gap-3 mb-3">
-                   <div className={cn("p-2 rounded-full", isDarkMode ? "bg-white/10" : "bg-white/20")}>
-                      <Compass className={cn("size-5", isDarkMode ? "text-fuchsia-400" : "text-white")} />
-                   </div>
-                   <span className={cn("text-xs font-bold uppercase tracking-wider", isDarkMode ? "text-slate-400" : "text-white/80")}>Travel Tip</span>
-                </div>
-                <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-200" : "text-white")}>
-                   "Did you know? The best itineraries mix planned activities with unstructured time for spontaneous discovery."
-                </p>
-            </div>
-
-          </div>
-        </SafeAreaWrapper>
-      </div>
+      <GeneratingPage 
+        isDarkMode={isDarkMode} 
+        glassPanelClass={glassPanelClass} 
+      />
     );
   }
-
 
   if (appState === "itinerary" && itinerary) {
-    const primaryGradientButton = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20";
-    // Glass panel styles specific to itinerary
-    const glassCardClass = isDarkMode
-      ? "bg-slate-900/60 border-white/10 text-white shadow-xl backdrop-blur-xl"
-      : "bg-white/60 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
-      
-    const timelineLineClass = isDarkMode ? "bg-white/10" : "bg-indigo-500/20";
-    const dayHeaderClass = isDarkMode ? "bg-slate-800/80 text-white" : "bg-white/80 text-indigo-900";
-    
-    const pageBgClass = isDarkMode ? "bg-slate-950" : "bg-gradient-to-br from-rose-200 via-sky-200 to-indigo-200";
-
     return (
-      <div 
-        className={cn(
-          "h-[100svh] relative overflow-hidden transition-colors duration-500",
-          pageBgClass
-        )}
-      >
-        {/* Animated Background - Extends into safe area notch */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-           <div className={cn(
-              "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-              isDarkMode ? "bg-fuchsia-500/20" : "bg-fuchsia-600/30"
-            )}
-            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
-          />
-          <div className={cn(
-              "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-              isDarkMode ? "bg-blue-500/20" : "bg-blue-500/30"
-            )}
-            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
-          />
-           <div className={cn(
-             "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-             isDarkMode 
-               ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-               : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
-           )} />
-        </div>
-
-        {/* Content with safe area padding */}
-        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full">
-          <div className="h-full overflow-y-auto relative z-10 scrollbar-hide">
-            {/* Top Controls */}
-            <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    handleThemeToggle();
-                    playSound("switch");
-                  }}
-                  className={cn(
-                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
-                    isDarkMode ? "text-slate-400 hover:text-white" : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-                >
-                   {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleMuteToggle}
-                  className={cn(
-                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
-                    isDarkMode ? "text-slate-400 hover:text-white" : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-                >
-                   {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
-                </Button>
-            </div>
-            
-            {/* Hero Header */}
-            <div className="relative pt-12 pb-8 px-6 text-center z-10">
-               <div className={cn(
-                 "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border backdrop-blur-md",
-                 isDarkMode ? "bg-white/10 border-white/10 text-slate-300" : "bg-white/40 border-white/20 text-indigo-900"
-               )}>
-                  Itinerary Ready
-               </div>
-               <h1 className={cn(
-                  "text-4xl md:text-6xl font-black tracking-tight mb-2 bg-clip-text text-transparent pb-2",
-                  isDarkMode 
-                    ? "bg-gradient-to-r from-fuchsia-400 to-blue-400" 
-                    : "bg-gradient-to-r from-fuchsia-600 to-blue-600"
-               )}>
-                  {itinerary.destination}
-               </h1>
-               <p className={cn("text-lg font-medium opacity-80", isDarkMode ? "text-slate-300" : "text-indigo-900")}>
-                  {itinerary.tripDates.startDate} — {itinerary.tripDates.endDate}
-               </p>
-               
-               {/* Primary Actions */}
-               <div className="flex justify-center gap-3 mt-6">
-                  <Button 
-                    onClick={() => setShowNearbyActivities(true)}
-                    className={cn(
-                      "rounded-full px-6 font-bold shadow-lg transition-transform hover:scale-105 active:scale-95",
-                      primaryGradientButton
-                    )}
-                  >
-                    <Compass className="size-4 mr-2" /> Explore Nearby
-                  </Button>
-                  <Button 
-                    onClick={handleOpenMapView}
-                    className={cn(
-                      "rounded-full px-6 font-bold border shadow-md transition-transform hover:scale-105 active:scale-95",
-                      isDarkMode ? "bg-white/10 border-white/10 text-white hover:bg-white/20" : "bg-white/60 border-white/40 text-indigo-900 hover:bg-white/80"
-                    )}
-                  >
-                    <Map className="size-4 mr-2" /> Map View
-                  </Button>
-               </div>
-            </div>
-
-            <div className="max-w-3xl mx-auto px-4 pb-32">
-              
-              {/* Cost Summary Card */}
-              <div className={cn("rounded-2xl p-6 mb-8 flex items-center justify-between", glassCardClass)}>
-                <div className="flex items-center gap-4">
-                   <div className={cn("p-3 rounded-xl", isDarkMode ? "bg-green-500/20" : "bg-green-100")}>
-                      <DollarSign className={cn("size-6", isDarkMode ? "text-green-400" : "text-green-600")} />
-                   </div>
-                   <div>
-                      <p className="text-xs font-bold uppercase opacity-60">Estimated Total</p>
-                      <p className={cn("text-2xl font-black", isDarkMode ? "text-green-400" : "text-green-700")}>
-                         ${itinerary.totalEstimatedCost.toLocaleString()}
-                      </p>
-                   </div>
-                </div>
-                 <Button
-                    onClick={handleReOptimize}
-                    variant="ghost"
-                    className="rounded-full size-10 p-0 hover:bg-white/10"
-                    disabled={isGenerating}
-                  >
-                    <RefreshCw className={cn("size-5", isGenerating && "animate-spin")} />
-                  </Button>
-              </div>
-
-              {/* Timeline Items */}
-              {itinerary.days.map((day, dayIndex) => (
-                <div key={day.dayNumber} className="relative pl-8 pb-8 last:pb-0">
-                  {/* Timeline Line */}
-                  <div className={cn("absolute left-[11px] top-8 bottom-0 w-[2px]", timelineLineClass)} />
-                  
-                  {/* Day Header Dot */}
-                  <div className={cn(
-                    "absolute left-0 top-1 size-6 rounded-full border-4 shadow-lg z-10",
-                    isDarkMode ? "border-slate-950 bg-fuchsia-500" : "border-indigo-50 bg-fuchsia-500"
-                  )} />
-
-                  <div className="mb-6">
-                     <h3 className={cn("text-xl font-black inline-flex items-center gap-2", isDarkMode ? "text-white" : "text-indigo-950")}>
-                        Day {day.dayNumber} <span className="text-sm font-medium opacity-60 font-sans">{day.date}</span>
-                     </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    {day.activities.map((activity, actIndex) => {
-                      const isTransportBetween = activity.type === "transport-between";
-
-                      if (isTransportBetween) {
-                         return (
-                            <div
-                              key={`${day.dayNumber}-${actIndex}`}
-                              draggable
-                              onDragStart={(e) => {
-                                e.stopPropagation();
-                                handleActivityDragStart(dayIndex, actIndex);
-                              }}
-                              onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
-                              onDrop={() => handleActivityDrop(dayIndex, actIndex)}
-                              onDragEnd={handleActivityDragEnd}
-                              className={cn(
-                                "relative ml-[-12px] flex items-center gap-3 py-2 px-3 rounded-lg border backdrop-blur-sm transition-all cursor-grab active:cursor-grabbing group",
-                                isDarkMode 
-                                  ? "bg-slate-900/40 border-white/5 hover:bg-slate-800/60" 
-                                  : "bg-white/40 border-white/20 hover:bg-white/60",
-                                draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95",
-                                dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-fuchsia-500/50 bg-fuchsia-500/10"
-                              )}
-                            >
-                               <div className="p-1.5 rounded-full bg-slate-500/20 text-slate-500">
-                                  <Car className="size-3" />
-                               </div>
-                               <div className="flex-1 min-w-0 flex items-center gap-2 text-xs font-medium opacity-70">
-                                  <span>{activity.time}</span>
-                                  <span className="w-1 h-1 rounded-full bg-current" />
-                                  <span className="truncate">{activity.title}</span>
-                               </div>
-                               <div className="opacity-0 group-hover:opacity-100 transition-opacity px-2 cursor-grab text-slate-400">
-                                  <GripVertical className="size-3" />
-                               </div>
-                            </div>
-                         );
-                      }
-
-                      return (
-                        <div
-                          key={`${day.dayNumber}-${actIndex}`}
-                          onClick={() => {
-                            setSelectedActivity(activity);
-                            setSelectedActivityPosition({ dayIndex, actIndex });
-                            setActivityDialogOpen(true);
-                          }}
-                          draggable
-                          onDragStart={(e) => {
-                            e.stopPropagation();
-                            handleActivityDragStart(dayIndex, actIndex);
-                          }}
-                          onDragOver={(e) => handleActivityDragOver(e, dayIndex, actIndex)}
-                          onDrop={() => handleActivityDrop(dayIndex, actIndex)}
-                          onDragEnd={handleActivityDragEnd}
-                          className={cn(
-                            "group relative rounded-2xl p-4 border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer",
-                            glassCardClass,
-                            draggedActivity?.dayIndex === dayIndex && draggedActivity?.actIndex === actIndex && "opacity-50 scale-95 ring-2 ring-fuchsia-500",
-                            dragOverActivity?.dayIndex === dayIndex && dragOverActivity?.actIndex === actIndex && "border-fuchsia-500 bg-fuchsia-500/10",
-                            refreshingActivityPosition?.dayIndex === dayIndex && refreshingActivityPosition?.actIndex === actIndex && "opacity-50 animate-pulse"
-                          )}
-                        >
-                           <div className="flex gap-4">
-                              {/* Left Column: Time & Icon */}
-                              <div className="flex flex-col items-center gap-2 pt-1">
-                                 <div className={cn(
-                                    "p-2.5 rounded-xl text-white shadow-md",
-                                    activity.type === 'food' ? "bg-orange-500" :
-                                    activity.type === 'attraction' ? "bg-cyan-500" :
-                                    activity.type === 'activity' ? "bg-green-500" :
-                                    "bg-indigo-500"
-                                 )}>
-                                    {activity.type === 'food' ? <Utensils className="size-4" /> :
-                                     activity.type === 'attraction' ? <Camera className="size-4" /> :
-                                     activity.type === 'activity' ? <Compass className="size-4" /> :
-                                     <MapPin className="size-4" />}
-                                 </div>
-                                 <span className="text-xs font-bold opacity-60 text-center leading-tight w-[60px]">
-                                    {activity.time}
-                                 </span>
-                              </div>
-
-                              {/* Right Column: Content */}
-                              <div className="flex-1 min-w-0">
-                                 <div className="flex justify-between items-start gap-2">
-                                    <h4 className={cn("font-bold text-lg leading-tight", isDarkMode ? "text-white" : "text-slate-900")}>
-                                       {activity.title}
-                                    </h4>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 cursor-grab active:cursor-grabbing p-1">
-                                       <GripVertical className="size-4" />
-                                    </div>
-                                 </div>
-                                 
-                                 <div className="flex items-center gap-1.5 mt-1 text-xs font-medium opacity-70 mb-2">
-                                    <MapPin className="size-3" />
-                                    <span className="truncate">{activity.location}</span>
-                                    {activity.rating && (
-                                       <>
-                                          <span className="mx-1">•</span>
-                                          <Star className="size-3 text-yellow-500 fill-yellow-500" />
-                                          <span>{activity.rating}</span>
-                                       </>
-                                    )}
-                                 </div>
-
-                                 <p className={cn("text-xs line-clamp-2 leading-relaxed mb-3", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                                    {activity.description}
-                                 </p>
-                                 
-                                 <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-1">
-                                    <span className={cn("text-sm font-bold", isDarkMode ? "text-green-400" : "text-green-600")}>
-                                       ${activity.estimatedCost}
-                                    </span>
-                                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                                       <Button 
-                                          size="icon" 
-                                          variant="ghost" 
-                                          className="size-8 rounded-full hover:bg-white/10"
-                                          onClick={() => handleInlineRefreshActivity(dayIndex, actIndex)}
-                                       >
-                                          <RefreshCw className="size-3.5" />
-                                       </Button>
-                                       <Button 
-                                          size="icon" 
-                                          variant="ghost" 
-                                          className="size-8 rounded-full hover:bg-red-500/20 text-red-500"
-                                          onClick={() => handleDeleteActivity(dayIndex, actIndex)}
-                                       >
-                                          <Trash2 className="size-3.5" />
-                                       </Button>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                      );
-                    })}
-                    
-                    {/* Add Activity Button */}
-                    <button
-                       onClick={() => {
-                          setAddActivityDayIndex(dayIndex);
-                          setAddActivityDialogOpen(true);
-                       }}
-                       className={cn(
-                          "w-full py-3 rounded-xl border border-dashed flex items-center justify-center gap-2 text-sm font-bold transition-all hover:scale-[1.01] active:scale-95",
-                          isDarkMode 
-                             ? "border-white/20 text-slate-400 hover:bg-white/5 hover:text-white" 
-                             : "border-indigo-300 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700"
-                       )}
-                    >
-                       <Plus className="size-4" /> Add Activity to Day {day.dayNumber}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Floating Action Bar */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md">
-               <div className={cn(
-                  "rounded-2xl p-2 flex items-center justify-between shadow-2xl backdrop-blur-xl border",
-                  isDarkMode ? "bg-slate-900/80 border-white/20" : "bg-white/80 border-white/40"
-               )}>
-                  <Button 
-                     variant="ghost" 
-                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
-                     onClick={() => setAppState("questionnaire")}
-                  >
-                     <ChevronLeft className="size-5" />
-                     <span className="text-[10px]">Back</span>
-                  </Button>
-                   <div className="w-px h-8 bg-white/20" />
-                  <Button 
-                     variant="ghost" 
-                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
-                     onClick={handleExportPDF}
-                  >
-                     <Download className="size-5" />
-                     <span className="text-[10px]">Export</span>
-                  </Button>
-                  <Button 
-                     variant="ghost" 
-                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-white/10"
-                     onClick={() => {
-                        // Email Logic
-                         if (!itinerary) return;
-                         window.open(`mailto:?subject=Trip to ${itinerary.destination}&body=Check out my itinerary!`, '_blank');
-                     }}
-                  >
-                     <Mail className="size-5" />
-                     <span className="text-[10px]">Email</span>
-                  </Button>
-                  <div className="w-px h-8 bg-white/20" />
-                  <Button 
-                     variant="ghost" 
-                     className="flex-1 flex-col h-auto py-2 gap-1 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-600"
-                     onClick={handleReset}
-                  >
-                     <RotateCcw className="size-5" />
-                     <span className="text-[10px]">Reset</span>
-                  </Button>
-               </div>
-            </div>
-
-          </div>
-
-        {/* Nearby Activities Panel */}
-        <Dialog open={showNearbyActivities} onOpenChange={setShowNearbyActivities}>
-          <DialogContent className={cn("max-w-2xl max-h-[85vh] overflow-y-auto", glassCardClass)}>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Compass className="size-5" />
-                Nearby Activities in {itinerary.destination}
-              </DialogTitle>
-              <DialogDescription>
-                Select activities to add to your itinerary
-              </DialogDescription>
-            </DialogHeader>
-            
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap mt-4">
-              {[ 
-                { id: "all", label: "All", icon: <Sparkles className="size-3" /> },
-                { id: "food", label: "Food", icon: <Coffee className="size-3" /> },
-                { id: "attraction", label: "Attractions", icon: <Landmark className="size-3" /> },
-                { id: "activity", label: "Activities", icon: <TreePine className="size-3" /> },
-              ].map((cat) => (
-                <Button
-                  key={cat.id}
-                  variant={nearbyCategory === cat.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setNearbyCategory(cat.id)}
-                  className={cn(
-                    "text-xs",
-                    nearbyCategory === cat.id 
-                      ? (isDarkMode ? "bg-fuchsia-500 hover:bg-fuchsia-600" : "bg-indigo-600 hover:bg-indigo-700")
-                      : (isDarkMode ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-white/40 border-white/20")
-                  )}
-                >
-                  {cat.icon}
-                  <span className="ml-1">{cat.label}</span>
-                </Button>
-              ))}
-            </div>
-
-            {/* Activities List */}
-            <div className="mt-4 space-y-3">
-              {isLoadingNearby ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="size-8 animate-spin text-fuchsia-500" />
-                </div>
-              ) : nearbyActivities.length === 0 ? (
-                <p className={cn("text-center py-8", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                  No nearby activities found. Try refreshing.
-                </p>
-              ) : (
-                nearbyActivities
-                  .filter((act) => nearbyCategory === "all" || act.type === nearbyCategory)
-                  .map((activity, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "p-3 rounded-lg border",
-                        isDarkMode ? "bg-white/5 border-white/5" : "bg-white/40 border-white/20"
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                             <div className={cn(
-                                "p-1.5 rounded-md text-white shadow-sm",
-                                activity.type === 'food' ? "bg-orange-500" :
-                                activity.type === 'attraction' ? "bg-cyan-500" :
-                                activity.type === 'activity' ? "bg-green-500" :
-                                "bg-indigo-500"
-                             )}>
-                                {activity.type === 'food' ? <Utensils className="size-3" /> :
-                                 activity.type === 'attraction' ? <Camera className="size-3" /> :
-                                 activity.type === 'activity' ? <Compass className="size-3" /> :
-                                 <MapPin className="size-3" />}
-                             </div>
-                            <h4 className={cn("font-medium", isDarkMode ? "text-white" : "text-slate-900")}>{activity.title}</h4>
-                            {activity.rating && (
-                              <div className="flex items-center gap-1 text-xs text-yellow-500">
-                                <Star className="size-3 fill-yellow-500" />
-                                {activity.rating}
-                              </div>
-                            )}
-                          </div>
-                          <p className={cn("text-sm mt-1", isDarkMode ? "text-slate-400" : "text-slate-600")}>{activity.location}</p>
-                          <p className={cn("text-sm mt-1", isDarkMode ? "text-slate-500" : "text-slate-500")}>{activity.description}</p>
-                          <span className={cn("text-sm font-medium", isDarkMode ? "text-green-400" : "text-green-600")}>
-                            ${activity.estimatedCost}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          {itinerary.days.map((day, dayIdx) => (
-                            <Button
-                              key={dayIdx}
-                              size="sm"
-                              variant="outline"
-                              className={cn(
-                                "text-xs h-7",
-                                isDarkMode ? "border-white/10 hover:bg-white/10" : "border-white/30 hover:bg-white/20"
-                              )}
-                              onClick={() => handleAddNearbyActivity(activity, dayIdx)}
-                            >
-                              <Plus className="size-3 mr-1" />
-                              Day {day.dayNumber}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Map View Dialog */}
-        <Dialog open={showMapView} onOpenChange={setShowMapView}>
-          <DialogContent className={cn("max-w-4xl max-h-[90vh] overflow-y-auto", glassCardClass)}>
-            <DialogHeader>
-              <DialogTitle className={cn("flex items-center gap-2", isDarkMode ? "text-white" : "text-amber-900")}>
-                <Map className="size-5" />
-                Trip Map - {itinerary.destination}
-              </DialogTitle>
-              <DialogDescription>
-                Your complete itinerary visualized on a map
-              </DialogDescription>
-            </DialogHeader>
-
-            {/* Map Legend */}
-            <div className="flex gap-4 flex-wrap mt-4 p-3 bg-slate-50 rounded-lg">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-amber-500" />
-                <span>Food</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-cyan-500" />
-                <span>Attractions</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-green-500" />
-                <span>Activities</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-purple-500" />
-                <span>Accommodation</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-blue-500" />
-                <span>Transportation</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="size-3 rounded-full bg-slate-400" />
-                <span>Transit Between</span>
-              </div>
-            </div>
-
-            {/* Interactive Map Embed */}
-            <div className="mt-4 rounded-lg overflow-hidden border border-slate-200">
-              {isLoadingMap ? (
-                <div className="h-[450px] flex items-center justify-center bg-slate-100">
-                  <div className="text-center">
-                    <Loader2 className="size-8 animate-spin text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-slate-600">Loading map for {itinerary.destination}...</p>
-                  </div>
-                </div>
-              ) : mapCoordinates ? (
-                <iframe
-                  title="Trip Map"
-                  width="100%"
-                  height="450"
-                  frameBorder="0"
-                  style={{ border: 0 }}
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoordinates.lon - 0.15},${mapCoordinates.lat - 0.1},${mapCoordinates.lon + 0.15},${mapCoordinates.lat + 0.1}&layer=mapnik&marker=${mapCoordinates.lat},${mapCoordinates.lon}`}
-                  allowFullScreen
-                />
-              ) : (
-                <div className="h-[450px] flex items-center justify-center bg-slate-100">
-                  <div className="text-center p-6">
-                    <Map className="size-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-sm text-slate-600 mb-4">
-                      Unable to load map preview for {itinerary.destination}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Use the buttons below to view the location in your preferred map app
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="p-3 bg-slate-100 space-y-2">
-                <div className="flex gap-2 justify-center flex-wrap">
-                  <a
-                    href={mapCoordinates
-                      ? `https://www.google.com/maps/@${mapCoordinates.lat},${mapCoordinates.lon},13z`
-                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(itinerary.destination)}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                  >
-                    <Navigation className="size-3" />
-                    Open in Google Maps
-                  </a>
-                  <a
-                    href={mapCoordinates
-                      ? `https://www.openstreetmap.org/?mlat=${mapCoordinates.lat}&mlon=${mapCoordinates.lon}#map=13/${mapCoordinates.lat}/${mapCoordinates.lon}`
-                      : `https://www.openstreetmap.org/search?query=${encodeURIComponent(itinerary.destination)}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
-                  >
-                    <Map className="size-3" />
-                    Open in OpenStreetMap
-                  </a>
-                </div>
-                {mapCoordinates && (
-                  <p className="text-xs text-slate-500 text-center">
-                    Showing {itinerary.destination} ({mapCoordinates.lat.toFixed(4)}, {mapCoordinates.lon.toFixed(4)})
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Route Summary by Day */}
-            <div className="mt-4 space-y-3">
-              <h4 className="font-medium text-amber-900">Route Summary</h4>
-              {itinerary.days.map((day) => (
-                <div key={day.dayNumber} className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                  <h5 className="font-medium text-amber-800 mb-2">
-                    Day {day.dayNumber} - {day.date}
-                  </h5>
-                  <div className="flex flex-wrap gap-2">
-                    {day.activities.map((activity, idx) => {
-                      const colorClass =
-                        activity.type === "food" ? "bg-amber-500" :
-                        activity.type === "attraction" ? "bg-cyan-500" :
-                        activity.type === "activity" ? "bg-green-500" :
-                        activity.type === "accommodation" ? "bg-purple-500" :
-                        activity.type === "transportation" ? "bg-blue-500" :
-                        activity.type === "transport-between" ? "bg-slate-400" :
-                        "bg-gray-400";
-
-                      return (
-                        <div key={idx} className="flex items-center gap-1">
-                          <div className={cn("size-2 rounded-full", colorClass)} />
-                          <span className="text-xs text-amber-700">
-                            {activity.title}
-                          </span>
-                          {idx < day.activities.length - 1 && (
-                            <ChevronRight className="size-3 text-amber-400" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Google Maps Links for Each Day */}
-            <div className="mt-4">
-              <h4 className="font-medium text-amber-900 mb-2">Get Directions</h4>
-              <div className="flex gap-2 flex-wrap">
-                {itinerary.days.map((day) => {
-                  // Create a Google Maps directions URL with all locations
-                  const mainActivities = day.activities.filter(a => a.type !== "transport-between");
-                  const locations = mainActivities.map(a => encodeURIComponent(a.location + ", " + itinerary.destination)).join("/");
-                  const mapsUrl = `https://www.google.com/maps/dir/${locations}`;
-
-                  return (
-                    <a
-                      key={day.dayNumber}
-                      href={mapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors"
-                    >
-                      <Navigation className="size-3" />
-                      Day {day.dayNumber} Route
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Activity Detail Dialog */}
-        <Dialog open={activityDialogOpen} onOpenChange={setActivityDialogOpen}>
-          <DialogContent className={cn("max-w-md max-h-[85vh] overflow-y-auto", glassCardClass)}>
-            {selectedActivity && (
-              <>
-                <DialogHeader>
-                  <div className="flex items-center gap-2">
-                    {selectedActivity.type === 'food' && <Utensils className="size-5 text-amber-600" />}
-                    {selectedActivity.type === 'attraction' && <Camera className="size-5 text-cyan-600" />}
-                    {selectedActivity.type === 'transportation' && <Bus className="size-5 text-blue-600" />}
-                    {selectedActivity.type === 'accommodation' && <Bed className="size-5 text-purple-600" />}
-                    {selectedActivity.type === 'activity' && <Compass className="size-5 text-green-600" />}
-                    {!selectedActivity.type && <MapPin className="size-5 text-amber-600" />}
-                    <DialogTitle className={cn(isDarkMode ? "text-white" : "text-amber-900")}>{selectedActivity.title}</DialogTitle>
-                  </div>
-                  <DialogDescription className={cn("flex items-center gap-2", isDarkMode ? "text-slate-300" : "text-amber-700")}>
-                    <MapPin className="size-4" />
-                    {selectedActivity.location}
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4 mt-4">
-                  {/* Time and Cost */}
-                  <div className="flex items-center justify-between py-2 px-3 bg-amber-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-cyan-700">
-                      <Clock className="size-4" />
-                      <span className="font-medium">{selectedActivity.time}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-green-700">
-                      <DollarSign className="size-4" />
-                      <span className="font-medium">${selectedActivity.estimatedCost}</span>
-                    </div>
-                  </div>
-
-                  {/* Rating */}
-                  {selectedActivity.rating && (
-                    <div className="flex items-center gap-2">
-                      <Star className="size-4 text-yellow-500 fill-yellow-500" />
-                      <span className={cn("font-medium", isDarkMode ? "text-amber-400" : "text-amber-700")}>{selectedActivity.rating.toFixed(1)}</span>
-                      <span className={cn("text-sm", isDarkMode ? "text-slate-400" : "text-slate-500")}>/ 5.0</span>
-                    </div>
-                  )}
-
-                  {/* Description */}
-                  <div>
-                    <h4 className={cn("font-medium mb-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>Description</h4>
-                    <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>{selectedActivity.description}</p>
-                  </div>
-
-                  {/* Detailed Info */}
-                  {selectedActivity.detailedInfo && (
-                    <div>
-                      <h4 className={cn("font-medium mb-2 flex items-center gap-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>
-                        <Info className="size-4" />
-                        More Details
-                      </h4>
-                      <p className={cn("text-sm leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>{selectedActivity.detailedInfo}</p>
-                    </div>
-                  )}
-
-                  {/* Menu Highlights (for food activities) */}
-                  {selectedActivity.menuHighlights && selectedActivity.menuHighlights.length > 0 && (
-                    <div>
-                      <h4 className={cn("font-medium mb-2 flex items-center gap-2", isDarkMode ? "text-slate-200" : "text-slate-900")}>
-                        <Utensils className="size-4" />
-                        Menu Highlights
-                      </h4>
-                      <ul className="space-y-1">
-                        {selectedActivity.menuHighlights.map((item, idx) => (
-                          <li key={idx} className="text-amber-700 text-sm flex items-center gap-2">
-                            <span className="size-1.5 rounded-full bg-amber-400" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Website Link */}
-                  {selectedActivity.websiteUrl && (
-                    <a
-                      href={selectedActivity.websiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-cyan-600 hover:text-cyan-700 text-sm font-medium"
-                    >
-                      <ExternalLink className="size-4" />
-                      Visit Website
-                    </a>
-                  )}
-                </div>
-
-                <div className="mt-6 flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setActivityDialogOpen(false)}
-                  >
-                    Close
-                  </Button>
-                  <Button
-                    className="flex-1 bg-cyan-600 hover:bg-cyan-700"
-                    onClick={handleRefreshActivity}
-                    disabled={isRefreshingActivity}
-                  >
-                    {isRefreshingActivity ? (
-                      <>
-                        <Loader2 className="size-4 mr-2 animate-spin" />
-                        Refreshing...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="size-4 mr-2" />
-                        Find Alternative
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Add Activity Dialog */}
-        <Dialog open={addActivityDialogOpen} onOpenChange={setAddActivityDialogOpen}>
-          <DialogContent className={cn("max-w-sm", glassCardClass)}>
-            <DialogHeader>
-              <DialogTitle className={cn(isDarkMode ? "text-white" : "text-amber-900")}>Add New Activity</DialogTitle>
-              <DialogDescription>
-                {addActivityDayIndex !== null && itinerary && (
-                  <>Add an activity for Day {itinerary.days[addActivityDayIndex].dayNumber}</>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 mt-4">
-              <div>
-                <Label className="mb-2 block">Time</Label>
-                <Input
-                  type="time"
-                  value={newActivityTime}
-                  onChange={(e) => setNewActivityTime(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Activity Type</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[ 
-                    { value: "food", label: "Food", icon: <Utensils className="size-4" /> },
-                    { value: "attraction", label: "Attraction", icon: <Camera className="size-4" /> },
-                    { value: "activity", label: "Activity", icon: <Compass className="size-4" /> },
-                    { value: "transportation", label: "Transport", icon: <Bus className="size-4" /> },
-                  ].map((type) => (
-                    <Button
-                      key={type.value}
-                      variant={newActivityType === type.value ? "default" : "outline"}
-                      className={cn(
-                        "flex items-center gap-2 justify-start",
-                        newActivityType === type.value && "bg-cyan-600 hover:bg-cyan-700"
-                      )}
-                      onClick={() => setNewActivityType(type.value)}
-                    >
-                      {type.icon}
-                      {type.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setAddActivityDialogOpen(false);
-                  setNewActivityTime("12:00");
-                  setNewActivityType("activity");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
-                onClick={handleAddActivity}
-                disabled={isAddingActivity}
-              >
-                {isAddingActivity ? (
-                  <>
-                    <Loader2 className="size-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="size-4 mr-2" />
-                    Add Activity
-                  </>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        </SafeAreaWrapper>
-      </div>
+      <ItineraryPage
+        isDarkMode={isDarkMode}
+        handleThemeToggle={handleThemeToggle}
+        isMuted={isMuted}
+        volume={volume}
+        handleMuteToggle={handleMuteToggle}
+        playSound={playSound}
+        itinerary={itinerary}
+        setItinerary={setItinerary}
+        showNearbyActivities={showNearbyActivities}
+        setShowNearbyActivities={setShowNearbyActivities}
+        nearbyActivities={nearbyActivities}
+        nearbyCategory={nearbyCategory}
+        setNearbyCategory={setNearbyCategory}
+        isLoadingNearby={isLoadingNearby}
+        handleAddNearbyActivity={handleAddNearbyActivity}
+        showMapView={showMapView}
+        setShowMapView={setShowMapView}
+        handleOpenMapView={handleOpenMapView}
+        mapCoordinates={mapCoordinates}
+        isLoadingMap={isLoadingMap}
+        editingActivity={editingActivity}
+        setEditingActivity={setEditingActivity}
+        draggedActivity={draggedActivity}
+        setDraggedActivity={setDraggedActivity}
+        dragOverActivity={dragOverActivity}
+        setDragOverActivity={setDragOverActivity}
+        handleActivityDragStart={handleActivityDragStart}
+        handleActivityDragOver={handleActivityDragOver}
+        handleActivityDrop={handleActivityDrop}
+        handleActivityDragEnd={handleActivityDragEnd}
+        handleDeleteActivity={handleDeleteActivity}
+        handleOpenAddActivity={handleOpenAddActivity}
+        handleAddActivity={handleAddActivity}
+        addingActivityForDay={addingActivityForDay}
+        setAddingActivityForDay={setAddingActivityForDay}
+        newActivityForm={newActivityForm}
+        setNewActivityForm={setNewActivityForm}
+        isAddingActivity={isAddingActivity}
+        handleReOptimize={handleReOptimize}
+        isGenerating={isGenerating}
+      />
     );
   }
-
 
   if (appState === "questionnaire") {
-    // Glass panel styles specific to questionnaire
-    const glassCardClass = isDarkMode
-      ? "bg-slate-900/40 border-white/10 text-white shadow-2xl backdrop-blur-xl"
-      : "bg-white/40 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
-    
-    const inputClass = isDarkMode
-      ? "bg-slate-950/50 border-white/10 text-white placeholder:text-slate-500 focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20"
-      : "bg-white/60 border-white/40 text-slate-900 placeholder:text-slate-500 focus:border-blue-500/50 focus:ring-blue-500/20";
-
-    const tileClass = (isActive: boolean) => cn(
-      "cursor-pointer transition-all duration-300 relative overflow-hidden rounded-xl border p-4 flex flex-col gap-2 h-full",
-      isActive 
-        ? (isDarkMode 
-            ? "bg-fuchsia-500/20 border-fuchsia-500/50 text-white shadow-[0_0_20px_rgba(217,70,239,0.2)]" 
-            : "bg-blue-500/10 border-blue-500/50 text-slate-900 shadow-[0_0_20px_rgba(59,130,246,0.15)]") 
-        : (isDarkMode 
-            ? "bg-white/5 border-white/5 hover:bg-white/10 text-slate-300" 
-            : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
-    );
-
     return (
-      <div 
-        className={cn(
-          "h-[100svh] relative overflow-hidden transition-colors duration-500",
-          pageBgClass
-        )}
-      >
-        {/* Animated Background - Extends into safe area notch */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-           <div className={cn(
-              "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-              isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
-            )}
-            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}
-          />
-          <div className={cn(
-              "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-              isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
-            )}
-            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "0.5s" }}
-          />
-          <div className={cn(
-              "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
-              isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
-            )}
-            style={{ animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite", animationDelay: "1s" }}
-          />
-           <div className={cn(
-             "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-             isDarkMode 
-               ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-               : "bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)]"
-           )} />
-        </div>
-
-        {/* Content with safe area padding */}
-        <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={true} className="h-full">
-          <div className="h-full overflow-y-auto relative z-10 p-4 md:p-6 pb-24">
-            
-            {/* Top Controls */}
-            <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    handleThemeToggle();
-                    playSound("switch");
-                  }}
-                  className={cn(
-                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
-                    isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-indigo-900 hover:bg-white/40"
-                  )}
-                >
-                   {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleMuteToggle}
-                  className={cn(
-                    "rounded-full p-2 hover:bg-white/10 active:scale-95 transition-all",
-                    isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-indigo-900 hover:bg-white/40"
-                  )}
-                >
-                   {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
-                </Button>
-                <button 
-                   onClick={() => setAppState("landing")}
-                   className={cn("p-2 rounded-full transition-colors active:scale-95", isDarkMode ? "hover:bg-white/10 text-slate-400 hover:text-white" : "hover:bg-white/40 text-slate-600 hover:text-indigo-900")}
-                >
-                   <X className="size-6" />
-                </button>
-            </div>
-
-            <div className="max-w-2xl mx-auto">
-              
-              {/* Header */}
-              <div className="mb-8 text-center">
-                 <h2 className={cn(
-                    "text-3xl font-black bg-clip-text text-transparent mb-2 uppercase tracking-wide",
-                    isDarkMode 
-                      ? "bg-gradient-to-r from-fuchsia-400 to-blue-400" 
-                      : "bg-gradient-to-r from-fuchsia-600 to-blue-600"
-                 )}>
-                    Plan Your Journey
-                 </h2>
-                 <p className={cn("text-sm font-medium", subTextClass)}>
-                    Step {questionnaireStep} of 3: {
-                      questionnaireStep === 1 ? "Taste & Preferences" : 
-                      questionnaireStep === 2 ? "Style & Comfort" : "Logistics"
-                    }
-                 </p>
-                 
-                 {/* Progress Indicator */}
-                 <div className="flex justify-center gap-2 mt-4">
-                    {[1, 2, 3].map(step => (
-                      <div 
-                        key={step} 
-                        className={cn(
-                          "h-1.5 rounded-full transition-all duration-500",
-                          step === questionnaireStep 
-                            ? "w-8 bg-gradient-to-r from-fuchsia-500 to-blue-500" 
-                            : step < questionnaireStep
-                              ? "w-2 bg-green-500"
-                              : "w-2 bg-slate-200/20"
-                        )}
-                      />
-                    ))}
-                 </div>
-              </div>
-
-              {/* Form Content */}
-              <div className={cn("rounded-3xl p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 border", glassCardClass)}>
-                
-                {questionnaireStep === 1 && (
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <Utensils className="size-5 text-fuchsia-500" />
-                        Dietary Preferences
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {["Vegetarian", "Vegan", "Gluten-Free", "Halal", "Kosher", "None"].map((diet) => (
-                           <div 
-                              key={diet}
-                              onClick={() => {
-                                if (dietaryNeeds.includes(diet)) {
-                                  setDietaryNeeds(dietaryNeeds.filter((d) => d !== diet));
-                                } else {
-                                  // If selecting "None", clear others. If selecting others, clear "None"
-                                  if (diet === "None") setDietaryNeeds(["None"]);
-                                  else setDietaryNeeds([...dietaryNeeds.filter(d => d !== "None"), diet]);
-                                }
-                              }}
-                              className={tileClass(dietaryNeeds.includes(diet))}
-                           >
-                              <div className="flex items-center justify-between">
-                                <span className="font-semibold text-sm">{diet}</span>
-                                {dietaryNeeds.includes(diet) && <Check className="size-4 text-fuchsia-500" />}
-                              </div>
-                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                       <div>
-                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                            Allergies
-                          </Label>
-                          <Input
-                            placeholder="e.g. Peanuts, Shellfish..."
-                            value={foodAllergies}
-                            onChange={(e) => setFoodAllergies(e.target.value)}
-                            className={cn("h-12 rounded-xl", inputClass)}
-                          />
-                       </div>
-                       
-                       <div>
-                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                             Meal Budget
-                          </Label>
-                          <div className="flex gap-2">
-                            {["$", "$$", "$$$", "$$$$"].map((budget) => (
-                              <button
-                                key={budget}
-                                onClick={() => setMealBudget(budget)}
-                                className={cn(
-                                  "flex-1 h-12 rounded-xl border font-bold transition-all",
-                                  mealBudget === budget
-                                    ? (isDarkMode 
-                                        ? "bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400" 
-                                        : "bg-fuchsia-500/10 border-fuchsia-500 text-fuchsia-600")
-                                    : (isDarkMode 
-                                        ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
-                                        : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
-                                )}
-                              >
-                                {budget}
-                              </button>
-                            ))}
-                          </div>
-                       </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between mb-4">
-                        <Label className={cn("block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                          Culinary Adventurousness
-                        </Label>
-                        <span className="font-bold text-fuchsia-500">{foodAdventurousness}/10</span>
-                      </div>
-                      <Slider
-                        value={[foodAdventurousness]}
-                        onValueChange={([val]) => setFoodAdventurousness(val)}
-                        min={1}
-                        max={10}
-                        step={1}
-                        className="py-4"
-                      />
-                      <div className="flex justify-between text-xs font-medium opacity-60 mt-1">
-                        <span>Safe & Familiar</span>
-                        <span>Exotic & Wild</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className={cn("mb-4 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                        Favorite Cuisines
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {["Italian", "Chinese", "Japanese", "Mexican", "Indian", "Thai", "French", "Mediterranean", "American", "Korean", "Vietnamese", "Greek", "African"].map((cuisine) => (
-                          <button
-                            key={cuisine}
-                            onClick={() => {
-                              if (favoriteCuisines.includes(cuisine)) {
-                                setFavoriteCuisines(favoriteCuisines.filter((c) => c !== cuisine));
-                              } else {
-                                setFavoriteCuisines([...favoriteCuisines, cuisine]);
-                              }
-                            }}
-                            className={cn(
-                              "px-4 py-2 rounded-full text-xs font-bold border transition-all",
-                              favoriteCuisines.includes(cuisine)
-                                ? "bg-gradient-to-r from-fuchsia-500 to-blue-500 text-white border-transparent"
-                                : (isDarkMode 
-                                    ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
-                                    : "bg-white/40 border-white/20 hover:bg-white/60 text-slate-600")
-                            )}
-                          >
-                            {cuisine}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {questionnaireStep === 2 && (
-                   <div className="space-y-8">
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                          <Car className="size-5 text-blue-500" />
-                          Transportation
-                        </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          {[ 
-                            { id: "Uber/Lyft", icon: Car }, 
-                            { id: "Transit", icon: Bus }, 
-                            { id: "Rental", icon: Car }, 
-                            { id: "Flight", icon: Plane },
-                            { id: "Bike", icon: Navigation }, 
-                            { id: "Walk", icon: MapPin },
-                          ].map((item) => (
-                             <div 
-                                key={item.id}
-                                onClick={() => {
-                                  if (transportationMethod.includes(item.id)) {
-                                    setTransportationMethod(transportationMethod.filter((m) => m !== item.id));
-                                  } else {
-                                    setTransportationMethod([...transportationMethod, item.id]);
-                                  }
-                                }}
-                                className={tileClass(transportationMethod.includes(item.id))}
-                             >
-                                <item.icon className="size-5 opacity-70" />
-                                <span className="font-semibold text-xs">{item.id}</span>
-                             </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                           Travel Priority
-                        </Label>
-                        <div className="grid grid-cols-3 gap-3">
-                           {[ 
-                              { value: "speed" as const, label: "Speed", icon: FastForward },
-                              { value: "cost" as const, label: "Budget", icon: DollarSign },
-                              { value: "comfort" as const, label: "Comfort", icon: Coffee },
-                            ].map((option) => (
-                              <button
-                                key={option.value}
-                                onClick={() => setTransportationPriority(option.value)}
-                                className={tileClass(transportationPriority === option.value)}
-                              >
-                                <option.icon className="size-5 opacity-70 mb-1" />
-                                <span className="font-bold text-sm">{option.label}</span>
-                              </button>
-                            ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2 pt-4 border-t border-white/10">
-                          <Home className="size-5 text-green-500" />
-                          Accommodation
-                        </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {["Hotel", "Resort", "Airbnb", "Hostel", "Boutique", "Villa"].map((type) => (
-                               <div 
-                                  key={type}
-                                  onClick={() => {
-                                    if (accommodationType.includes(type)) {
-                                      setAccommodationType(accommodationType.filter((t) => t !== type));
-                                    } else {
-                                      setAccommodationType([...accommodationType, type]);
-                                    }
-                                  }}
-                                  className={tileClass(accommodationType.includes(type))}
-                               >
-                                  <span className="font-semibold text-sm">{type}</span>
-                               </div>
-                            ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <Label className={cn("mb-4 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                          Budget per Night: <span className="text-blue-500">${pricePerNight}</span>
-                        </Label>
-                        <Slider
-                          value={[pricePerNight]}
-                          onValueChange={([val]) => setPricePerNight(val)}
-                          min={50}
-                          max={1000}
-                          step={50}
-                          className="py-4"
-                        />
-                         <div className="flex justify-between text-xs font-medium opacity-60 mt-1">
-                          <span>$50</span>
-                          <span>$1000+</span>
-                        </div>
-                      </div>
-                   </div>
-                )}
-
-                {questionnaireStep === 3 && (
-                   <div className="space-y-8">
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                           <Map className="size-5 text-indigo-500" />
-                           Trip Logistics
-                        </h3>
-                        
-                        <div className="space-y-4">
-                           <div>
-                              <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                                 Where are you going?
-                              </Label>
-                               <div className="flex gap-2">
-                                  <Input
-                                    placeholder="Destination City/Country"
-                                    value={destination}
-                                    onChange={(e) => setDestination(e.target.value)}
-                                    disabled={surpriseMe}
-                                    className={cn("h-12 rounded-xl flex-1", inputClass)}
-                                  />
-                                   <button
-                                      onClick={() => {
-                                          setSurpriseMe(!surpriseMe);
-                                          if (!surpriseMe) setDestination("");
-                                      }}
-                                      className={cn(
-                                          "px-4 rounded-xl border flex flex-col items-center justify-center min-w-[80px]",
-                                          surpriseMe 
-                                            ? (isDarkMode ? "bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400" : "bg-fuchsia-500/10 border-fuchsia-500 text-fuchsia-600")
-                                            : (isDarkMode ? "bg-white/5 border-white/10" : "bg-white/40 border-white/20")
-                                      )}
-                                   >
-                                      <Sparkles className="size-4 mb-1" />
-                                      <span className="text-[10px] font-bold uppercase">Surprise</span>
-                                   </button>
-                               </div>
-                           </div>
-                           
-                           <div>
-                              <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                                 Departing From
-                              </Label>
-                                <Input
-                                    placeholder="Origin City"
-                                    value={departureLocation}
-                                    onChange={(e) => setDepartureLocation(e.target.value)}
-                                    className={cn("h-12 rounded-xl", inputClass)}
-                                />
-                           </div>
-
-                           <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                 <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                                    Start Date
-                                 </Label>
-                                 <Input type="date" className={cn("h-12 rounded-xl", inputClass)} 
-                                    onChange={(e) => setTripDates(prev => ({ ...prev, from: e.target.value ? new Date(e.target.value) : undefined }))}
-                                 />
-                              </div>
-                               <div>
-                                 <Label className={cn("mb-2 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                                    End Date
-                                 </Label>
-                                 <Input type="date" className={cn("h-12 rounded-xl", inputClass)} 
-                                    onChange={(e) => setTripDates(prev => ({ ...prev, to: e.target.value ? new Date(e.target.value) : undefined }))}
-                                 />
-                              </div>
-                           </div>
-                        </div>
-                      </div>
-
-                      <div>
-                          <Label className={cn("mb-3 block font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                              Travelers
-                          </Label>
-                          <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5, "6+"].map((num) => (
-                               <button
-                                  key={num}
-                                  onClick={() => setNumberOfTravelers(typeof num === 'string' ? 6 : num)}
-                                  className={cn(
-                                     "flex-1 h-12 rounded-xl border font-bold text-lg",
-                                     numberOfTravelers === (typeof num === 'string' ? 6 : num)
-                                      ? (isDarkMode 
-                                          ? "bg-blue-500/20 border-blue-500 text-blue-400" 
-                                          : "bg-blue-500/10 border-blue-500 text-blue-600")
-                                      : (isDarkMode 
-                                          ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-400" 
-                                          : "bg-white/40 border-white/20 hover:bg-white/50 text-slate-600")
-                                  )}
-                               >
-                                  {num}
-                               </button>
-                            ))}
-                          </div>
-                      </div>
-                   </div>
-                )}
-              </div>
-
-               {/* Navigation Buttons */}
-               <div className="flex gap-4 mt-8">
-                  {questionnaireStep === 1 ? (
-                     <button 
-                        onClick={() => setAppState("swiping")}
-                        className={cn(
-                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95",
-                           isDarkMode ? "bg-white/5 text-white hover:bg-white/10" : "bg-white/40 text-slate-800 hover:bg-white/50"
-                        )}
-                     >
-                        <ChevronLeft className="size-5" /> Back
-                     </button>
-                  ) : (
-                     <button 
-                        onClick={() => setQuestionnaireStep(prev => prev - 1)}
-                        className={cn(
-                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95",
-                           isDarkMode ? "bg-white/5 text-white hover:bg-white/10" : "bg-white/40 text-slate-800 hover:bg-white/50"
-                        )}
-                     >
-                        <ChevronLeft className="size-5" /> Previous
-                     </button>
-                  )}
-
-                  {questionnaireStep < 3 ? (
-                     <button 
-                        onClick={() => setQuestionnaireStep(prev => prev + 1)}
-                        className={cn(
-                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white shadow-lg",
-                           primaryGradientButton
-                        )}
-                     >
-                        Next Step <ChevronRight className="size-5" />
-                     </button>
-                  ) : (
-                     <button 
-                        onClick={handleGenerateItinerary}
-                        disabled={(!tripDates.from || !tripDates.to || !departureLocation.trim() || (!surpriseMe && !destination.trim()))}
-                        className={cn(
-                           "flex-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed",
-                           primaryGradientButton
-                        )}
-                     >
-                        {isGenerating ? <Loader2 className="size-5 animate-spin" /> : <Sparkles className="size-5" />}
-                        Generate Itinerary
-                     </button>
-                  )}
-               </div>
-
-            </div>
-          </div>
-        </SafeAreaWrapper>
-      </div>
+      <QuestionnairePage
+        isDarkMode={isDarkMode}
+        handleThemeToggle={handleThemeToggle}
+        isMuted={isMuted}
+        volume={volume}
+        handleMuteToggle={handleMuteToggle}
+        playSound={playSound}
+        pageBgClass={pageBgClass}
+        subTextClass={subTextClass}
+        primaryGradientButton={primaryGradientButton}
+        questionnaireStep={questionnaireStep}
+        setQuestionnaireStep={setQuestionnaireStep}
+        dietaryNeeds={dietaryNeeds}
+        setDietaryNeeds={setDietaryNeeds}
+        foodAllergies={foodAllergies}
+        setFoodAllergies={setFoodAllergies}
+        mealBudget={mealBudget}
+        setMealBudget={setMealBudget}
+        foodAdventurousness={foodAdventurousness}
+        setFoodAdventurousness={setFoodAdventurousness}
+        favoriteCuisines={favoriteCuisines}
+        setFavoriteCuisines={setFavoriteCuisines}
+        transportationMethod={transportationMethod}
+        setTransportationMethod={setTransportationMethod}
+        transportationPriority={transportationPriority}
+        setTransportationPriority={setTransportationPriority}
+        accommodationType={accommodationType}
+        setAccommodationType={setAccommodationType}
+        pricePerNight={pricePerNight}
+        setPricePerNight={setPricePerNight}
+        destination={destination}
+        setDestination={setDestination}
+        surpriseMe={surpriseMe}
+        setSurpriseMe={setSurpriseMe}
+        departureLocation={departureLocation}
+        setDepartureLocation={setDepartureLocation}
+        tripDates={tripDates}
+        setTripDates={setTripDates}
+        numberOfTravelers={numberOfTravelers}
+        setNumberOfTravelers={setNumberOfTravelers}
+        setAppState={setAppState}
+        handleGenerateItinerary={handleGenerateItinerary}
+        isGenerating={isGenerating}
+      />
     );
   }
 
-
-  // Swiping UI (uses pageBgClass, glassPanelClass, accentBorderClass etc. from earlier)
-  const swipeGlassPanelClass = isDarkMode 
-    ? "bg-slate-900/60 border-white/10 text-white shadow-xl backdrop-blur-xl" 
-    : "bg-white/60 border-white/40 text-slate-900 shadow-xl backdrop-blur-xl";
-
+  // Swipe deck page
   return (
-    <div
-      className={cn(
-        "h-[100svh] relative flex flex-col overflow-hidden transition-colors duration-500",
-        pageBgClass
-      )}
-      style={{ touchAction: 'none' }}
-    >
-      {/* Background - Extends into safe area notch */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ zIndex: 0 }}>
-        {/* Fuchsia blob - top left */}
-        <div
-          className={cn(
-            "absolute -top-[20%] -left-[10%] w-[120vw] h-[120vw] sm:w-[80vw] sm:h-[80vw] sm:-top-40 sm:-left-16 rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-fuchsia-500/45 sm:bg-fuchsia-500/26" : "bg-fuchsia-500/70 sm:bg-fuchsia-500/60 mix-blend-multiply"
-          )}
-          style={{
-            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-          }}
-        />
-        
-        {/* Blue blob - middle right */}
-        <div
-          className={cn(
-            "absolute top-[30%] -right-[20%] w-[110vw] h-[110vw] sm:w-[70vw] sm:h-[70vw] sm:-right-28 rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-blue-500/41 sm:bg-blue-500/22" : "bg-blue-500/70 sm:bg-blue-500/60 mix-blend-multiply" 
-          )}
-          style={{
-            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-            animationDelay: "0.5s",
-          }}
-        />
-        
-        {/* Purple blob - bottom left */}
-        <div
-          className={cn(
-            "absolute bottom-0 left-[20%] w-[100vw] h-[100vw] sm:w-[70vw] sm:h-[70vw] sm:bottom-[-10%] rounded-full blur-[100px] sm:blur-[200px]",
-            isDarkMode ? "bg-purple-500/41 sm:bg-purple-500/22" : "bg-indigo-500/70 sm:bg-indigo-500/60 mix-blend-multiply"
-          )}
-          style={{
-            animation: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-            animationDelay: "1s",
-          }}
-        />
-        {/* Grid Overlay */}
-        <div className={cn(
-          "absolute inset-0 bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] z-0",
-          isDarkMode 
-            ? "bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" 
-            : "bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)]"
-        )} />
-      </div>
-
-      {/* Content with safe area padding */}
-      <SafeAreaWrapper fullHeight={false} includeTop={true} includeBottom={false} className="h-full">
-        <div className="relative z-10 flex flex-col h-full">
-          <header className={cn("px-4 pt-4 pb-3 md:px-6 md:pt-6 md:pb-4 relative", glassHeaderClass)} style={{ zIndex: 20, position: 'relative', backgroundColor: isDarkMode ? '#141A29' : '#509BDE' }}>
-          <div className="max-w-xl mx-auto space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h1
-                className={cn(
-                  "text-3xl font-black tracking-tight uppercase",
-                  "bg-clip-text text-transparent",
-                  isDarkMode
-                    ? "bg-gradient-to-r from-fuchsia-400 via-purple-400 to-blue-400"
-                    : "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600"
-                )}
-              >
-                Swipe Deck
-              </h1>
-              <div className="flex items-center gap-2 relative">
-                <button
-                  onClick={handleReset}
-                  className={cn(
-                     "rounded-full p-2 transition-all active:scale-95",
-                     isDarkMode 
-                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
-                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-                  aria-label="Reset"
-                >
-                  <RotateCcw className="size-5" />
-                </button>
-                <button
-                  onClick={handleAutoComplete}
-                  disabled={isAutoCompleting}
-                  className={cn(
-                     "rounded-full p-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
-                     isDarkMode 
-                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
-                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-                >
-                  {isAutoCompleting ? (
-                    <Loader2 className="size-5 animate-spin" />
-                  ) : (
-                    <Sparkles className="size-5" />
-                  )}
-                </button>
-                <div className="flex items-center gap-2">
-               <button
-                  onClick={() => {
-                     handleThemeToggle();
-                     playSound('switch');
-                  }}
-                  className={cn(
-                     "rounded-full p-2 transition-all active:scale-95",
-                     isDarkMode 
-                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
-                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-               >
-                  {isDarkMode ? <Moon className="size-5" /> : <Sun className="size-5" />}
-               </button>
-               
-               <button
-                  onClick={handleMuteToggle}
-                  className={cn(
-                     "rounded-full p-2 transition-all active:scale-95",
-                     isDarkMode 
-                        ? "text-slate-400 hover:text-white hover:bg-white/10" 
-                        : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                  )}
-               >
-                  {isMuted ? <VolumeX className="size-5" /> : volume < 0.35 ? <Volume1 className="size-5" /> : <Volume2 className="size-5" />}
-               </button>
-            </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between text-[11px] uppercase font-semibold">
-                <span className={subTextClass}>Now swiping: {currentCategory.displayName}</span>
-                <span className={subTextClass}>{overallProgress}% calibrated</span>
-              </div>
-              <Progress
-                value={overallProgress}
-                className={cn(
-                  "h-3 mt-2 bg-white/20",
-                  "[&_[data-slot=progress-indicator]]:bg-gradient-to-r",
-                  "[&_[data-slot=progress-indicator]]:from-fuchsia-500",
-                  "[&_[data-slot=progress-indicator]]:to-blue-500"
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-6 gap-2">
-              {CATEGORIES.map((cat, idx) => {
-                const progress = categoryProgress[cat.name];
-                const required = REQUIRED_SWIPES_MAP[cat.name];
-                const isComplete = progress >= required;
-                const percentage = Math.min(100, (progress / required) * 100);
-                const isActive = idx === currentCategoryIndex;
-
-                return (
-                  <button
-                    key={cat.name}
-                    onClick={() => {
-                      setCurrentCategoryIndex(idx);
-                      setShowContinueButton(false);
-                      playSound("click");
-                    }}
-                    className={cn(
-                      "rounded-2xl px-2 py-2 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all overflow-visible",
-                      isActive
-                        ? "bg-gradient-to-br from-fuchsia-500/90 to-blue-500/90 text-white shadow-lg border-transparent"
-                        : cn(swipeGlassPanelClass, isDarkMode ? "bg-white/10 border-white/10" : "bg-white/30 border-white/30"),
-                      isComplete && !isActive && "text-green-300 border-green-400/40",
-                      !isActive && "hover:scale-110 hover:shadow-xl hover:brightness-110 active:scale-110 active:shadow-xl active:brightness-110"
-                    )}
-                  >
-                    <div className="relative">
-                      <svg className="size-12" viewBox="0 0 36 36">
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="15.9"
-                          fill="none"
-                          stroke={isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(15,23,42,0.2)"}
-                          strokeWidth="2"
-                        />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="15.9"
-                          fill="none"
-                          stroke={isComplete ? "#22c55e" : "#ec4899"}
-                          strokeWidth="2.5"
-                          strokeDasharray={`${percentage}, 100`}
-                          strokeLinecap="round"
-                          transform="rotate(-90 18 18)"
-                        />
-                      </svg>
-                      <div className={cn("absolute inset-0 flex items-center justify-center", isActive && isComplete ? "text-white" : "")}>{cat.icon}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 flex items-center justify-center px-4 overflow-hidden" style={{ paddingTop: '2.5rem', paddingBottom: '1.5rem' }}>
-          <div className="relative w-full max-w-md h-full max-h-[550px]">
-
-            {cardStack[0] &&
-              (topCardReady ? (
-                <div
-                  ref={cardRef}
-                  className="absolute inset-x-0 top-0 h-full cursor-grab active:cursor-grabbing"
-                  style={{
-                    transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${dragOffset.x * 0.05}deg)`,
-                    transition: isDragging ? "none" : "transform 0.3s ease-out",
-                    zIndex: 20,
-                  }}
-                  onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
-                  onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
-                  onMouseUp={handleDragEnd}
-                  onMouseLeave={handleDragEnd}
-                  onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
-                  onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
-                  onTouchEnd={handleDragEnd}
-                >
-                  <Card
-                    onTransitionEnd={handleSwipeAnimationEnd}
-                    className={cn(
-                      "h-full overflow-hidden border backdrop-blur-2xl transition-all duration-600 ease-out",
-                      swipeGlassPanelClass,
-                      "shadow-[0_35px_80px_-40px_rgba(15,23,42,0.8)]",
-                      swipeDirection === "right" && "translate-x-[115%] rotate-6 opacity-0",
-                      swipeDirection === "left" && "-translate-x-[115%] -rotate-6 opacity-0"
-                    )}
-                  >
-                    <div className="absolute inset-0 pointer-events-none rounded-[24px] border border-white/20" />
-                    <div
-                      className="absolute inset-0 bg-green-500/20 z-10 flex items-center justify-center transition-opacity"
-                      style={{ opacity: swipeDirection === "right" ? 0.8 : Math.max(0, dragOffset.x / 120) * 0.8 }}
-                    >
-                      <div className="bg-green-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest rotate-6 border border-white/40">
-                        {currentRightPhrase || getSwipeRightPhrase(currentCategory.name)}
-                      </div>
-                    </div>
-                    <div
-                      className="absolute inset-0 bg-red-500/20 z-10 flex items-center justify-center transition-opacity"
-                      style={{ opacity: swipeDirection === "left" ? 0.8 : Math.max(0, -dragOffset.x / 120) * 0.8 }}
-                    >
-                      <div className="bg-red-500 text-white px-6 py-2 rounded-full text-2xl font-black tracking-widest -rotate-6 border border-white/40">
-                        {currentLeftPhrase || getSwipeLeftPhrase(currentCategory.name)}
-                      </div>
-                    </div>
-
-                    <div className="relative h-[60%]">
-                      <img src={cardStack[0].imageUrl} alt={cardStack[0].title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-                      <div className="absolute top-4 left-4">
-                        <Badge
-                          className={cn(
-                            "bg-gradient-to-r text-[11px] font-black tracking-widest uppercase border-none text-white",
-                            badgeGradientClass
-                          )}
-                        >
-                          {currentCategory.displayName}
-                        </Badge>
-                      </div>
-                    </div>
-                    <CardContent className="p-5 space-y-3">
-                      <div className="-mt-6">
-                        <h2 className="text-2xl font-black tracking-tight">{cardStack[0].title}</h2>
-                        <p className={cn("text-sm mt-2 leading-relaxed", subTextClass)}>{cardStack[0].description}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2 -mt-1">
-                        {cardStack[0].tags.map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="outline"
-                            className={cn(
-                              "text-[11px] font-semibold uppercase border-white/20 rounded-full px-3 py-1",
-                              isDarkMode ? "text-white/80" : "text-slate-700"
-                            )}
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center rounded-[32px] bg-white/50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-200 font-semibold text-sm z-20 backdrop-blur-lg">
-                  Preparing cards...
-                </div>
-              ))}
-          </div>
-        </main>
-
-        <footer className="pt-4 flex items-center justify-center flex-shrink-0 pb-[max(1.5rem,0.5rem)]">
-            {cardStack.length > 0 ? (
-              <div className="flex justify-center gap-6 items-center">
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className={cn(
-                    "size-16 rounded-full flex items-center justify-center transition-all active:scale-95 backdrop-blur-xl border relative z-50",
-                    isDarkMode 
-                      ? "bg-white/5 border-white/10 text-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.4)] hover:border-red-500/50 hover:bg-red-500/10" 
-                      : "bg-white/40 border-white/40 text-red-600 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:border-red-500/50 hover:bg-red-500/10"
-                  )}
-                  onClick={() => handleSwipe("left")}
-                >
-                  <X className="size-7" />
-                </Button>
-                <Button
-                  size="lg"
-                  className={cn(
-                    "size-16 rounded-full flex items-center justify-center transition-all active:scale-95 backdrop-blur-xl border",
-                     isDarkMode 
-                      ? "bg-white/5 border-white/10 text-green-400 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] hover:border-green-500/50 hover:bg-green-500/10" 
-                      : "bg-white/40 border-white/40 text-green-600 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:border-green-500/50 hover:bg-green-500/10"
-                  )}
-                  onClick={() => handleSwipe("right")}
-                >
-                  <Check className="size-7" />
-                </Button>
-                {completedCategories.size === 6 ? (
-                  <Button
-                    onClick={() => {
-                      playSound("success");
-                      setAppState("questionnaire");
-                    }}
-                    size="lg"
-                    className={cn(
-                      "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
-                      "bg-green-500 hover:bg-green-600"
-                    )}
-                  >
-                    <FastForward className="size-7" />
-                  </Button>
-                ) : (showContinueButton && !currentCategoryComplete) || (currentCategoryComplete && completedCategories.size < 6) ? (
-                  <Button
-                    onClick={handleContinueToNextCategory}
-                    size="lg"
-                    className={cn(
-                      "size-16 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all",
-                      "bg-green-500 hover:bg-green-600"
-                    )}
-                  >
-                    <FastForward className="size-7" />
-                  </Button>
-                ) : null}
-              </div>
-            ) : completedCategories.size === 6 ? (
-              <div className="flex justify-center gap-4 mt-8 opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards">
-                 <button 
-                    onClick={handleReset}
-                    className={cn(
-                       "rounded-full p-3 transition-all active:scale-95 group",
-                       isDarkMode 
-                          ? "text-slate-500 hover:text-white hover:bg-white/10" 
-                          : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm"
-                    )}
-                 >
-                    <RefreshCw className="size-5 group-hover:rotate-180 transition-transform duration-500" />
-                 </button>
-                  <button 
-                     onClick={handleAutoComplete}
-                     disabled={isAutoCompleting}
-                     className={cn(
-                        "rounded-full p-3 transition-all active:scale-95 group",
-                        isDarkMode 
-                           ? "text-slate-500 hover:text-white hover:bg-white/10" 
-                           : "text-indigo-900 bg-white/40 hover:bg-white/60 shadow-sm",
-                        isAutoCompleting && "opacity-50 cursor-not-allowed"
-                     )}
-                  >
-                     <FastForward className="size-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-               </div>
-            ) : (
-              <p className={cn("text-center text-sm font-semibold", subTextClass)}>
-                You've seen every card in this category.
-              </p>
-            )}
-        </footer>
-        </div>
-      </SafeAreaWrapper>
-
-      {showBadge && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-in fade-in duration-500">
-          <Card
-            className={cn(
-              "text-center p-8 rounded-3xl text-white shadow-2xl border-0 bg-gradient-to-r",
-              badgeGradientClass
-            )}
-          >
-            <Award className="size-16 mx-auto mb-3" />
-            <h3 className="text-2xl font-black">{showBadge} Complete!</h3>
-            <p className="text-sm opacity-90">Badge earned</p>
-          </Card>
-        </div>
-      )}
-
-      {showConfetti && (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center space-y-2 animate-pulse">
-              <PartyPopper className="size-24 mx-auto text-fuchsia-400" />
-              <h2 className="text-3xl font-black">Profile Calibrated!</h2>
-              <p className={cn("text-sm", subTextClass)}>Jump into the questionnaire to lock it in.</p>
-            </div>
-          </div>
-          {Array.from({ length: 50 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 rounded-full animate-ping"
-              style={{
-                backgroundColor: ["#f472b6", "#38bdf8", "#a855f7", "#34d399", "#facc15"][i % 5],
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random()}s`,
-                animationDuration: `${1 + Math.random()}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <SwipePage
+      isDarkMode={isDarkMode}
+      handleThemeToggle={handleThemeToggle}
+      isMuted={isMuted}
+      volume={volume}
+      handleMuteToggle={handleMuteToggle}
+      playSound={playSound}
+      pageBgClass={pageBgClass}
+      subTextClass={subTextClass}
+      cardStack={cardStack}
+      currentCategoryIndex={currentCategoryIndex}
+      setCurrentCategoryIndex={setCurrentCategoryIndex}
+      currentCategory={currentCategory}
+      categoryProgress={categoryProgress}
+      overallProgress={overallProgress}
+      CATEGORIES={CATEGORIES}
+      REQUIRED_SWIPES_MAP={REQUIRED_SWIPES_MAP}
+      swipeDirection={swipeDirection}
+      dragOffset={dragOffset}
+      isDragging={isDragging}
+      handleSwipe={handleSwipe}
+      handleDragStart={handleDragStart}
+      handleDragMove={handleDragMove}
+      handleDragEnd={handleDragEnd}
+      handleSwipeAnimationEnd={handleSwipeAnimationEnd}
+      getSwipeRightPhrase={getSwipeRightPhrase}
+      getSwipeLeftPhrase={getSwipeLeftPhrase}
+      currentRightPhrase={currentRightPhrase}
+      currentLeftPhrase={currentLeftPhrase}
+      badgeGradientClass={badgeGradientClass}
+      handleReset={handleReset}
+      handleAutoComplete={handleAutoComplete}
+      isAutoCompleting={isAutoCompleting}
+      handleSkipToQuestionnaire={handleSkipToQuestionnaire}
+      showContinueButton={showContinueButton}
+      setShowContinueButton={setShowContinueButton}
+      setAppState={setAppState}
+      showBadge={showBadge}
+      showConfetti={showConfetti}
+    />
   );
-} 
+}

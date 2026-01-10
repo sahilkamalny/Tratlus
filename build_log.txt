@@ -1,0 +1,394 @@
+﻿node.exe : 
+[33mYou or a 
+plugin you are 
+using have set `opt
+imizeDeps.esbuildOp
+tions` but this 
+option is now 
+deprecated. Vite 
+now uses Rolldown 
+to optimize the 
+dependencies. 
+Please use `optimiz
+eDeps.rollupOptions
+` instead.[39m
+At line:1 char:1
++ & "C:\Program Fil
+es\nodejs/node.exe"
+ "C:\Program Files\
+nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: (   
+ [33mYou or a p    
+...` instead.    
+[39m:String) [    
+], RemoteExcep    
+tion
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+
+ΓÖ╗∩╕Å  Generating routes...
+Γ£à Processed routes in 126ms
+[36mrolldown-vite v7.1.20 [32mbuilding for production...[36m[39m
+[2K
+transforming...Γ£ô 2395 modules transformed.
+rendering chunks...
+[31mΓ£ù[39m 
+Build failed in 
+1.47s
+
+PWA v1.2.0
+mode      generateSW
+precache  5 entries (0.00 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-8c29f6e4.js
+warnings
+  One of the glob 
+patterns doesn't 
+match any files. 
+Please remove or 
+fix the following: 
+{
+  "globDirectory": 
+"C:\\Projects\\Depl
+oyed\\Tratlus\\dist
+",
+  "globPattern": "*
+*/*.{js,wasm,css,ht
+ml}",
+  "globIgnores": [
+    "**/node_module
+s/**/*",
+    "sw.js",
+    "workbox-*.js"
+  ]
+}
+
+[31merror during 
+build:
+[31mBuild failed 
+with 3 errors:
+
+[31m[MISSING_EXPOR
+T] Error:[0m 
+"Route" is not 
+exported by "src/ro
+utes/pages/LoadingP
+age.tsx".
+   [38;5;246mΓò¡[
+0m[38;5;246mΓöÇ[0
+m[38;5;246m[[0m s
+rc/routeTree.gen.ts
+:3:10 
+[38;5;246m][0m
+   
+[38;5;246mΓöé[0m
+ [38;5;246m3 
+Γöé[0m [38;5;249m
+i[0m[38;5;249mm[
+0m[38;5;249mp[0m
+[38;5;249mo[0m[38
+;5;249mr[0m[38;5;
+249mt[0m[38;5;249
+m [0m[38;5;249m{
+[0m[38;5;249m [0m
+Route[38;5;249m [
+0m[38;5;249ma[0m
+[38;5;249ms[0m[38
+;5;249m [0m[38;5;
+249mP[0m[38;5;249
+ma[0m[38;5;249mg
+[0m[38;5;249me[0m
+[38;5;249ms[0m[3
+8;5;249mL[0m[38;5
+;249mo[0m[38;5;24
+9ma[0m[38;5;249md
+[0m[38;5;249mi[0
+m[38;5;249mn[0m[
+38;5;249mg[0m[38;
+5;249mP[0m[38;5;2
+49ma[0m[38;5;249m
+g[0m[38;5;249me[
+0m[38;5;249mI[0m
+[38;5;249mm[0m[38
+;5;249mp[0m[38;5;
+249mo[0m[38;5;249
+mr[0m[38;5;249mt
+[0m[38;5;249m [0m
+[38;5;249m}[0m[3
+8;5;249m [0m[38;5
+;249mf[0m[38;5;24
+9mr[0m[38;5;249mo
+[0m[38;5;249mm[0
+m[38;5;249m [0m[
+38;5;249m"[0m[38;
+5;249m.[0m[38;5;2
+49m/[0m[38;5;249m
+r[0m[38;5;249mo[
+0m[38;5;249mu[0m
+[38;5;249mt[0m[38
+;5;249me[0m[38;5;
+249ms[0m[38;5;249
+m/[0m[38;5;249mp
+[0m[38;5;249ma[0m
+[38;5;249mg[0m[3
+8;5;249me[0m[38;5
+;249ms[0m[38;5;24
+9m/[0m[38;5;249mL
+[0m[38;5;249mo[0
+m[38;5;249ma[0m[
+38;5;249md[0m[38;
+5;249mi[0m[38;5;2
+49mn[0m[38;5;249m
+g[0m[38;5;249mP[
+0m[38;5;249ma[0m
+[38;5;249mg[0m[38
+;5;249me[0m[38;5;
+249m"[0m[38;5;249
+m;[0m
+ [38;5;240m  
+Γöé[0m          
+ΓöÇΓöÇΓö¼ΓöÇΓöÇ  
+ [38;5;240m  
+Γöé[0m            
+Γò░ΓöÇΓöÇΓöÇΓöÇ 
+Missing export
+[38;5;246mΓöÇΓöÇΓö
+ÇΓò»[0m
+
+[31m[MISSING_EXPOR
+T] Error:[0m 
+"Route" is not 
+exported by "src/ro
+utes/pages/Generati
+ngPage.tsx".
+   [38;5;246mΓò¡[
+0m[38;5;246mΓöÇ[0
+m[38;5;246m[[0m s
+rc/routeTree.gen.ts
+:4:10 
+[38;5;246m][0m
+   
+[38;5;246mΓöé[0m
+ [38;5;246m4 
+Γöé[0m [38;5;249m
+i[0m[38;5;249mm[
+0m[38;5;249mp[0m
+[38;5;249mo[0m[38
+;5;249mr[0m[38;5;
+249mt[0m[38;5;249
+m [0m[38;5;249m{
+[0m[38;5;249m [0m
+Route[38;5;249m [
+0m[38;5;249ma[0m
+[38;5;249ms[0m[38
+;5;249m [0m[38;5;
+249mP[0m[38;5;249
+ma[0m[38;5;249mg
+[0m[38;5;249me[0m
+[38;5;249ms[0m[3
+8;5;249mG[0m[38;5
+;249me[0m[38;5;24
+9mn[0m[38;5;249me
+[0m[38;5;249mr[0
+m[38;5;249ma[0m[
+38;5;249mt[0m[38;
+5;249mi[0m[38;5;2
+49mn[0m[38;5;249m
+g[0m[38;5;249mP[
+0m[38;5;249ma[0m
+[38;5;249mg[0m[38
+;5;249me[0m[38;5;
+249mI[0m[38;5;249
+mm[0m[38;5;249mp
+[0m[38;5;249mo[0m
+[38;5;249mr[0m[3
+8;5;249mt[0m[38;5
+;249m [0m[38;5;24
+9m}[0m[38;5;249m 
+[0m[38;5;249mf[0
+m[38;5;249mr[0m[
+38;5;249mo[0m[38;
+5;249mm[0m[38;5;2
+49m [0m[38;5;249m
+"[0m[38;5;249m.[
+0m[38;5;249m/[0m
+[38;5;249mr[0m[38
+;5;249mo[0m[38;5;
+249mu[0m[38;5;249
+mt[0m[38;5;249me
+[0m[38;5;249ms[0m
+[38;5;249m/[0m[3
+8;5;249mp[0m[38;5
+;249ma[0m[38;5;24
+9mg[0m[38;5;249me
+[0m[38;5;249ms[0
+m[38;5;249m/[0m[
+38;5;249mG[0m[38;
+5;249me[0m[38;5;2
+49mn[0m[38;5;249m
+e[0m[38;5;249mr[
+0m[38;5;249ma[0m
+[38;5;249mt[0m[38
+;5;249mi[0m[38;5;
+249mn[0m[38;5;249
+mg[0m[38;5;249mP
+[0m[38;5;249ma[0m
+[38;5;249mg[0m[3
+8;5;249me[0m[38;5
+;249m"[0m[38;5;24
+9m;[0m
+ [38;5;240m  
+Γöé[0m          
+ΓöÇΓöÇΓö¼ΓöÇΓöÇ  
+ [38;5;240m  
+Γöé[0m            
+Γò░ΓöÇΓöÇΓöÇΓöÇ 
+Missing export
+[38;5;246mΓöÇΓöÇΓö
+ÇΓò»[0m
+
+[31m[MISSING_EXPOR
+T] Error:[0m 
+"Route" is not 
+exported by "src/ro
+utes/data/travelCar
+ds.tsx".
+   [38;5;246mΓò¡[
+0m[38;5;246mΓöÇ[0
+m[38;5;246m[[0m s
+rc/routeTree.gen.ts
+:5:10 
+[38;5;246m][0m
+   
+[38;5;246mΓöé[0m
+ [38;5;246m5 
+Γöé[0m [38;5;249m
+i[0m[38;5;249mm[
+0m[38;5;249mp[0m
+[38;5;249mo[0m[38
+;5;249mr[0m[38;5;
+249mt[0m[38;5;249
+m [0m[38;5;249m{
+[0m[38;5;249m [0m
+Route[38;5;249m [
+0m[38;5;249ma[0m
+[38;5;249ms[0m[38
+;5;249m [0m[38;5;
+249mD[0m[38;5;249
+ma[0m[38;5;249mt
+[0m[38;5;249ma[0m
+[38;5;249mT[0m[3
+8;5;249mr[0m[38;5
+;249ma[0m[38;5;24
+9mv[0m[38;5;249me
+[0m[38;5;249ml[0
+m[38;5;249mC[0m[
+38;5;249ma[0m[38;
+5;249mr[0m[38;5;2
+49md[0m[38;5;249m
+s[0m[38;5;249mI[
+0m[38;5;249mm[0m
+[38;5;249mp[0m[38
+;5;249mo[0m[38;5;
+249mr[0m[38;5;249
+mt[0m[38;5;249m 
+[0m[38;5;249m}[0m
+[38;5;249m [0m[3
+8;5;249mf[0m[38;5
+;249mr[0m[38;5;24
+9mo[0m[38;5;249mm
+[0m[38;5;249m [0
+m[38;5;249m"[0m[
+38;5;249m.[0m[38;
+5;249m/[0m[38;5;2
+49mr[0m[38;5;249m
+o[0m[38;5;249mu[
+0m[38;5;249mt[0m
+[38;5;249me[0m[38
+;5;249ms[0m[38;5;
+249m/[0m[38;5;249
+md[0m[38;5;249ma
+[0m[38;5;249mt[0m
+[38;5;249ma[0m[3
+8;5;249m/[0m[38;5
+;249mt[0m[38;5;24
+9mr[0m[38;5;249ma
+[0m[38;5;249mv[0
+m[38;5;249me[0m[
+38;5;249ml[0m[38;
+5;249mC[0m[38;5;2
+49ma[0m[38;5;249m
+r[0m[38;5;249md[
+0m[38;5;249ms[0m
+[38;5;249m"[0m[38
+;5;249m;[0m
+ [38;5;240m  
+Γöé[0m          
+ΓöÇΓöÇΓö¼ΓöÇΓöÇ  
+ [38;5;240m  
+Γöé[0m            
+Γò░ΓöÇΓöÇΓöÇΓöÇ 
+Missing export
+[38;5;246mΓöÇΓöÇΓö
+ÇΓò»[0m
+[31m
+    at aggregateBin
+dingErrorsIntoJsErr
+or (file:///C:/Proj
+ects/Deployed/Tratl
+us/node_modules/rol
+ldown/dist/shared/s
+rc-CPA2meNe.mjs:248
+5:18)
+    at unwrapBindin
+gResult (file:///C:
+/Projects/Deployed/
+Tratlus/node_module
+s/rolldown/dist/sha
+red/src-CPA2meNe.mj
+s:2460:128)
+    at RolldownBuil
+d.write (file:///C:
+/Projects/Deployed/
+Tratlus/node_module
+s/rolldown/dist/sha
+red/src-CPA2meNe.mj
+s:4242:33)
+    at async 
+buildEnvironment (f
+ile:///C:/Projects/
+Deployed/Tratlus/no
+de_modules/vite/dis
+t/node/chunks/node.
+js:33078:64)
+    at async 
+Object.build (file:
+///C:/Projects/Depl
+oyed/Tratlus/node_m
+odules/vite/dist/no
+de/chunks/node.js:3
+3481:19)
+    at async 
+Object.buildApp (fi
+le:///C:/Projects/D
+eployed/Tratlus/nod
+e_modules/vite/dist
+/node/chunks/node.j
+s:33478:153)
+    at async 
+CAC.<anonymous> (fi
+le:///C:/Projects/D
+eployed/Tratlus/nod
+e_modules/vite/dist
+/node/cli.js:629:3)
+[39m
